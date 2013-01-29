@@ -1,3 +1,4 @@
+package legacy;
 import lejos.nxt.LCD;
 import lejos.util.Delay;
 import actors.Engine;

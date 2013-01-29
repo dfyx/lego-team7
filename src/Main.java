@@ -1,5 +1,6 @@
 import static robot.Platform.ENGINE;
 import actors.Engine;
+import legacy.SensorArm;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.util.Delay;

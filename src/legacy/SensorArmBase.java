@@ -1,3 +1,4 @@
+package legacy;
 import lejos.nxt.LightSensor;
 import lejos.nxt.NXTRegulatedMotor;
 import robot.Platform;
