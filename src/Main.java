@@ -9,29 +9,35 @@ import lejos.nxt.LCD;
 public class Main {
 
 	public static void main(String[] args) {
-		SensorArm sensor = new SensorArm();
-		Engine engine = new Engine();
+		try {
+			SensorArm sensor = new SensorArm();
+			Engine engine = new Engine();
 
-		// Calibrate
-		LCD.drawString("Calibrate", 0, 0);
-		Button.waitForAnyPress();
-		sensor.calibrateLine2(engine);
-		LCD.drawString("Calibrated", 0, 0);
-		sensor.moveCentral();
+			// Calibrate
+			LCD.drawString("Calibrate", 0, 0);
+			Button.waitForAnyPress();
+			sensor.calibrateLine2(engine);
+			LCD.drawString("Calibrated", 0, 0);
+			sensor.moveCentral();
 
-		// Rotate for line
-		int lightValue = sensor.isOnLine();
-		final int ROTATION_MAX_SPEED = 300;
-		engine.startRotation(ROTATION_MAX_SPEED);
-		do {
-			lightValue = sensor.isOnLine();
-			LCD.drawString("" + lightValue + "    ", 0, 0);
-			engine.startRotation(ROTATION_MAX_SPEED * (100 - lightValue) / 100);
-		} while (lightValue < 50);
-		engine.stop();
-		System.out.println("End");
+			// Rotate for line
+			int lightValue = sensor.isOnLine();
+			final int ROTATION_MAX_SPEED = 300;
+			engine.startRotation(ROTATION_MAX_SPEED);
+			do {
+				lightValue = sensor.isOnLine();
+				LCD.drawString("" + lightValue + "    ", 0, 0);
+				engine.startRotation(ROTATION_MAX_SPEED * (100 - lightValue)
+						/ 100);
+			} while (lightValue < 50);
+			engine.stop();
+			System.out.println("End");
 
-		Button.waitForAnyPress();
+			Button.waitForAnyPress();
+		} catch (Exception e) {
+			System.out.println("Exception: " + e.getMessage());
+			Button.waitForAnyPress();
+		}
 
 		/*
 		 * System.out.println("Wait for connection"); NXTConnection connection =
