@@ -9,8 +9,6 @@ public class Engine implements Actor {
 
 	int newLeftSpeed = 0;
 	int newRightSpeed = 0;
-	boolean newLeftForward = true;
-	boolean newRightForward = true;
 
 	@Override
 	public void commit() {
@@ -25,7 +23,7 @@ public class Engine implements Actor {
 		}
 		if (newRightSpeed == 0) {
 			rightMotor.stop();
-		} else if (newLeftSpeed > 0) {
+		} else if (newRightSpeed > 0) {
 			rightMotor.setSpeed(newRightSpeed);
 			rightMotor.forward();
 		} else {
