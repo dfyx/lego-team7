@@ -1,5 +1,13 @@
 package strategies;
 
-public class StrategyFollowLine implements Strategy {
 
+public class StrategyFollowLine extends Strategy {
+	
+	protected void doInit() {
+		
+	}
+	
+	protected void doRun() {
+
+	}
 }

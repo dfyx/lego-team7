@@ -1,7 +1,8 @@
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.util.Delay;
-import actors.Engine;
+import strategies.Strategy;
+import strategies.StrategyCalibrateLight;
 
 /**
  * @author markus
@@ -18,7 +19,15 @@ public class Main {
 		 * !forward; Button.waitForAnyPress(); }
 		 */
 		try {
-			SensorArm sensor = new SensorArm();
+			Loop loop = new Loop();
+			Strategy calibrate = new StrategyCalibrateLight();
+			loop.runStrategies(calibrate);
+			System.out.println("finished");
+			Button.waitForAnyPress();
+			
+			
+			
+			/*SensorArm sensor = new SensorArm();
 			Engine engine = new Engine();
 
 			// Calibrate
@@ -36,7 +45,7 @@ public class Main {
 			 * sensor.isOnLine(); LCD.drawString("" + lightValue + "    ", 0,
 			 * 0); engine.startRotation(ROTATION_MAX_SPEED * (100 - lightValue)
 			 * / 100); } while (lightValue < 50); engine.stop();
-			 */
+			 *
 
 			//Button.waitForAnyPress();
 
@@ -61,7 +70,7 @@ public class Main {
 				LCD.drawString("out: " + out + "    ", 0, 0);
 
 				Delay.msDelay(10);
-			}
+			}*/
 
 			// Button.waitForAnyPress();
 		} catch (Exception e) {

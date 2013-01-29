@@ -7,12 +7,39 @@ public class Engine implements Actor {
 	private NXTRegulatedMotor leftMotor = Motor.A;
 	private NXTRegulatedMotor rightMotor = Motor.B;
 
+	int newLeftSpeed = 0;
+	int newRightSpeed = 0;
+	boolean newLeftForward = true;
+	boolean newRightForward = true;
+
+	@Override
+	public void commit() {
+		if (newLeftSpeed == 0) {
+			leftMotor.stop();
+		} else if (newLeftSpeed > 0) {
+			leftMotor.setSpeed(newLeftSpeed);
+			leftMotor.forward();
+		} else {
+			leftMotor.setSpeed(-newLeftSpeed);
+			leftMotor.backward();
+		}
+		if (newRightSpeed == 0) {
+			rightMotor.stop();
+		} else if (newLeftSpeed > 0) {
+			rightMotor.setSpeed(newRightSpeed);
+			rightMotor.forward();
+		} else {
+			rightMotor.setSpeed(-newRightSpeed);
+			rightMotor.backward();
+		}
+	}
+
 	/**
 	 * Stop the motor
 	 */
 	public void stop() {
-		leftMotor.stop();
-		rightMotor.stop();
+		newLeftSpeed = 0;
+		newRightSpeed = 0;
 	}
 
 	/**
@@ -27,9 +54,9 @@ public class Engine implements Actor {
 	/**
 	 * Rotate the robot
 	 * 
-	 * @param speed The speed used for rotation.
-	 * 			If -1000<=speed<0, we rotate left
-	 * 			If 0<speed<1000, we rotate right
+	 * @param speed
+	 *            The speed used for rotation. If -1000<=speed<0, we rotate left
+	 *            If 0<speed<1000, we rotate right
 	 */
 	public void rotate(int speed) {
 		if (speed < 0)
@@ -63,7 +90,7 @@ public class Engine implements Actor {
 	public void move(int speed, int direction) {
 		if (1000 < speed || -1000 > speed || 1000 < direction
 				|| -1000 > direction)
-			throw new IllegalStateException("Incorrect parameters");
+			throw new IllegalStateException("Incorrect parameters speed:"+speed+", direction:"+direction);
 
 		final int MAX = 1000;
 
@@ -89,23 +116,7 @@ public class Engine implements Actor {
 		if (1000 < right || -1000 > right || 1000 < left || -1000 > left)
 			throw new IllegalStateException("Incorrect intermediate 2 values");
 
-		if (left == 0) {
-			leftMotor.stop();
-		} else if (left > 0) {
-			leftMotor.setSpeed(left);
-			leftMotor.forward();
-		} else {
-			leftMotor.setSpeed(-left);
-			leftMotor.backward();
-		}
-		if (right == 0) {
-			rightMotor.stop();
-		} else if (right >= 0) {
-			rightMotor.setSpeed(right);
-			rightMotor.forward();
-		} else {
-			rightMotor.setSpeed(-right);
-			rightMotor.backward();
-		}
+		newLeftSpeed = left;
+		newRightSpeed = right;
 	}
 }
