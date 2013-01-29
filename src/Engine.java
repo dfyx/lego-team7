@@ -70,13 +70,8 @@ public class Engine {
 	
 	public void startCurve(int speed, double curvature) {
 		int absSpeed = Math.abs(speed);
-		if(curvature>=0) {
-			rightMotor.setSpeed(absSpeed);
-			leftMotor.setSpeed((int)(((double)absSpeed)/curvature));
-		} else {
-			leftMotor.setSpeed(absSpeed);
-			rightMotor.setSpeed((int)(((double)absSpeed)/(-curvature)));			
-		}
+		rightMotor.setSpeed(absSpeed);
+		leftMotor.setSpeed((int)(((double)absSpeed)/curvature));
 		if(speed>=0) {
 			leftMotor.forward();
 			rightMotor.forward();

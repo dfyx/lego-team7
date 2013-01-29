@@ -42,8 +42,15 @@ public class SensorArm extends SensorArmBase {
 		//Get base value
 		getLightSensor().setFloodlight(false);
 		Delay.msDelay(100);
-		final int baseLight = getLightSensor().getLightValue();
-		LCD.drawString("base: "+baseLight+"    ",0,0);
+		engine.move(50,true);
+		int sum=0;
+		int count=0;
+		while(engine.isMoving()) {
+			sum += getLightSensor().getLightValue();
+			++count;
+		}
+		final int baseLight = sum/count;
+		LCD.drawString("base: "+count+"    ",0,0);
 		
 		// Switch on light
 		getLightSensor().setFloodlight(true);

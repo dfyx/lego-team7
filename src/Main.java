@@ -42,9 +42,11 @@ public class Main {
 			while(true) {
 				lightValue = sensor.isOnLine();
 				if(lightValue>50)
-					curvation*=0.99;
+					if(curvation>0.1)
+						curvation*=0.999;
 				else
-					curvation*=1.01;
+					if(curvation<10)
+						curvation*=1.001;
 				LCD.drawString("Curve: "+curvation, 0,2);
 				engine.startCurve(MOVE_SPEED,curvation);
 			}
