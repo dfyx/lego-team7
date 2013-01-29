@@ -1,6 +1,6 @@
-import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.util.Delay;
+import actors.Engine;
 
 
 public class SensorArm extends SensorArmBase {
@@ -42,12 +42,12 @@ public class SensorArm extends SensorArmBase {
 		//Get base value
 		getLightSensor().setFloodlight(false);
 		Delay.msDelay(100);
-		engine.move(50,true);
+		engine.move(100);
 		int sum=0;
 		int count=0;
-		while(engine.isMoving()) {
+		for(count=0;count<100;++count) {
 			sum += getLightSensor().getLightValue();
-			++count;
+			Delay.msDelay(10);
 		}
 		final int baseLight = sum/count;
 		LCD.drawString("base: "+count+"    ",0,0);
@@ -59,7 +59,7 @@ public class SensorArm extends SensorArmBase {
 		// Measure light while moving arm
 		minLight = Integer.MAX_VALUE;
 		maxLight = Integer.MIN_VALUE;
-		engine.startMoving(MOVE_MAX_SPEED);
+		engine.move(MOVE_MAX_SPEED);
 		int lineValueCount=0;
 		while(lineValueCount<LINEFOUND_COUNT){
 			//System.out.println(""+lineValueCount+"/"+LINEFOUND_COUNT);
@@ -79,7 +79,7 @@ public class SensorArm extends SensorArmBase {
 			double speedFactorMin = 1-((double)normalizedValue)/(5*normalizedMin);
 			double speedFactorMax = 1-((double)normalizedMax/(5*normalizedValue));
 			double speedFactor = Math.min(speedFactorMin, speedFactorMax);
-			engine.startMoving((int)(speedFactor*MOVE_MAX_SPEED));
+			engine.move((int)(speedFactor*MOVE_MAX_SPEED));
 			LCD.drawString("min: "+(minLight-baseLight)+"   ",0,2);
 			LCD.drawString("max: "+(maxLight-baseLight)+"   ",0,3);
 			LCD.drawString("value: "+(value-baseLight)+"   ",0,4);

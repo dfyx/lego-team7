@@ -1,8 +1,7 @@
-import java.text.DecimalFormat;
-
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.util.Delay;
+import actors.Engine;
 
 /**
  * @author markus
@@ -58,7 +57,7 @@ public class Main {
 				LCD.drawString("Diff: "+deltaLight+"    ",0,2);
 				direction += deltaLight; 
 				direction = Math.min(1000, Math.max(-1000, direction));
-				engine.startCurve(MOVE_SPEED, direction);
+				engine.move(MOVE_SPEED, direction);
 				LCD.drawString("Curve: " + direction + "    ", 0, 0);
 				Delay.msDelay(10);
 				lastLightValue = lightValue;
