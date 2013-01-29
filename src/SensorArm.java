@@ -99,11 +99,12 @@ public class SensorArm extends SensorArmBase {
 		//getMotor().rotateTo(centralAngle);
 	}
 	
-	public int isOnLine() {
+	//0 <= return <= 1000
+	public int getNormalizedLight() {
 		//moveCentral();
 		getLightSensor().setFloodlight(true);
 		int measured = getLightSensor().getLightValue();
-		int normalized = 100 * (measured - minLight) / (maxLight - minLight);
+		int normalized = 1000 * (measured - minLight) / (maxLight - minLight);
 		return normalized;
 	}
 }
