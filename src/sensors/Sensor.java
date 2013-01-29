@@ -1,5 +1,9 @@
 package sensors;
 
-public interface Sensor {
+public interface Sensor<Type> {
 
+    void poll();
+    
+    Type getValue();
+    
 }

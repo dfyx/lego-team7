@@ -1,18 +1,23 @@
+import static robot.Platform.ENGINE;
+import static robot.Platform.SENSORS;
 import lejos.util.Delay;
-import sensors.Head;
+import sensors.Sensor;
 import strategies.Strategy;
-import actors.Engine;
 
 public class Loop {
-	
-	Engine engine = new Engine();
-	Head head = new Head();
-	
+		
 	public void runStrategies(Strategy strategy) {
-		strategy.init(head,engine);
+		strategy.init();
+		
 		while(strategy.isRunning()){
-			strategy.run();
-			engine.commit();
+			for (Sensor<?> s : SENSORS) {
+			    s.poll();
+			}
+		    
+		    strategy.run();
+			
+			ENGINE.commit();
+			
 			Delay.msDelay(10);
 		}
 	}

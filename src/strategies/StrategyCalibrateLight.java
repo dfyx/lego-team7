@@ -1,5 +1,7 @@
 package strategies;
 
+import static robot.Platform.ENGINE;
+import static robot.Platform.LIGHT_SENSOR;
 import lejos.nxt.LCD;
 
 public class StrategyCalibrateLight extends Strategy {
@@ -19,8 +21,8 @@ public class StrategyCalibrateLight extends Strategy {
 
 	protected void doInit() {
 		// Switch off calibration
-		head.calibrateLight(0, 1000);
-		head.setFloodlight(false);
+		LIGHT_SENSOR.resetCalibration();
+		LIGHT_SENSOR.setFloodlight(false);
 		cycle = 0;
 	}
 
@@ -29,23 +31,23 @@ public class StrategyCalibrateLight extends Strategy {
 		
 		if(cycle<10) {
 		} else if(cycle==10) {
-			engine.move(100);
+			ENGINE.move(100);
 			sum=0;
 			count=0;
 		} else if(cycle<=110) {
-			sum+=head.getLight();
+			sum+=LIGHT_SENSOR.getRawValue();
 			++count;
 		} else if(cycle==120) {
 			baseLight = sum/count;
-			head.setFloodlight(true);
+			LIGHT_SENSOR.setFloodlight(true);
 		} else if(cycle<130) {
 		} else if(cycle==130) {
 			minLight = Integer.MAX_VALUE;
 			maxLight = Integer.MIN_VALUE;
 			lineValueCount = 0;
-			engine.move(MOVE_MAX_SPEED);
+			ENGINE.move(MOVE_MAX_SPEED);
 		} else if (lineValueCount < LINEFOUND_COUNT) {
-			int value = head.getLight();
+			int value = LIGHT_SENSOR.getRawValue();
 			if (value < minLight)
 				minLight = value;
 			if (value > maxLight)
@@ -62,14 +64,14 @@ public class StrategyCalibrateLight extends Strategy {
 					/ (5 * normalizedMin);
 			double speedFactorMax = 1 - ((double) normalizedMax / (5 * normalizedValue));
 			double speedFactor = Math.min(speedFactorMin, speedFactorMax);
-			engine.move((int) (speedFactor * MOVE_MAX_SPEED));
+			ENGINE.move((int) (speedFactor * MOVE_MAX_SPEED));
 			LCD.drawString("min: " + (minLight - baseLight) + "   ", 0, 2);
 			LCD.drawString("max: " + (maxLight - baseLight) + "   ", 0, 3);
 			LCD.drawString("value: " + (value - baseLight) + "   ", 0, 4);
 		} else {
-			engine.stop();
+			ENGINE.stop();
 			// Set calibration
-			head.calibrateLight(minLight, maxLight);
+			LIGHT_SENSOR.calibrate(minLight, maxLight);
 			setFinished();
 		}
 	}

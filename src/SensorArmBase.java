@@ -1,17 +1,14 @@
 import lejos.nxt.LightSensor;
-import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
-import lejos.nxt.SensorPort;
+import robot.Platform;
 
 public class SensorArmBase {
-	private LightSensor lightSensor = new LightSensor(SensorPort.S1);
-	private NXTRegulatedMotor motor = Motor.C;
 	
 	public LightSensor getLightSensor() {
-		return lightSensor;
+		return Platform.LIGHT_SENSOR.getRealSensor();
 	}
 	
 	public NXTRegulatedMotor getMotor() {
-		return motor;
+		return Platform.HEAD_MOTOR;
 	}
 }

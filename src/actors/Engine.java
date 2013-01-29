@@ -1,11 +1,9 @@
 package actors;
 
-import lejos.nxt.Motor;
-import lejos.nxt.NXTRegulatedMotor;
+import static robot.Platform.LEFT_MOTOR;
+import static robot.Platform.RIGHT_MOTOR;
 
 public class Engine implements Actor {
-	private NXTRegulatedMotor leftMotor = Motor.A;
-	private NXTRegulatedMotor rightMotor = Motor.B;
 
 	int newLeftSpeed = 0;
 	int newRightSpeed = 0;
@@ -13,22 +11,22 @@ public class Engine implements Actor {
 	@Override
 	public void commit() {
 		if (newLeftSpeed == 0) {
-			leftMotor.stop();
+			LEFT_MOTOR.stop();
 		} else if (newLeftSpeed > 0) {
-			leftMotor.setSpeed(newLeftSpeed);
-			leftMotor.forward();
+			LEFT_MOTOR.setSpeed(newLeftSpeed);
+			LEFT_MOTOR.forward();
 		} else {
-			leftMotor.setSpeed(-newLeftSpeed);
-			leftMotor.backward();
+			LEFT_MOTOR.setSpeed(-newLeftSpeed);
+			LEFT_MOTOR.backward();
 		}
 		if (newRightSpeed == 0) {
-			rightMotor.stop();
+			RIGHT_MOTOR.stop();
 		} else if (newRightSpeed > 0) {
-			rightMotor.setSpeed(newRightSpeed);
-			rightMotor.forward();
+			RIGHT_MOTOR.setSpeed(newRightSpeed);
+			RIGHT_MOTOR.forward();
 		} else {
-			rightMotor.setSpeed(-newRightSpeed);
-			rightMotor.backward();
+			RIGHT_MOTOR.setSpeed(-newRightSpeed);
+			RIGHT_MOTOR.backward();
 		}
 	}
 
@@ -46,7 +44,7 @@ public class Engine implements Actor {
 	 * @return True, iff the robot is either moving or rotating.
 	 */
 	public boolean isMoving() {
-		return leftMotor.isMoving() || rightMotor.isMoving();
+		return LEFT_MOTOR.isMoving() || RIGHT_MOTOR.isMoving();
 	}
 
 	/**
