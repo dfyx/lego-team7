@@ -41,27 +41,26 @@ public class Main {
 			//Button.waitForAnyPress();
 
 			final int MOVE_SPEED = 400;
-			final double ADJUST_FACTOR = 1.0/250;
-			final double DELTA_FACTOR = 1;
-			final double DELTA_WEIGHT = 0.1;
-			int lastLightValue = sensor.getNormalizedLight();
-			int lastDelta = 0;
+			final double EXP_FACTOR = 1.0/60000;
+			final double LINEAR_FACTOR = 0.75;
 
 			while (true) {
 				int lightValue = sensor.getNormalizedLight();
-				int deltaLight = ((int)((1 - DELTA_WEIGHT)*lastDelta+DELTA_WEIGHT*DELTA_FACTOR*(lightValue-lastLightValue)));
-				int direction = lightValue - 500; // positive value => brighter
+				int error = lightValue - 500; // positive value => brighter
 													// => turn right
-				direction *= Math.abs(direction)*ADJUST_FACTOR;
-				LCD.drawString("Abs: "+direction+"    ",0,1);
-				LCD.drawString("Diff: "+deltaLight+"    ",0,2);
-				direction += deltaLight; 
-				direction = Math.min(1000, Math.max(-1000, direction));
-				engine.move(MOVE_SPEED, direction);
-				LCD.drawString("Curve: " + direction + "    ", 0, 0);
+
+				int linear = (int) (LINEAR_FACTOR * error);
+				int exponential = (int) (error * error * error * EXP_FACTOR);
+				LCD.drawString("lin: "+ linear + "    ",0,1);
+				LCD.drawString("exp: "+ exponential +"    ",0,2);
+				
+				int out = linear + exponential;
+				
+				out = Math.min(1000, Math.max(-1000, out));
+				engine.move(MOVE_SPEED, out);
+				LCD.drawString("out: " + out + "    ", 0, 0);
+
 				Delay.msDelay(10);
-				lastLightValue = lightValue;
-				lastDelta = deltaLight;
 			}
 
 			// Button.waitForAnyPress();
