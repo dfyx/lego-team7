@@ -42,21 +42,21 @@ public class Main {
 			//Button.waitForAnyPress();
 
 			final int MOVE_SPEED = 400;
-			final double ADJUST_FACTOR = 0.5;
-			final double DELTA_FACTOR = 4;
+			final double ADJUST_FACTOR = 1.0/250;
+			final double DELTA_FACTOR = 1;
 			final double DELTA_WEIGHT = 0.1;
 			int lastLightValue = sensor.getNormalizedLight();
 			int lastDelta = 0;
 
 			while (true) {
 				int lightValue = sensor.getNormalizedLight();
-				int deltaLight = ((int)((1 - DELTA_WEIGHT)*lastDelta+DELTA_WEIGHT*(lightValue-lastLightValue)));
+				int deltaLight = ((int)((1 - DELTA_WEIGHT)*lastDelta+DELTA_WEIGHT*DELTA_FACTOR*(lightValue-lastLightValue)));
 				int direction = lightValue - 500; // positive value => brighter
 													// => turn right
-				direction *= ADJUST_FACTOR;
+				direction *= Math.abs(direction)*ADJUST_FACTOR;
 				LCD.drawString("Abs: "+direction+"    ",0,1);
-				LCD.drawString("Diff: "+(deltaLight*DELTA_FACTOR)+"    ",0,2);
-				direction += deltaLight * DELTA_FACTOR; 
+				LCD.drawString("Diff: "+deltaLight+"    ",0,2);
+				direction += deltaLight; 
 				direction = Math.min(1000, Math.max(-1000, direction));
 				engine.startCurve(MOVE_SPEED, direction);
 				LCD.drawString("Curve: " + direction + "    ", 0, 0);
