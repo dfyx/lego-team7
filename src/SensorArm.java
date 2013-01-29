@@ -37,7 +37,7 @@ public class SensorArm extends SensorArmBase {
 	public void calibrateLine2(Engine engine) {
 		final double LINEFOUND_FACTOR=5;
 		final int LINEFOUND_COUNT=20;
-		final int MOVE_MAX_SPEED = 300;
+		final int MOVE_MAX_SPEED = 600;
 		
 		//Get base value
 		getLightSensor().setFloodlight(false);
@@ -67,7 +67,12 @@ public class SensorArm extends SensorArmBase {
 			if(LINEFOUND_FACTOR*normalizedValue<normalizedMax
 					|| LINEFOUND_FACTOR*normalizedMin<normalizedValue)
 				++lineValueCount;
-			//int diff=LINEFOUND_FACTOR*normalizedValue-normalizedMax
+			else if(lineValueCount>1)
+				lineValueCount-=2;
+			double speedFactorMin = 1-((double)normalizedValue)/(5*normalizedMin);
+			double speedFactorMax = 1-((double)normalizedMax/(5*normalizedValue));
+			double speedFactor = Math.min(speedFactorMin, speedFactorMax);
+			engine.startMoving((int)(speedFactor*MOVE_MAX_SPEED));
 			LCD.drawString("min: "+(minLight-baseLight)+"   ",0,2);
 			LCD.drawString("max: "+(maxLight-baseLight)+"   ",0,3);
 			LCD.drawString("value: "+(value-baseLight)+"   ",0,4);
