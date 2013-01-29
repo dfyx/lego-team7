@@ -41,13 +41,13 @@ public class Engine {
 		} else if (speed>0) {
 			leftMotor.setSpeed(speed);
 			rightMotor.setSpeed(speed);
-			leftMotor.forward();
-			rightMotor.backward();	
+			leftMotor.backward();
+			rightMotor.forward();	
 		} else {
 			leftMotor.setSpeed(-speed);
 			rightMotor.setSpeed(-speed);
-			leftMotor.backward();
-			rightMotor.forward();
+			leftMotor.forward();
+			rightMotor.backward();
 		}
 	}
 	
@@ -68,11 +68,22 @@ public class Engine {
 		}
 	}
 	
-	public void startCurve(int speed, int curvature) {
-		rightMotor.setSpeed(speed);
-		leftMotor.setSpeed(speed/2);
-		leftMotor.forward();
-		rightMotor.forward();
+	public void startCurve(int speed, double curvature) {
+		int absSpeed = Math.abs(speed);
+		if(curvature>=0) {
+			rightMotor.setSpeed(absSpeed);
+			leftMotor.setSpeed((int)(((double)absSpeed)/curvature));
+		} else {
+			leftMotor.setSpeed(absSpeed);
+			rightMotor.setSpeed((int)(((double)absSpeed)/(-curvature)));			
+		}
+		if(speed>=0) {
+			leftMotor.forward();
+			rightMotor.forward();
+		} else {
+			leftMotor.backward();
+			rightMotor.backward();
+		}
 	}
 	
 	/*public void setSpeed(int speed) {

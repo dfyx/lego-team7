@@ -19,9 +19,10 @@ public class Main {
 			sensor.calibrateLine2(engine);
 			LCD.drawString("Calibrated", 0, 0);
 			sensor.moveCentral();
+			Button.waitForAnyPress();
 
 			// Rotate for line
-			int lightValue = sensor.isOnLine();
+			int lightValue;
 			final int ROTATION_MAX_SPEED = 300;
 			engine.startRotation(ROTATION_MAX_SPEED);
 			do {
@@ -31,9 +32,25 @@ public class Main {
 						/ 100);
 			} while (lightValue < 50);
 			engine.stop();
-			System.out.println("End");
-
+			
 			Button.waitForAnyPress();
+			
+			final int MOVE_SPEED = 300;
+			double curvation=2;
+			engine.startCurve(MOVE_SPEED,curvation);
+			
+			while(true) {
+				lightValue = sensor.isOnLine();
+				if(lightValue>50)
+					curvation*=0.99;
+				else
+					curvation*=1.01;
+				LCD.drawString("Curve: "+curvation, 0,2);
+				engine.startCurve(MOVE_SPEED,curvation);
+			}
+			
+
+			//Button.waitForAnyPress();
 		} catch (Exception e) {
 			System.out.println("Exception: " + e.getMessage());
 			Button.waitForAnyPress();
