@@ -1,3 +1,5 @@
+import java.text.DecimalFormat;
+
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 
@@ -9,6 +11,19 @@ import lejos.nxt.LCD;
 public class Main {
 
 	public static void main(String[] args) {
+		/*int speed = 0;
+		boolean forward = true;
+		while(true) {
+			System.out.println(speed);
+			speed+=25;
+			Motor.C.setSpeed(speed);
+			if(forward)
+				Motor.C.forward();
+			else
+				Motor.C.backward();
+			forward = !forward;
+			Button.waitForAnyPress();
+		}*/
 		try {
 			SensorArm sensor = new SensorArm();
 			Engine engine = new Engine();
@@ -47,7 +62,7 @@ public class Main {
 				else
 					if(curvation<10)
 						curvation*=1.001;
-				LCD.drawString("Curve: "+curvation, 0,2);
+				LCD.drawString("Curve: "+(int)1000*curvation, 0,2);
 				engine.startCurve(MOVE_SPEED,curvation);
 			}
 			
