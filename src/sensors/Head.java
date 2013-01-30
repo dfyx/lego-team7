@@ -16,8 +16,8 @@ public class Head implements Sensor<Integer> {
 	private static final UltrasonicSensor SENSOR = new UltrasonicSensor(Platform.ULTRASONIC_PORT);
 	
 	//Factor of horizontal movement of the complete movement range
-	private static final double VERTICAL_FACTOR_DOWN = 0.72;
-	private static final double VERTICAL_FACTOR_UP = 0.58;
+	private static final double VERTICAL_FACTOR_DOWN = 0.7;
+	private static final double VERTICAL_FACTOR_UP = 0.79;
 
 	int positionX; // -1000: full left, 0: centered, 1000: full right
 	int positionY; // -1000: bottom, 0: top
@@ -59,14 +59,10 @@ public class Head implements Sensor<Integer> {
 	public void continueSweeping() {
 		sweepThread.restart();
 	}
-	
-	private void checkMoveTarget(int moveTarget) {
-		if(moveTarget>bottomRightPos || moveTarget<topLeftPos)
-			throw new IllegalStateException("Move out of range: "+moveTarget);
-	}
 
 	public void moveTo(int x, int y) {
-		//System.out.println("Move from "+positionX+"/"+positionY+" to "+x+"/"+y);
+		System.out.println("Move from "+positionX+"/"+positionY+" to "+x+"/"+y);
+		System.out.flush();
 		
 		//Move down on the right side
 		if(x==positionX && positionX==1000 && y<=positionY) {
@@ -74,9 +70,9 @@ public class Head implements Sensor<Integer> {
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = false;
 			positionY=y;
-			//System.out.println("-> Move down (on right side) to "+moveTarget);
-			checkMoveTarget(moveTarget);
-			MOTOR.rotateTo(moveTarget);
+			System.out.println("-> Move down (on right side) to "+moveTarget);
+			System.out.flush();
+			doRotateTo(moveTarget);
 		}
 		//Move up on the left side
 		else if (x==positionX && positionX==-1000 && y>=positionY) {
@@ -84,24 +80,24 @@ public class Head implements Sensor<Integer> {
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = true;
 			positionY=y;
-			//System.out.println("-> Move up (on left side) to "+moveTarget);
-			checkMoveTarget(moveTarget);
-			MOTOR.rotateTo(moveTarget);
+			System.out.println("-> Move up (on left side) to "+moveTarget);
+			System.out.flush();
+			doRotateTo(moveTarget);
 		}
 		//Move horizontally
 		else if (y==positionY) {
 			if(currentHorizontalBorderIsLeft) {
-				int moveTarget = currentHorizontalBorderPos + HORIZONTAL_ANGLE_RIGHT/2 + x*HORIZONTAL_ANGLE_RIGHT/2000;
+				int moveTarget = currentHorizontalBorderPos + HORIZONTAL_ANGLE_LEFT/2 + x*HORIZONTAL_ANGLE_LEFT/2000;
 				positionX=x;
-				//System.out.println("-> Move horizontally (from left) to "+moveTarget);
-				checkMoveTarget(moveTarget);
-				MOTOR.rotateTo(moveTarget);
+				System.out.println("-> Move horizontally (from left) to "+moveTarget);
+				System.out.flush();
+				doRotateTo(moveTarget);
 			} else {
-				int moveTarget = currentHorizontalBorderPos - HORIZONTAL_ANGLE_LEFT/2 + x*HORIZONTAL_ANGLE_LEFT/2000;
+				int moveTarget = currentHorizontalBorderPos - HORIZONTAL_ANGLE_RIGHT/2 + x*HORIZONTAL_ANGLE_RIGHT/2000;
 				positionX=x;
-				//System.out.println("-> Move horizontally (from right) to "+moveTarget);
-				checkMoveTarget(moveTarget);
-				MOTOR.rotateTo(moveTarget);
+				System.out.println("-> Move horizontally (from right) to "+moveTarget);
+				System.out.flush();
+				doRotateTo(moveTarget);
 			}
 		}
 		//Move arbitrarily down
@@ -129,7 +125,15 @@ public class Head implements Sensor<Integer> {
 	}
 	
 	private final static int MIN_MOVEMENT = 12;
-	private final int CALIBRATION_POWER = 35;
+	private final int CALIBRATION_POWER = 40;
+	
+	private void doRotateTo(int motorPos) {
+		if(motorPos>bottomRightPos || motorPos<topLeftPos)
+			throw new IllegalStateException("Move out of range: "+motorPos);
+		System.out.println("--rotate to "+motorPos);
+		System.out.flush();
+		MOTOR.rotateTo(motorPos);
+	}
 	
 	private int doCalibrateDirection(int power) {
 		MOTOR.suspendRegulation();
@@ -161,11 +165,12 @@ public class Head implements Sensor<Integer> {
 	}
 	
 	public void calibrateBottomRight() {
-		bottomRightPos = doCalibrateDirection(CALIBRATION_POWER) - 75;
+		bottomRightPos = doCalibrateDirection(CALIBRATION_POWER) - 100;
+		System.out.println("bottomRight: "+bottomRightPos);
+		System.out.flush();
 		recalcPositions();
 		
-		checkMoveTarget(bottomRightPos);
-		MOTOR.rotateTo(bottomRightPos);
+		doRotateTo(bottomRightPos);
 		positionX = 1000;
 		positionY = -1000;
 		currentHorizontalBorderPos = bottomRightPos;
@@ -174,11 +179,12 @@ public class Head implements Sensor<Integer> {
 	
 	public void calibrateTopLeft() {
 		//System.out.println("Recalibrate");
-		topLeftPos = doCalibrateDirection(-CALIBRATION_POWER) + 75;
+		topLeftPos = doCalibrateDirection(-CALIBRATION_POWER) + 140;
+		System.out.println("topLeft: "+topLeftPos);
+		System.out.flush();
 		recalcPositions();
 		
-		checkMoveTarget(topLeftPos);
-		MOTOR.rotateTo(topLeftPos);
+		doRotateTo(topLeftPos);
 		positionX = -1000;
 		positionY = 0;
 		currentHorizontalBorderPos = topLeftPos;
@@ -192,10 +198,10 @@ public class Head implements Sensor<Integer> {
 		HORIZONTAL_ANGLE_RIGHT = distance-VERTICAL_ANGLE_DOWN;
 		VERTICAL_ANGLE_UP = (int)(VERTICAL_FACTOR_UP*distance);
 		HORIZONTAL_ANGLE_LEFT = distance-VERTICAL_ANGLE_UP;		
-		topCentered = topLeftPos + HORIZONTAL_ANGLE_RIGHT / 2;
-		topRightPos = topLeftPos + HORIZONTAL_ANGLE_RIGHT;
-		bottomLeftPos = bottomRightPos - HORIZONTAL_ANGLE_LEFT;
-		bottomCentered = bottomRightPos - HORIZONTAL_ANGLE_LEFT / 2;
+		topCentered = topLeftPos + HORIZONTAL_ANGLE_LEFT / 2;
+		topRightPos = topLeftPos + HORIZONTAL_ANGLE_LEFT;
+		bottomLeftPos = bottomRightPos - HORIZONTAL_ANGLE_RIGHT;
+		bottomCentered = bottomRightPos - HORIZONTAL_ANGLE_RIGHT / 2;
 	}
 
 	public void calibrate() {
@@ -207,23 +213,29 @@ public class Head implements Sensor<Integer> {
 		//System.out.println("bottomright: "+bottomRightPos);
 		
 		//System.out.println("TO TOP CENTER");
+		/*moveTo(0,0);
+		Button.waitForAnyPress();		
+		moveTo(-1000,0);
+		Button.waitForAnyPress();
 		moveTo(0,0);
+		Button.waitForAnyPress();
+		moveTo(1000,0);
+		Button.waitForAnyPress();
+		moveTo(0,0);
+		Button.waitForAnyPress();
+		
+		moveTo(0,-1000);
+		Button.waitForAnyPress();
+		moveTo(-1000,-1000);
+		Button.waitForAnyPress();
+		moveTo(0,-1000);
+		Button.waitForAnyPress();
+		moveTo(1000,-1000);
+		Button.waitForAnyPress();
+		moveTo(0,-1000);*/
 		//Button.waitForAnyPress();
 		
-		/*moveTo(-1000,0);
-		moveTo(1000,0);
-		moveTo(-1000,0);
-		moveTo(1000,0);
-		moveTo(-1000,0);
-		moveTo(1000,0);
-		moveTo(-1000,-1000);
-		moveTo(1000,-1000);
-		moveTo(-1000,-1000);
-		moveTo(1000,-1000);
-		moveTo(-1000,-1000);
-		moveTo(1000,-1000);
-		
-		while(true) {
+		/*while(true) {
 			System.out.println("TO TOP LEFT");
 			moveTo(-1000,0);
 			System.out.println("TO BOTTOM LEFT");

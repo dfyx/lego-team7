@@ -19,10 +19,10 @@ public class Main {
 	public static void main(String[] args) {
 		new Platform();
 
-		Loop loop = new Loop();
-		Strategy calibrate = new StrategyCalibrateLight();
-		loop.run(calibrate);
-		System.out.println("finished");
+		//Loop loop = new Loop();
+		//Strategy calibrate = new StrategyCalibrateLight();
+		//loop.run(calibrate);
+		//System.out.println("finished");
 		Button.waitForAnyPress();
 
 		/*
