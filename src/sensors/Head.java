@@ -110,61 +110,64 @@ public class Head implements Sensor<Integer> {
 		}
 		//Button.waitForAnyPress();
 	}
-
-	public void calibrate() {
-		final int MIN_MOVEMENT = 12;
-		int power = 35;
-
-		int round = 0;
-
+	
+	private final static int MIN_MOVEMENT = 12;
+	private final int CALIBRATION_POWER = 35;
+	
+	private int doCalibrateDirection(int power) {
 		MOTOR.suspendRegulation();
-		for (int i = 0; i < 2; ++i) {
-			RAW_MOTOR.setPower(power);
-			// MOTOR.forward();
+		RAW_MOTOR.setPower(power);
+		// MOTOR.forward();
+		Delay.msDelay(100);
+		int lastPosition = RAW_MOTOR.getTachoCount();
+		int position = RAW_MOTOR.getTachoCount();
+		int min = Integer.MAX_VALUE;
+		int max = Integer.MIN_VALUE;
+		do {
+			int diff = Math.abs(lastPosition - position);
+			// System.out.println("moving: " + diff);
+			if (diff < min)
+				min = diff;
+			if (diff > max)
+				max = diff;
 			Delay.msDelay(100);
-			int lastPosition = RAW_MOTOR.getTachoCount();
-			int position = RAW_MOTOR.getTachoCount();
-			int min = Integer.MAX_VALUE;
-			int max = Integer.MIN_VALUE;
-			do {
-				int diff = Math.abs(lastPosition - position);
-				// System.out.println("moving: " + diff);
-				if (diff < min)
-					min = diff;
-				if (diff > max)
-					max = diff;
-				Delay.msDelay(100);
-				lastPosition = position;
-				position = RAW_MOTOR.getTachoCount();
-				if (Button.ENTER.isDown()) {
-					System.out.println("Pos: " + position);
-				}
-				//System.out.println("Speed: "+(position-lastPosition));
-			} while (Math.abs(position - lastPosition) >= MIN_MOVEMENT);
-			power = -power;
+			lastPosition = position;
+			position = RAW_MOTOR.getTachoCount();
+			//if (Button.ENTER.isDown()) {
+			//	System.out.println("Pos: " + position);
+			//}
+			//System.out.println("Speed: "+(position-lastPosition));
+		} while (Math.abs(position - lastPosition) >= MIN_MOVEMENT);
 
-			if (round==0) {
-				System.out.println("New bottom right: "+position);
-				bottomRightPos = position;
-				round = 1;
-			} else if (round==1) {
-				System.out.println("New top left: "+position);
-				topLeftPos = position;
-				round = 2;
-				//break;
-			} else if (round==2) {
-				System.out.println("New bottom right: "+position);
-				round = 3;
-			} else if (round==3) {
-				System.out.println("New top left: "+position);
-				round=0;
-			}
-
-		}
 		MOTOR.stop();
-
-		bottomRightPos -= 75;
-		topLeftPos += 75;
+		return position;
+	}
+	
+	public void calibrateBottomRight() {
+		bottomRightPos = doCalibrateDirection(CALIBRATION_POWER) - 75;
+		recalcPositions();
+		
+		checkMoveTarget(bottomRightPos);
+		MOTOR.rotateTo(bottomRightPos);
+		positionX = 1000;
+		positionY = -1000;
+		currentHorizontalBorderPos = bottomRightPos;
+		currentHorizontalBorderIsLeft = false;
+	}
+	
+	public void calibrateTopLeft() {
+		topLeftPos = doCalibrateDirection(-CALIBRATION_POWER) + 75;
+		recalcPositions();
+		
+		checkMoveTarget(topLeftPos);
+		MOTOR.rotateTo(topLeftPos);
+		positionX = -1000;
+		positionY = 0;
+		currentHorizontalBorderPos = topLeftPos;
+		currentHorizontalBorderIsLeft = true;
+	}
+	
+	private void recalcPositions() {
 		int distance = bottomRightPos - topLeftPos;
 		VERTICAL_ANGLE_DOWN = (int)(VERTICAL_FACTOR_DOWN*distance);
 		HORIZONTAL_ANGLE_RIGHT = distance-VERTICAL_ANGLE_DOWN;
@@ -174,12 +177,12 @@ public class Head implements Sensor<Integer> {
 		topRightPos = topLeftPos + HORIZONTAL_ANGLE_RIGHT;
 		bottomLeftPos = bottomRightPos - HORIZONTAL_ANGLE_LEFT;
 		bottomCentered = bottomRightPos - HORIZONTAL_ANGLE_LEFT / 2;
-		checkMoveTarget(topLeftPos);
-		MOTOR.rotateTo(topLeftPos);
-		positionX = -1000;
-		positionY = 0;
-		currentHorizontalBorderPos = topLeftPos;
-		currentHorizontalBorderIsLeft = true;
+	}
+
+	public void calibrate() {
+		
+		calibrateBottomRight();
+		calibrateTopLeft();
 		
 		System.out.println("topleft: "+topLeftPos);
 		System.out.println("bottomright: "+bottomRightPos);
