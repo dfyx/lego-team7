@@ -11,13 +11,19 @@ public class Head implements Sensor<Integer> {
 
 	private static final NXTRegulatedMotor MOTOR = Motor.C;
 	private static final NXTMotor RAW_MOTOR = new NXTMotor(MotorPort.C);
+	
+	//Factor of horizontal movement of the complete movement range
+	private static final double VERTICAL_FACTOR_DOWN = 0.72;
+	private static final double VERTICAL_FACTOR_UP = 0.58;
 
-	int positionX; // -1000: 90° left, 0: centered, 1000: 90° right
+	int positionX; // -1000: full left, 0: centered, 1000: full right
 	int positionY; // -1000: bottom, 0: top
 	int currentHorizontalBorderPos;
 	boolean currentHorizontalBorderIsLeft;
-	int HORIZONTAL_ANGLE;
-	int VERTICAL_ANGLE;
+	int HORIZONTAL_ANGLE_RIGHT;
+	int VERTICAL_ANGLE_DOWN;
+	int HORIZONTAL_ANGLE_LEFT;
+	int VERTICAL_ANGLE_UP;
 	int topLeftPos;
 	int topCentered;
 	int topRightPos;
@@ -49,34 +55,40 @@ public class Head implements Sensor<Integer> {
 	}
 
 	public void moveTo(int x, int y) {
+		System.out.println("Move from "+positionX+"/"+positionY+" to "+x+"/"+y);
+		
 		//Move down on the right side
 		if(x==positionX && positionX==1000 && y<=positionY) {
 			int moveTarget = topRightPos - y*(bottomRightPos-topRightPos)/1000;
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = false;
 			positionY=y;
+			System.out.println("-> Move down (on right side) to "+moveTarget);
 			checkMoveTarget(moveTarget);
 			MOTOR.rotateTo(moveTarget);
 		}
 		//Move up on the left side
-		else if (x==positionX && positionX==0 && y>=positionY) {
+		else if (x==positionX && positionX==-1000 && y>=positionY) {
 			int moveTarget = topLeftPos - y*(bottomLeftPos-topLeftPos)/1000;
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = true;
 			positionY=y;
+			System.out.println("-> Move up (on left side) to "+moveTarget);
 			checkMoveTarget(moveTarget);
 			MOTOR.rotateTo(moveTarget);
 		}
 		//Move horizontally
 		else if (y==positionY) {
 			if(currentHorizontalBorderIsLeft) {
-				int moveTarget = currentHorizontalBorderPos + HORIZONTAL_ANGLE/2 + x*HORIZONTAL_ANGLE/2000;
+				int moveTarget = currentHorizontalBorderPos + HORIZONTAL_ANGLE_RIGHT/2 + x*HORIZONTAL_ANGLE_RIGHT/2000;
 				positionX=x;
+				System.out.println("-> Move horizontally (from left) to "+moveTarget);
 				checkMoveTarget(moveTarget);
 				MOTOR.rotateTo(moveTarget);
 			} else {
-				int moveTarget = currentHorizontalBorderPos - HORIZONTAL_ANGLE/2 + x*HORIZONTAL_ANGLE/2000;
+				int moveTarget = currentHorizontalBorderPos - HORIZONTAL_ANGLE_LEFT/2 + x*HORIZONTAL_ANGLE_LEFT/2000;
 				positionX=x;
+				System.out.println("-> Move horizontally (from right) to "+moveTarget);
 				checkMoveTarget(moveTarget);
 				MOTOR.rotateTo(moveTarget);
 			}
@@ -89,17 +101,18 @@ public class Head implements Sensor<Integer> {
 		}
 		//Move arbitratily up
 		else { //y>positionY
-			moveTo(0,positionY);
-			moveTo(0,y);
+			moveTo(-1000,positionY);
+			moveTo(-1000,y);
 			moveTo(x,y);
 		}
+		Button.waitForAnyPress();
 	}
 
 	public void calibrate() {
 		final int MIN_MOVEMENT = 12;
-		int power = 25;
+		int power = 35;
 
-		boolean round = false;
+		int round = 0;
 
 		MOTOR.suspendRegulation();
 		for (int i = 0; i < 2; ++i) {
@@ -123,49 +136,81 @@ public class Head implements Sensor<Integer> {
 				if (Button.ENTER.isDown()) {
 					System.out.println("Pos: " + position);
 				}
+				//System.out.println("Speed: "+(position-lastPosition));
 			} while (Math.abs(position - lastPosition) >= MIN_MOVEMENT);
 			power = -power;
 
-			if (!round) {
+			if (round==0) {
+				System.out.println("New bottom right: "+position);
 				bottomRightPos = position;
-				round = true;
-			} else {
+				round = 1;
+			} else if (round==1) {
+				System.out.println("New top left: "+position);
 				topLeftPos = position;
-				break;
+				round = 2;
+				//break;
+			} else if (round==2) {
+				System.out.println("New bottom right: "+position);
+				round = 3;
+			} else if (round==3) {
+				System.out.println("New top left: "+position);
+				round=0;
 			}
 
 		}
 		MOTOR.stop();
 
-		bottomRightPos -= 20;
-		topLeftPos += 20;
+		bottomRightPos -= 75;
+		topLeftPos += 75;
 		int distance = bottomRightPos - topLeftPos;
-		HORIZONTAL_ANGLE = distance / 3;
-		VERTICAL_ANGLE = distance - HORIZONTAL_ANGLE;
-		topCentered = topLeftPos + HORIZONTAL_ANGLE / 2;
-		topRightPos = topLeftPos + HORIZONTAL_ANGLE;
-		bottomLeftPos = bottomRightPos - HORIZONTAL_ANGLE;
-		bottomCentered = bottomRightPos - HORIZONTAL_ANGLE / 2;
-		positionX = -1;
+		VERTICAL_ANGLE_DOWN = (int)(VERTICAL_FACTOR_DOWN*distance);
+		HORIZONTAL_ANGLE_RIGHT = distance-VERTICAL_ANGLE_DOWN;
+		VERTICAL_ANGLE_UP = (int)(VERTICAL_FACTOR_UP*distance);
+		HORIZONTAL_ANGLE_LEFT = distance-VERTICAL_ANGLE_UP;		
+		topCentered = topLeftPos + HORIZONTAL_ANGLE_RIGHT / 2;
+		topRightPos = topLeftPos + HORIZONTAL_ANGLE_RIGHT;
+		bottomLeftPos = bottomRightPos - HORIZONTAL_ANGLE_LEFT;
+		bottomCentered = bottomRightPos - HORIZONTAL_ANGLE_LEFT / 2;
+		checkMoveTarget(topLeftPos);
+		MOTOR.rotateTo(topLeftPos);
+		positionX = -1000;
+		positionY = 0;
 		currentHorizontalBorderPos = topLeftPos;
 		currentHorizontalBorderIsLeft = true;
 		
+		System.out.println("topleft: "+topLeftPos);
+		System.out.println("bottomright: "+bottomRightPos);
+		
+		System.out.println("TO TOP CENTER");
 		moveTo(0,0);
 		Button.waitForAnyPress();
 		
+		moveTo(-1000,0);
+		moveTo(1000,0);
+		moveTo(-1000,0);
+		moveTo(1000,0);
+		moveTo(-1000,0);
+		moveTo(1000,0);
+		moveTo(-1000,-1000);
+		moveTo(1000,-1000);
+		moveTo(-1000,-1000);
+		moveTo(1000,-1000);
+		moveTo(-1000,-1000);
+		moveTo(1000,-1000);
+		
 		while(true) {
+			System.out.println("TO TOP LEFT");
 			moveTo(-1000,0);
-			Button.waitForAnyPress();
+			System.out.println("TO BOTTOM LEFT");
 			moveTo(-1000,-1000);
-			Button.waitForAnyPress();
+			System.out.println("TO BOTTOM CENTER");
 			moveTo(0,-1000);
-			Button.waitForAnyPress();
+			System.out.println("TO TOP CENTER");
 			moveTo(0,0);
-			Button.waitForAnyPress();
+			System.out.println("TO TOP RIGHT");
 			moveTo(1000,0);
-			Button.waitForAnyPress();
+			System.out.println("TO BOTTOM RIGHT");
 			moveTo(1000,-1000);
-			Button.waitForAnyPress();
 		}
 
 		/*System.out.println("BR: " + bottomRightPos);
@@ -197,7 +242,9 @@ public class Head implements Sensor<Integer> {
 	class SweepThread extends Thread {
 		@Override
 		public void run() {
-
+			//Move to top left
+			//moveTo(-1000,0);
+			
 		}
 	}
 }
