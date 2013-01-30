@@ -1,9 +1,12 @@
 package actors;
 
-import static robot.Platform.LEFT_MOTOR;
-import static robot.Platform.RIGHT_MOTOR;
+import lejos.nxt.Motor;
+import lejos.nxt.NXTRegulatedMotor;
 
 public class Engine implements Actor {
+	
+    private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
+    private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
 
 	int newLeftSpeed = 0;
 	int newRightSpeed = 0;

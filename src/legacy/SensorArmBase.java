@@ -10,6 +10,7 @@ public class SensorArmBase {
 	}
 	
 	public NXTRegulatedMotor getMotor() {
-		return Platform.HEAD_MOTOR;
+		//return Platform.HEAD_MOTOR;
+		return null;
 	}
 }
