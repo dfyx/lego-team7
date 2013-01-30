@@ -85,7 +85,8 @@ public class Engine implements Actor {
 	 */
 	public void moveCircle(int speed, int innerRadius) {
 		int wheelWidth = 92; // in mm
-		int outerRadius = innerRadius + wheelWidth;
+		//int wheelWidth = 180; // in mm
+		int outerRadius = innerRadius - wheelWidth;
 		System.out.println("Driving (inner/outer): " + innerRadius+"mm / "+outerRadius+"mm");
 
 		int outerSpeed = speed;
@@ -98,8 +99,8 @@ public class Engine implements Actor {
 		int innerSpeed = (speedCoefficientUp * outerSpeed)
 				/ speedCoefficientDown;
 
-		newLeftSpeed = innerSpeed;
-		newRightSpeed = outerSpeed;
+		newRightSpeed = innerSpeed;
+		newLeftSpeed = outerSpeed;
 
 		commit();
 
