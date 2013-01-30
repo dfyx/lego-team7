@@ -1,6 +1,7 @@
 package strategies;
 
 import lejos.nxt.UltrasonicSensor;
+import lejos.nxt.comm.RConsole;
 import robot.Platform;
 import utils.Utils;
 import static robot.Platform.ENGINE;
@@ -16,7 +17,7 @@ public class FollowWallStrategy extends Strategy {
 	private int speed = 1000;
 
 	private enum HeadOn {
-		Right, Left
+		RIGHT_SIDE, LEFT_SIDE
 	}
 
 	private static HeadOn headOn;
@@ -40,7 +41,7 @@ public class FollowWallStrategy extends Strategy {
 	protected void doInit() {
 		realSensor = new lejos.nxt.UltrasonicSensor(Platform.ULTRASONIC_PORT);
 		realSensor.setMode(UltrasonicSensor.MODE_CONTINUOUS);
-		headOn = HeadOn.Right;
+		headOn = HeadOn.RIGHT_SIDE;
 	}
 
 	protected void doRun() {
@@ -50,8 +51,10 @@ public class FollowWallStrategy extends Strategy {
 
 		int direction = getMotorSpeed();
 
-		if (headOn == HeadOn.Left)
+		if (headOn == HeadOn.LEFT_SIDE)
 			direction = -direction;
+		
+		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue + " -> " + direction);
 		
 		ENGINE.move(speed, direction);
 	}
