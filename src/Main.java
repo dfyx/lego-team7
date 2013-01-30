@@ -1,9 +1,10 @@
 import static robot.Platform.ENGINE;
-import actors.Engine;
 import legacy.SensorArm;
 import lejos.nxt.Button;
 import lejos.nxt.LCD;
 import lejos.util.Delay;
+import robot.Platform;
+import actors.Engine;
 
 /**
  * @author markus
@@ -13,6 +14,7 @@ import lejos.util.Delay;
 public class Main {
 
 	public static void main(String[] args) {
+		
 		/*
 		 * int speed = 0; boolean forward = true; while(true) {
 		 * System.out.println(speed); speed+=25; Motor.C.setSpeed(speed);
@@ -20,6 +22,11 @@ public class Main {
 		 * !forward; Button.waitForAnyPress(); }
 		 */
 		try {
+			//Init platform
+			new Platform();
+			
+			Button.waitForAnyPress();
+			
 			/*
 		    Loop loop = new Loop();
 			Strategy calibrate = new StrategyCalibrateLight();
@@ -28,7 +35,7 @@ public class Main {
 			Button.waitForAnyPress();
 			*/
 			
-			SensorArm sensor = new SensorArm();
+			/*SensorArm sensor = new SensorArm();
 			
 			// Calibrate
 			LCD.drawString("Calibrate", 0, 0);
@@ -56,7 +63,7 @@ public class Main {
 			 * sensor.isOnLine(); LCD.drawString("" + lightValue + "    ", 0,
 			 * 0); engine.startRotation(ROTATION_MAX_SPEED * (100 - lightValue)
 			 * / 100); } while (lightValue < 50); engine.stop();
-			 */
+			 *
 
 			//Button.waitForAnyPress();
 
@@ -82,7 +89,7 @@ public class Main {
 				ENGINE.commit();
 
 				Delay.msDelay(10);
-			}
+			}*/
 
 			// Button.waitForAnyPress();
 		} catch (Exception e) {
