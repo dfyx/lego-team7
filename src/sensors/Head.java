@@ -5,12 +5,15 @@ import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.UltrasonicSensor;
 import lejos.util.Delay;
+import robot.Platform;
 
 public class Head implements Sensor<Integer> {
 
 	private static final NXTRegulatedMotor MOTOR = Motor.C;
 	private static final NXTMotor RAW_MOTOR = new NXTMotor(MotorPort.C);
+	private static final UltrasonicSensor SENSOR = new UltrasonicSensor(Platform.ULTRASONIC_PORT);
 	
 	//Factor of horizontal movement of the complete movement range
 	private static final double VERTICAL_FACTOR_DOWN = 0.72;
@@ -51,7 +54,7 @@ public class Head implements Sensor<Integer> {
 	
 	public void checkMoveTarget(int moveTarget) {
 		if(moveTarget>bottomRightPos || moveTarget<topLeftPos)
-			throw new IllegalStateException("Move out of range");
+			throw new IllegalStateException("Move out of range: "+moveTarget);
 	}
 
 	public void moveTo(int x, int y) {
@@ -105,7 +108,7 @@ public class Head implements Sensor<Integer> {
 			moveTo(-1000,y);
 			moveTo(x,y);
 		}
-		Button.waitForAnyPress();
+		//Button.waitForAnyPress();
 	}
 
 	public void calibrate() {
@@ -185,7 +188,7 @@ public class Head implements Sensor<Integer> {
 		moveTo(0,0);
 		Button.waitForAnyPress();
 		
-		moveTo(-1000,0);
+		/*moveTo(-1000,0);
 		moveTo(1000,0);
 		moveTo(-1000,0);
 		moveTo(1000,0);
@@ -211,7 +214,7 @@ public class Head implements Sensor<Integer> {
 			moveTo(1000,0);
 			System.out.println("TO BOTTOM RIGHT");
 			moveTo(1000,-1000);
-		}
+		}*/
 
 		/*System.out.println("BR: " + bottomRightPos);
 		System.out.println("BL: " + bottomLeftPos);
@@ -238,13 +241,26 @@ public class Head implements Sensor<Integer> {
 		MOTOR.rotateTo((topLeftPos + topRightPos) / 2);
 		MOTOR.stop();*/
 	}
+	
+	static final int VALUECOUNT=10;
+	
+	private int distancesUp[] = new int[VALUECOUNT];
+	private int distancesDown[] = new int[VALUECOUNT];
 
 	class SweepThread extends Thread {
 		@Override
 		public void run() {
-			//Move to top left
-			//moveTo(-1000,0);
-			
+			while(true) {
+				//Scan upper line
+				for(int i=0;i<VALUECOUNT;++i) {
+					moveTo(-1000+i*2000/VALUECOUNT,0);
+					distancesUp[i]=SENSOR.getDistance();
+				}
+				for(int i=0;i<VALUECOUNT;++i) {
+					moveTo(1000-i*2000/VALUECOUNT,-1000);
+					distancesDown[VALUECOUNT-i-1]=SENSOR.getDistance();
+				}
+			}
 		}
 	}
 }
