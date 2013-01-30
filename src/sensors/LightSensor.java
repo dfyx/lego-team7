@@ -1,6 +1,7 @@
 package sensors;
 
 import lejos.nxt.SensorPort;
+import utils.Utils;
 
 public class LightSensor implements Sensor<Integer> {
 
@@ -22,7 +23,7 @@ public class LightSensor implements Sensor<Integer> {
     public void poll() {
         rawSensorValue = realSensor.getNormalizedLightValue();
         
-        normalizedValue = 1000 * Math.max(0, rawSensorValue - minLight) / (maxLight - minLight);
+        normalizedValue = Utils.clamp(1000 * (rawSensorValue - minLight) / (maxLight - minLight),0,1000);
     }
 
     /**
