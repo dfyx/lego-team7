@@ -46,6 +46,12 @@ public class FollowWallStrategy extends Strategy {
 		realSensor = new lejos.nxt.UltrasonicSensor(Platform.ULTRASONIC_PORT);
 		realSensor.setMode(UltrasonicSensor.MODE_CONTINUOUS);
 		headOn = HeadOn.LEFT_SIDE;
+		
+		Platform.HEAD.pauseSweeping();
+		if(headOn == HeadOn.LEFT_SIDE)
+			Platform.HEAD.moveTo(-1000, 0);
+		else
+			Platform.HEAD.moveTo(1000, 0);
 	}
 
 	protected void doRun() {
