@@ -12,43 +12,45 @@ public class Loop {
 	private static int LOOP_TIME = 10;
 	
 	/**
+	 * Counts main loop cycles
+	 */
+	private static int numCycles = 0;
+	
+	/**
 	 * Main loop
 	 * Only run this once!
 	 * 
+	 * @param strategy The strategy to perform
+	 * 
 	 */
-	public void loop() {
+	public void run(Strategy strategy) {
 		Utils.resetTimer();
-		int lastEndTime = 0;
+		numCycles = 0;
 		
-		boolean run = true;
-		while(run) {
-			System.out.println("lastEnd: " + lastEndTime + ", " + "current: " + Utils.getSystemTime());
-			// ----------------------
+		strategy.init();
+		
+		int lastEndTime = Utils.getSystemTime();
+		
+		while(strategy.isRunning()) {
+			// poll sensors
+			for (Sensor<?> s : SENSORS) {
+			    s.poll();
+			}
 			
-			// TODO your code here
+			// run strategy and commit changes
+			strategy.run();
+			ENGINE.commit();
 			
-			// ----------------------
 			// check when to perform the next cycle
 			lastEndTime += LOOP_TIME;
 			if(lastEndTime > Utils.getSystemTime())
 				Delay.msDelay(lastEndTime - Utils.getSystemTime());
+			
+			numCycles++;
 		}
 	}
 	
-	// TODO delete?
-	public void runStrategies(Strategy strategy) {
-		strategy.init();
-		
-		while(strategy.isRunning()){
-			for (Sensor<?> s : SENSORS) {
-			    s.poll();
-			}
-		    
-		    strategy.run();
-			
-			ENGINE.commit();
-			
-			Delay.msDelay(10);
-		}
+	public static int getNumCycles() {
+		return numCycles;
 	}
 }
