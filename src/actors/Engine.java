@@ -2,11 +2,12 @@ package actors;
 
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.util.Delay;
 
 public class Engine implements Actor {
-	
-    private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
-    private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
+
+	private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
+	private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
 
 	int newLeftSpeed = 0;
 	int newRightSpeed = 0;
@@ -76,7 +77,41 @@ public class Engine implements Actor {
 	}
 
 	/**
-	 * Move forward or backward
+	 * Move in a circle See also #move
+	 * 
+	 * @param speed Should not be above 500
+	 * @param innerRadius Should not be below ~100 mm
+	 *            (in mm)
+	 */
+	public void moveCircle(int speed, int innerRadius) {
+		int wheelWidth = 92; // in mm
+		int outerRadius = innerRadius + wheelWidth;
+		System.out.println("Driving (inner/outer): " + innerRadius+"mm / "+outerRadius+"mm");
+
+		int outerSpeed = speed;
+
+		// innerSpeed = speedCoefficient*outerSpeed
+		//
+		int speedCoefficientUp = innerRadius;
+		int speedCoefficientDown = outerRadius;
+
+		int innerSpeed = (speedCoefficientUp * outerSpeed)
+				/ speedCoefficientDown;
+
+		newLeftSpeed = innerSpeed;
+		newRightSpeed = outerSpeed;
+
+		commit();
+
+		Delay.msDelay(100);
+
+		System.out.println("desL / realL  ||  desR / realR: " + newLeftSpeed
+				+ " / " + LEFT_MOTOR.getRotationSpeed() + "  ||  "
+				+ newRightSpeed + " / " + RIGHT_MOTOR.getRotationSpeed());
+	}
+
+	/**
+	 * Move forward or backward See also #moveCircle
 	 * 
 	 * @param speed
 	 *            The speed. If -1000<=speed<0, it moves backward. If
@@ -89,7 +124,8 @@ public class Engine implements Actor {
 	public void move(int speed, int direction) {
 		if (1000 < speed || -1000 > speed || 1000 < direction
 				|| -1000 > direction)
-			throw new IllegalStateException("Incorrect parameters speed:"+speed+", direction:"+direction);
+			throw new IllegalStateException("Incorrect parameters speed:"
+					+ speed + ", direction:" + direction);
 
 		final int MAX = 1000;
 
