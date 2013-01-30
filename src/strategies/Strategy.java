@@ -18,9 +18,9 @@ public abstract class Strategy {
         doInit();
     }
 
-    abstract void doInit();
+    abstract protected void doInit();
 
-    abstract void doRun();
+    abstract protected void doRun();
 
     protected void setFinished() {
         running = false;
