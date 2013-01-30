@@ -99,15 +99,24 @@ public class Head implements Sensor<Integer> {
 		//Move arbitrarily down
 		else if(y<=positionY) {
 			moveTo(1000,positionY);
-			moveTo(1000,y);
-			moveTo(x,y);
+			if(y!=positionY)
+				moveTo(1000,y);
+			if(x!=1000)
+				moveTo(x,y);
 		}
 		//Move arbitratily up
 		else { //y>positionY
 			moveTo(-1000,positionY);
-			moveTo(-1000,y);
-			moveTo(x,y);
+			if(y!=positionY)
+				moveTo(-1000,y);
+			if(x!=-1000)
+				moveTo(x,y);
 		}
+		
+		if(x==-1000 && y==0)
+			calibrateTopLeft();
+		else if(x==1000 && y==-1000)
+			calibrateBottomRight();
 		//Button.waitForAnyPress();
 	}
 	
@@ -156,6 +165,7 @@ public class Head implements Sensor<Integer> {
 	}
 	
 	public void calibrateTopLeft() {
+		System.out.println("Recalibrate");
 		topLeftPos = doCalibrateDirection(-CALIBRATION_POWER) + 75;
 		recalcPositions();
 		
@@ -165,6 +175,7 @@ public class Head implements Sensor<Integer> {
 		positionY = 0;
 		currentHorizontalBorderPos = topLeftPos;
 		currentHorizontalBorderIsLeft = true;
+		System.out.println("Recalibrate finished");
 	}
 	
 	private void recalcPositions() {
