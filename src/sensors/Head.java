@@ -52,7 +52,15 @@ public class Head implements Sensor<Integer> {
 		return null;
 	}
 	
-	public void checkMoveTarget(int moveTarget) {
+	public void pauseSweeping() {
+		sweepThread.pause();
+	}
+	
+	public void continueSweeping() {
+		sweepThread.restart();
+	}
+	
+	private void checkMoveTarget(int moveTarget) {
 		if(moveTarget>bottomRightPos || moveTarget<topLeftPos)
 			throw new IllegalStateException("Move out of range: "+moveTarget);
 	}
@@ -262,15 +270,33 @@ public class Head implements Sensor<Integer> {
 	private int distancesDown[] = new int[VALUECOUNT];
 
 	class SweepThread extends Thread {
+		
+		private boolean isRunning=true;
+		
+		public void pause() {
+			isRunning=false;
+		}
+		
+		public void restart() {
+			isRunning=true;
+		}
+		
+		private void doPause() {
+			while(!isRunning)
+				Delay.msDelay(100);
+		}
+		
 		@Override
 		public void run() {
 			while(true) {
 				//Scan upper line
 				for(int i=0;i<VALUECOUNT;++i) {
+					doPause();
 					moveTo(-1000+i*2000/VALUECOUNT,0);
 					distancesUp[i]=SENSOR.getDistance();
 				}
 				for(int i=0;i<VALUECOUNT;++i) {
+					doPause();
 					moveTo(1000-i*2000/VALUECOUNT,-1000);
 					distancesDown[VALUECOUNT-i-1]=SENSOR.getDistance();
 				}
