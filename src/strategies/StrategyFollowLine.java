@@ -1,22 +1,5 @@
 package strategies;
 
-<<<<<<< HEAD
-public class StrategyFollowLine extends Strategy {
-
-	@Override
-	protected void doInit() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected void doRun() {
-		// TODO Auto-generated method stub
-		
-	}
-
-}
-=======
 import static robot.Platform.ENGINE;
 import static robot.Platform.LIGHT_SENSOR;
 
@@ -47,4 +30,3 @@ public class StrategyFollowLine extends Strategy {
         ENGINE.move(MOVE_SPEED, out);
     }
 }
->>>>>>> master
