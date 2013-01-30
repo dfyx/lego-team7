@@ -66,7 +66,7 @@ public class Head implements Sensor<Integer> {
 	}
 
 	public void moveTo(int x, int y) {
-		System.out.println("Move from "+positionX+"/"+positionY+" to "+x+"/"+y);
+		//System.out.println("Move from "+positionX+"/"+positionY+" to "+x+"/"+y);
 		
 		//Move down on the right side
 		if(x==positionX && positionX==1000 && y<=positionY) {
@@ -74,7 +74,7 @@ public class Head implements Sensor<Integer> {
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = false;
 			positionY=y;
-			System.out.println("-> Move down (on right side) to "+moveTarget);
+			//System.out.println("-> Move down (on right side) to "+moveTarget);
 			checkMoveTarget(moveTarget);
 			MOTOR.rotateTo(moveTarget);
 		}
@@ -84,7 +84,7 @@ public class Head implements Sensor<Integer> {
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = true;
 			positionY=y;
-			System.out.println("-> Move up (on left side) to "+moveTarget);
+			//System.out.println("-> Move up (on left side) to "+moveTarget);
 			checkMoveTarget(moveTarget);
 			MOTOR.rotateTo(moveTarget);
 		}
@@ -93,13 +93,13 @@ public class Head implements Sensor<Integer> {
 			if(currentHorizontalBorderIsLeft) {
 				int moveTarget = currentHorizontalBorderPos + HORIZONTAL_ANGLE_RIGHT/2 + x*HORIZONTAL_ANGLE_RIGHT/2000;
 				positionX=x;
-				System.out.println("-> Move horizontally (from left) to "+moveTarget);
+				//System.out.println("-> Move horizontally (from left) to "+moveTarget);
 				checkMoveTarget(moveTarget);
 				MOTOR.rotateTo(moveTarget);
 			} else {
 				int moveTarget = currentHorizontalBorderPos - HORIZONTAL_ANGLE_LEFT/2 + x*HORIZONTAL_ANGLE_LEFT/2000;
 				positionX=x;
-				System.out.println("-> Move horizontally (from right) to "+moveTarget);
+				//System.out.println("-> Move horizontally (from right) to "+moveTarget);
 				checkMoveTarget(moveTarget);
 				MOTOR.rotateTo(moveTarget);
 			}
@@ -173,7 +173,7 @@ public class Head implements Sensor<Integer> {
 	}
 	
 	public void calibrateTopLeft() {
-		System.out.println("Recalibrate");
+		//System.out.println("Recalibrate");
 		topLeftPos = doCalibrateDirection(-CALIBRATION_POWER) + 75;
 		recalcPositions();
 		
@@ -183,7 +183,7 @@ public class Head implements Sensor<Integer> {
 		positionY = 0;
 		currentHorizontalBorderPos = topLeftPos;
 		currentHorizontalBorderIsLeft = true;
-		System.out.println("Recalibrate finished");
+		//System.out.println("Recalibrate finished");
 	}
 	
 	private void recalcPositions() {
@@ -203,12 +203,12 @@ public class Head implements Sensor<Integer> {
 		calibrateBottomRight();
 		calibrateTopLeft();
 		
-		System.out.println("topleft: "+topLeftPos);
-		System.out.println("bottomright: "+bottomRightPos);
+		//System.out.println("topleft: "+topLeftPos);
+		//System.out.println("bottomright: "+bottomRightPos);
 		
-		System.out.println("TO TOP CENTER");
+		//System.out.println("TO TOP CENTER");
 		moveTo(0,0);
-		Button.waitForAnyPress();
+		//Button.waitForAnyPress();
 		
 		/*moveTo(-1000,0);
 		moveTo(1000,0);
