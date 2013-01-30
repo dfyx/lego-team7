@@ -95,8 +95,8 @@ public class Engine implements Actor {
 
 		int left = 500, right = 500;
 
-		left -= direction;
-		right += direction;
+		left += direction;
+		right -= direction;
 
 		left *= 2;
 		right *= 2;
