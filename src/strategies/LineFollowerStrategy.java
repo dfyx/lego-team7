@@ -10,7 +10,7 @@ public class LineFollowerStrategy extends Strategy {
     private static final double EXP_FACTOR = 1.0 / 60000;
     private static final double LINEAR_FACTOR = 0.6;
 
-    public StrategyFollowLine(final int motorSpeed) {
+    public LineFollowerStrategy(final int motorSpeed) {
         if (motorSpeed < 0 || motorSpeed > 1000) {
             throw new IllegalArgumentException("motorSpeed out of range");
         }
