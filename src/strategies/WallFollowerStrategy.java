@@ -7,7 +7,7 @@ import utils.Utils;
 import static robot.Platform.ENGINE;
 
 // TODO SB should work for right and left looking sensor head
-public class FollowWallStrategy extends Strategy {
+public class WallFollowerStrategy extends Strategy {
 	// TODO SB calibrate?
 	/**
 	 * desired distance to wall (in mm)
@@ -38,7 +38,7 @@ public class FollowWallStrategy extends Strategy {
 	 */
 	private int actualValue;
 
-	public FollowWallStrategy() {
+	public WallFollowerStrategy() {
 
 	}
 

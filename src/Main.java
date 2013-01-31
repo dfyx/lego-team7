@@ -1,6 +1,6 @@
 import lejos.nxt.Button;
 import robot.Platform;
-import strategies.FollowWallStrategy;
+import strategies.WallFollowerStrategy;
 import strategies.Strategy;
 
 /**
@@ -16,7 +16,7 @@ public class Main {
 	    Loop loop = new Loop();
 	    
 	    System.out.println("start");
-	    Strategy followWall = new FollowWallStrategy();
+	    Strategy followWall = new WallFollowerStrategy();
 	    loop.run(followWall);
 	    System.out.println("finished");
 	    

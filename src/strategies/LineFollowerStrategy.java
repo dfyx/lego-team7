@@ -3,7 +3,7 @@ package strategies;
 import static robot.Platform.ENGINE;
 import static robot.Platform.LIGHT_SENSOR;
 
-public class StrategyFollowLine extends Strategy {
+public class LineFollowerStrategy extends Strategy {
 
     private static final int MOVE_SPEED = 400;
     private static final double EXP_FACTOR = 1.0 / 60000;
