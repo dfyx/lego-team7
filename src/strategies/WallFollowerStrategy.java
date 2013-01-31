@@ -1,7 +1,6 @@
 package strategies;
 
 import lejos.nxt.UltrasonicSensor;
-import lejos.nxt.comm.RConsole;
 import robot.Platform;
 import utils.Utils;
 import static robot.Platform.ENGINE;
