@@ -87,6 +87,20 @@ public class Engine implements Actor {
 	public boolean isMoving() {
 		return LEFT_MOTOR.isMoving() || RIGHT_MOTOR.isMoving();
 	}
+	
+	/**
+	 * Check whether the robot will be moving (or rotating) in the next cycle.
+	 * 
+	 * Note that this only represents current knowledge. Someone might for
+	 * example call {@link #stop() stop} before the next call of {@link
+	 * #commit() commit}.
+	 * 
+	 * @return <tt>true</tt>, iff the robot will either either be moving or
+	 * rotating.
+	 */
+	public boolean willBeMoving() {
+		return newLeftSpeed * newRightSpeed != 0;
+	}
 
 	/**
 	 * Rotate the robot on the spot.
