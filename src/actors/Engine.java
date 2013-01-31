@@ -25,8 +25,8 @@ public class Engine implements Actor {
     private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
     private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
 
-	int newLeftSpeed = 0;
-	int newRightSpeed = 0;
+	protected int newLeftSpeed = 0;
+	protected int newRightSpeed = 0;
 
 	@Override
 	public void commit() {
