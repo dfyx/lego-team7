@@ -1,5 +1,7 @@
 package sensors;
 
+import java.util.Arrays;
+
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
@@ -19,7 +21,7 @@ public class Head implements Sensor<Integer> {
 	// Factor of horizontal movement of the complete movement range
 	private static final double VERTICAL_FACTOR_DOWN = 0.7;
 	private static final double VERTICAL_FACTOR_UP = 0.79;
-	
+
 	private static final int HORIZONTAL_SPEED = 1000;
 	private static final int VERTICAL_SPEED = 1000;
 
@@ -54,8 +56,10 @@ public class Head implements Sensor<Integer> {
 	private int polledDistance;
 	private int polledPositionX;
 	private int polledPositionY;
-	
-	private class Monitor {}
+
+	private class Monitor {
+	}
+
 	private Monitor sweepValuesMonitor = new Monitor();
 
 	private MotorThread motorThread = new MotorThread();
@@ -69,24 +73,9 @@ public class Head implements Sensor<Integer> {
 
 	@Override
 	public void poll() {
-		if(motorThread.isMoving()) {
-			int motorPos = MOTOR.getTachoCount();
-			if(currentHorizontalBorderIsLeft) {
-				polledPositionX=-1000+(int)(2000*((double)(motorPos-currentHorizontalBorderPos))/horizontalAngleLeft);
-			} else {
-				polledPositionX=1000-(int)(2000*((double)(currentHorizontalBorderPos-motorPos))/horizontalAngleRight);
-			}
-			if(polledPositionX<=-1000) {
-				polledPositionX=-1000;
-				polledPositionY=(int)((double)(-1000*(motorPos-topLeftPos))/verticalAngleUp);
-				polledPositionY=Utils.clamp(polledPositionY, -1000, 0);
-			} else if(polledPositionX>=1000) {
-				polledPositionX=1000;
-				polledPositionY=(int)((double)(-1000*(verticalAngleDown-(bottomRightPos-motorPos)))/verticalAngleDown);
-				polledPositionY=Utils.clamp(polledPositionY, -1000, 0);
-			} else
-				polledPositionY = positionY;
-			polledDistance = SENSOR.getDistance();
+		if (motorThread.isMoving()) {
+			polledPositionX = calcXPos();
+			polledPositionY = calcYPos();
 		} else {
 			polledPositionX = positionX;
 			polledPositionY = positionY;
@@ -94,11 +83,38 @@ public class Head implements Sensor<Integer> {
 		}
 	}
 
+	public int calcXPos() {
+		int motorPos = MOTOR.getTachoCount();
+		int x;
+		if (currentHorizontalBorderIsLeft) {
+			x = -1000
+					+ (int) (2000 * ((double) (motorPos - currentHorizontalBorderPos)) / horizontalAngleLeft);
+		} else {
+			x = 1000 - (int) (2000 * ((double) (currentHorizontalBorderPos - motorPos)) / horizontalAngleRight);
+		}
+		return Utils.clamp(x, -1000, 1000);
+	}
+
+	public int calcYPos() {
+		int motorPos = MOTOR.getTachoCount();
+		int x = calcXPos();
+		int y;
+		if (x == -1000) {
+			y = (int) ((double) (-1000 * (motorPos - topLeftPos)) / verticalAngleUp);
+			y = Utils.clamp(y, -1000, 0);
+		} else if (x >= 1000) {
+			y = (int) ((double) (-1000 * (verticalAngleDown - (bottomRightPos - motorPos))) / verticalAngleDown);
+			y = Utils.clamp(y, -1000, 0);
+		} else
+			y = positionY;
+		return y;
+	}
+
 	@Override
 	public Integer getValue() {
 		return polledDistance;
 	}
-	
+
 	/**
 	 * Returns true, iff the sensor head is currently moving
 	 */
@@ -133,7 +149,7 @@ public class Head implements Sensor<Integer> {
 	public void stopSweeping() {
 		sweepThread.pause();
 	}
-	
+
 	private int[] sweepValues;
 	boolean sweepAtTop;
 	int sweepFromX;
@@ -143,20 +159,28 @@ public class Head implements Sensor<Integer> {
 	/**
 	 * Start sweeping
 	 * 
-	 * @param xFrom The leftmost x position to sweep. See getPositionX() for range.
-	 * @param xTo The rightmost x position to sweep. See getPositionX() for range.
-	 * @param top True, if the y position for sweeping should be top. False, if it should be bottom.
-	 * @param valuecount The number of values to scan, distributed over the sweeping area 
+	 * @param xFrom
+	 *            The leftmost x position to sweep. See getPositionX() for
+	 *            range.
+	 * @param xTo
+	 *            The rightmost x position to sweep. See getPositionX() for
+	 *            range.
+	 * @param top
+	 *            True, if the y position for sweeping should be top. False, if
+	 *            it should be bottom.
+	 * @param valuecount
+	 *            The number of values to scan, distributed over the sweeping
+	 *            area
 	 */
 	public void startSweeping(int xFrom, int xTo, boolean top, int valuecount) {
-		sweepAtTop=top;
-		sweepFromX=xFrom;
-		sweepToX=xTo;
+		sweepAtTop = top;
+		sweepFromX = xFrom;
+		sweepToX = xTo;
 		valueCount = valuecount;
-		
+
 		sweepThread.restart();
 	}
-	
+
 	/**
 	 * Move the head manually to a given position
 	 * 
@@ -165,28 +189,29 @@ public class Head implements Sensor<Integer> {
 	 * @param y
 	 *            The y coordinate. Range as given in Javadoc for getPositionY()
 	 * @param async
-	 * 			  If true, the call immediately returns while the head is still moving.
+	 *            If true, the call immediately returns while the head is still
+	 *            moving.
 	 */
 	public void moveTo(int x, int y, boolean async) {
-		if(async) {
-			motorThread.moveTo(x,y);
+		if (async) {
+			motorThread.moveTo(x, y);
 			return;
 		} else {
-			while(motorThread.isMoving()) {
+			while (motorThread.isMoving()) {
 				Delay.msDelay(10);
 			}
-			moveSync(x,y);
+			moveSync(x, y);
 		}
 	}
-	
-	private int lastCalibrationTopLeft=0;
-	private int lastCalibrationBottomRight=0;
-	//How long to wait at least between recalibration attempts (in ms)
+
+	private int lastCalibrationTopLeft = 0;
+	private int lastCalibrationBottomRight = 0;
+	// How long to wait at least between recalibration attempts (in ms)
 	private static final int RECALIBRATION_MIN_INTERVAL = 10000;
 
 	/**
-	 * Move the head manually to a given position.
-	 * The method is synchronous and returns only after the movement is complete.
+	 * Move the head manually to a given position. The method is synchronous and
+	 * returns only after the movement is complete.
 	 * 
 	 * @param x
 	 *            The x coordinate. Range as given in Javadoc for getPositionX()
@@ -194,7 +219,6 @@ public class Head implements Sensor<Integer> {
 	 *            The y coordinate. Range as given in Javadoc for getPositionY()
 	 */
 	private synchronized void moveSync(int x, int y) {
-		System.out.println("Move to "+x+"/"+y);
 
 		// Move down on the right side
 		if (x == positionX && positionX == 1000 && y <= positionY) {
@@ -255,11 +279,16 @@ public class Head implements Sensor<Integer> {
 				moveSync(x, y);
 		}
 
-		if (x == -1000 && y == 0 && lastCalibrationTopLeft+RECALIBRATION_MIN_INTERVAL<Utils.getSystemTime()) {
+		if (x == -1000
+				&& y == 0
+				&& lastCalibrationTopLeft + RECALIBRATION_MIN_INTERVAL < Utils
+						.getSystemTime()) {
 			calibrateTopLeft();
 			lastCalibrationTopLeft = Utils.getSystemTime();
-		}
-		else if (x == 1000 && y == -1000 && lastCalibrationBottomRight+RECALIBRATION_MIN_INTERVAL<Utils.getSystemTime()) {
+		} else if (x == 1000
+				&& y == -1000
+				&& lastCalibrationBottomRight + RECALIBRATION_MIN_INTERVAL < Utils
+						.getSystemTime()) {
 			calibrateBottomRight();
 			lastCalibrationBottomRight = Utils.getSystemTime();
 		}
@@ -284,7 +313,7 @@ public class Head implements Sensor<Integer> {
 			throw new IllegalArgumentException("Move out of range: " + motorPos);
 		MOTOR.rotateTo(motorPos);
 	}
-	
+
 	private boolean calibrating;
 
 	// Calibrate one of the corners using the given power
@@ -363,41 +392,42 @@ public class Head implements Sensor<Integer> {
 	}
 
 	/**
-	 * Return one of the measured values in the upper sweep line.
-	 * 
-	 * @param xPos
-	 *            The index of the value to return. Must be >=0 and
-	 *            <getHorizontalValueCount().
+	 * Return the measured sweep values Lower indices in the array are values
+	 * more to the left
 	 */
-	public int getSweepValue(int xPos) {
-		synchronized(sweepValuesMonitor) {
-			return sweepValues[xPos];
+	public int[] getSweepValues() {
+		synchronized (sweepValuesMonitor) {
+			return Arrays.copyOf(sweepValues, sweepValues.length);
 		}
 	}
-	
-	//This thread handles asynchronous motor movements
+
+	// This thread handles asynchronous motor movements
 	private class MotorThread extends Thread {
 		private boolean isMoving = false;
 		private int targetX;
 		private int targetY;
-		
+
 		public boolean isMoving() {
 			return isMoving;
 		}
-		
+
 		public void moveTo(int x, int y) {
-			targetX=x;
-			targetY=y;
-			isMoving=true;
+			targetX = x;
+			targetY = y;
+			isMoving = true;
 		}
-		
+
 		public void run() {
-			while(true) {
-				while(!isMoving || calibrating) {
-					Delay.msDelay(10);
+			try {
+				while (true) {
+					while (!isMoving || calibrating) {
+						Delay.msDelay(10);
+					}
+					Head.this.moveSync(targetX, targetY); // Move synchronously
+					isMoving = false;
 				}
-				Head.this.moveSync(targetX,targetY); //Move synchronously
-				isMoving=false;
+			} finally {
+				MOTOR.stop();
 			}
 		}
 	}
@@ -413,9 +443,8 @@ public class Head implements Sensor<Integer> {
 		}
 
 		public void restart() {
-			restart=true;
+			restart = true;
 			isRunning = true;
-			System.out.println("Start sweeping");
 		}
 
 		private void doPause() {
@@ -425,39 +454,97 @@ public class Head implements Sensor<Integer> {
 
 		@Override
 		public void run() {
-			while (true) {
-				doPause();
-				restart=false;
-				int y=0;
-				if(!sweepAtTop)
-					y=-1000;
-				int from = sweepFromX;
-				int to = sweepToX;
-				//Init sweepValues
-				synchronized(sweepValuesMonitor) {
-					sweepValues = new int[valueCount];
-					for(int i=0;i<valueCount;++i) {
-						sweepValues[i]=255;
-					}
-				}
-				// Scan left to right
-				for (int i = 0; i < sweepValues.length; ++i) {
+			try {
+				int y = 0, from = 0, to = 0;
+				while (true) {
+//System.out.println("1");
+					while(isMoving())
+						Delay.msDelay(1);
 					doPause();
-					if(restart) {
-						break;
+					//System.out.println("2");
+					if (restart) {
+						//System.out.println("3");
+						if (sweepAtTop)
+							y = 0;
+						else
+							y = -1000;
+						from = sweepFromX;
+						to = sweepToX;
+						//System.out.println("4");
+
+						// Init sweepValues
+						synchronized (sweepValuesMonitor) {
+							sweepValues = new int[valueCount];
+							for (int i = 0; i < valueCount; ++i) {
+								sweepValues[i] = 255;
+							}
+						}
+						//System.out.println("5");
+						restart = false;
 					}
-					moveTo(from + i * (to-from) / (sweepValues.length - 1), y, false);
-					sweepValues[i] = SENSOR.getDistance();
-				}
-				// Scan right to left
-				for (int i = sweepValues.length-2; i >0; --i) {
-					doPause();
-					if(restart) {
-						break;
+					// Scan left to right
+					/*
+					 * while(isMoving()) { Delay.msDelay(1); }
+					 */
+					moveTo(to, y, true);
+					//System.out.println("6");
+					int currentIndex = 0;
+					while (isMoving()/* && currentIndex<sweepValues.length */) {
+						//System.out.println("7");
+						doPause();
+						if (restart)
+							break;
+						int x = calcXPos();
+						//System.out.println("8");
+						if (x >= from + (to - from) * currentIndex
+								/ (sweepValues.length - 1)) {
+							sweepValues[currentIndex] = SENSOR.getDistance();
+							++currentIndex;
+						}
+						Delay.msDelay(1);
 					}
-					moveTo(from + i * (to-from) / (sweepValues.length - 1), y, false);
-					sweepValues[i] = SENSOR.getDistance();
+					//System.out.println("9");
+					if (restart)
+						continue;
+					//System.out.println("10");
+					if (currentIndex != sweepValues.length)
+						throw new IllegalStateException(
+								"sweepValues.length!=currentIndex");
+					currentIndex -= 2;
+					//System.out.println("11");
+					/*
+					 * while(isMoving()) { Delay.msDelay(1); }
+					 */
+					moveTo(from, y, true);
+					//System.out.println("12");
+					while (isMoving()/* && currentIndex>=0 */) {
+						//System.out.println("13");
+						doPause();
+						//System.out.println("14");
+						if (restart)
+							break;
+						//System.out.println("15");
+						int x = calcXPos();
+						//System.out.println("16");
+						if (x <= from + (to - from) * currentIndex
+								/ (sweepValues.length - 1)) {
+							//System.out.println("17");
+							sweepValues[currentIndex] = SENSOR.getDistance();
+							--currentIndex;
+						}
+						//System.out.println("18");
+						Delay.msDelay(1);
+					}
+					if (restart)
+						continue;
+					//System.out.println("19");
+					if (currentIndex != -1)
+						throw new IllegalStateException("-1!=currentIndex=="
+								+ currentIndex);
 				}
+			} finally {
+				System.out.println("Motor stopped");
+				MOTOR.stop();
 			}
 		}
 	}
