@@ -1,7 +1,5 @@
 package sensors;
 
-import java.util.concurrent.locks.ReentrantLock;
-
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
