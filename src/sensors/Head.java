@@ -247,7 +247,7 @@ public class Head implements Sensor<Integer> {
 	// Perform a motor rotation to the given motor coordinates
 	private void doRotateTo(int motorPos) {
 		if (motorPos > bottomRightPos || motorPos < topLeftPos)
-			throw new IllegalStateException("Move out of range: " + motorPos);
+			throw new IllegalArgumentException("Move out of range: " + motorPos);
 		MOTOR.rotateTo(motorPos);
 	}
 	
