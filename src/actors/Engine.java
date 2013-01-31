@@ -84,10 +84,19 @@ public class Engine implements Actor {
 	 *            (in mm)
 	 */
 	public void moveCircle(int speed, int innerRadius) {
+		innerRadius = innerRadius / 6;
 		int wheelWidth = 92; // in mm
-		//int wheelWidth = 180; // in mm
-		int outerRadius = innerRadius - wheelWidth;
+		//int wheelWidth = 500; // in mm
+		int outerRadius = innerRadius + wheelWidth;
+
 		System.out.println("Driving (inner/outer): " + innerRadius+"mm / "+outerRadius+"mm");
+		
+		/*int factorUpper = 2;
+		int factorLower = 6;
+		int virtualInner = (innerRadius*factorUpper)/factorLower;
+		int virtualOuter = (outerRadius*factorUpper)/factorLower;*/
+		
+		//System.out.println("Virtual  (inner/outer): " + virtualInner+"mm / "+virtualOuter+"mm");
 
 		int outerSpeed = speed;
 
