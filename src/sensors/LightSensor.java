@@ -17,6 +17,7 @@ public class LightSensor implements Sensor<Integer> {
         realSensor = new lejos.nxt.LightSensor(port);
         
         resetCalibration();
+        setFloodlight(true);
     }
     
     @Override
