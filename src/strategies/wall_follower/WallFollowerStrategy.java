@@ -1,9 +1,10 @@
-package strategies;
+package strategies.wall_follower;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
 import static robot.Platform.ULTRASONIC_PORT;
 import lejos.nxt.UltrasonicSensor;
+import strategies.Strategy;
 import utils.Utils;
 
 // TODO SB should work for right and left looking sensor head
