@@ -27,6 +27,24 @@ public class Engine implements Actor {
 
 	protected int newLeftSpeed = 0;
 	protected int newRightSpeed = 0;
+	
+	private Engine() {
+	}
+	
+	private static Engine instance = null;
+	
+	/**
+	 * Get an instance of Engine
+	 * 
+	 * @return an instance
+	 */
+	public static Engine getInstance() {
+		if(instance == null) {
+			instance = new Engine();
+		}
+		
+		return instance;
+	}
 
 	@Override
 	public void commit() {

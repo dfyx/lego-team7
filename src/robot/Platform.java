@@ -22,6 +22,6 @@ public class Platform {
     public static final Sensor<?> SENSORS[] = new Sensor[] {
             HEAD, LIGHT_SENSOR, LEFT_BUMPER, RIGHT_BUMPER };
     
-    public static final Engine ENGINE = new Engine();    
+    public static final Engine ENGINE = Engine.getInstance();    
     
 }
