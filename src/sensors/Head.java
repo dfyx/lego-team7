@@ -54,8 +54,10 @@ public class Head implements Sensor<Integer> {
 	private int polledDistance;
 	private int polledPositionX;
 	private int polledPositionY;
+	
+	private class Monitor {}
+	private Monitor sweepValuesMonitor = new Monitor();
 
-	//final Lock lock = new ReentrantLock();
 	private MotorThread motorThread = new MotorThread();
 	private SweepThread sweepThread = new SweepThread();
 
@@ -90,7 +92,6 @@ public class Head implements Sensor<Integer> {
 			polledPositionY = positionY;
 			polledDistance = SENSOR.getDistance();
 		}
-		//lock.unlock();
 	}
 
 	@Override
@@ -129,14 +130,30 @@ public class Head implements Sensor<Integer> {
 	 * Stop sweeping. Call this function, if you want to position the head
 	 * manually using moveTo(x,y)
 	 */
-	public void pauseSweeping() {
+	public void stopSweeping() {
 		sweepThread.pause();
 	}
+	
+	private int[] sweepValues;
+	boolean sweepAtTop;
+	int sweepFromX;
+	int sweepToX;
+	int valueCount;
 
 	/**
-	 * Restart sweeping after it was stopped with pauseSweeping().
+	 * Start sweeping
+	 * 
+	 * @param xFrom The leftmost x position to sweep. See getPositionX() for range.
+	 * @param xTo The rightmost x position to sweep. See getPositionX() for range.
+	 * @param top True, if the y position for sweeping should be top. False, if it should be bottom.
+	 * @param valuecount The number of values to scan, distributed over the sweeping area 
 	 */
-	public void continueSweeping() {
+	public void startSweeping(int xFrom, int xTo, boolean top, int valuecount) {
+		sweepAtTop=top;
+		sweepFromX=xFrom;
+		sweepToX=xTo;
+		valueCount = valuecount;
+		
 		sweepThread.restart();
 	}
 	
@@ -172,6 +189,7 @@ public class Head implements Sensor<Integer> {
 	 *            The y coordinate. Range as given in Javadoc for getPositionY()
 	 */
 	private synchronized void moveSync(int x, int y) {
+		System.out.println("Move to "+x+"/"+y);
 
 		// Move down on the right side
 		if (x == positionX && positionX == 1000 && y <= positionY) {
@@ -338,43 +356,16 @@ public class Head implements Sensor<Integer> {
 	}
 
 	/**
-	 * Number of values that are stored in one horizontal sweep. The complete
-	 * horizontal range is divided into VALUECOUNT measurement points.
-	 */
-	private static final int VALUECOUNT = 10;
-
-	// The upper horizontal line of measurement values
-	private int distancesUp[] = new int[VALUECOUNT];
-	// The lower horizontal line of measurement values
-	private int distancesDown[] = new int[VALUECOUNT];
-
-	/**
-	 * Return, how many values are measured in one horizontal line
-	 */
-	public int getHorizontalValueCount() {
-		return VALUECOUNT;
-	}
-
-	/**
 	 * Return one of the measured values in the upper sweep line.
 	 * 
 	 * @param xPos
 	 *            The index of the value to return. Must be >=0 and
 	 *            <getHorizontalValueCount().
 	 */
-	public int getUpperValue(int xPos) {
-		return distancesUp[xPos];
-	}
-
-	/**
-	 * Return one of the measured values in the lower sweep line.
-	 * 
-	 * @param xPos
-	 *            The index of the value to return. Must be >=0 and
-	 *            <getHorizontalValueCount().
-	 */
-	public int getLowerValue(int xPos) {
-		return distancesDown[xPos];
+	public int getSweepValue(int xPos) {
+		synchronized(sweepValuesMonitor) {
+			return sweepValues[xPos];
+		}
 	}
 	
 	//This thread handles asynchronous motor movements
@@ -407,14 +398,17 @@ public class Head implements Sensor<Integer> {
 	// The thread used for sweeping
 	private class SweepThread extends Thread {
 
-		private boolean isRunning = true;
+		private boolean isRunning = false;
+		private boolean restart;
 
 		public void pause() {
 			isRunning = false;
 		}
 
 		public void restart() {
+			restart=true;
 			isRunning = true;
+			System.out.println("Start sweeping");
 		}
 
 		private void doPause() {
@@ -425,16 +419,37 @@ public class Head implements Sensor<Integer> {
 		@Override
 		public void run() {
 			while (true) {
-				// Scan upper line
-				for (int i = 0; i < VALUECOUNT; ++i) {
-					doPause();
-					moveTo(-1000 + i * 2000 / (VALUECOUNT - 1), 0, false);
-					distancesUp[i] = SENSOR.getDistance();
+				doPause();
+				restart=false;
+				int y=0;
+				if(!sweepAtTop)
+					y=-1000;
+				int from = sweepFromX;
+				int to = sweepToX;
+				//Init sweepValues
+				synchronized(sweepValuesMonitor) {
+					sweepValues = new int[valueCount];
+					for(int i=0;i<valueCount;++i) {
+						sweepValues[i]=255;
+					}
 				}
-				for (int i = 0; i < VALUECOUNT; ++i) {
+				// Scan left to right
+				for (int i = 0; i < sweepValues.length; ++i) {
 					doPause();
-					moveTo(1000 - i * 2000 / (VALUECOUNT - 1), -1000, false);
-					distancesDown[VALUECOUNT - i - 1] = SENSOR.getDistance();
+					if(restart) {
+						break;
+					}
+					moveTo(from + i * (to-from) / (sweepValues.length - 1), y, false);
+					sweepValues[i] = SENSOR.getDistance();
+				}
+				// Scan right to left
+				for (int i = sweepValues.length-2; i >0; --i) {
+					doPause();
+					if(restart) {
+						break;
+					}
+					moveTo(from + i * (to-from) / (sweepValues.length - 1), y, false);
+					sweepValues[i] = SENSOR.getDistance();
 				}
 			}
 		}
