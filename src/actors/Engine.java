@@ -79,24 +79,33 @@ public class Engine implements Actor {
 	/**
 	 * Move in a circle See also #move
 	 * 
-	 * @param speed Should not be above 500
-	 * @param innerRadius Should not be below ~100 mm
-	 *            (in mm)
+	 * @param speed
+	 *            Should not be above 500
+	 * @param innerRadius
+	 *            Should not be below ~100 mm (in mm)
 	 */
 	public void moveCircle(int speed, int innerRadius) {
-		innerRadius = innerRadius / 6;
+		int oldInner = innerRadius;
+		if (innerRadius < 50)
+			throw new IllegalArgumentException(
+					"inner radius of circle to small: " + innerRadius + " < "
+							+ 50);
+		else if (innerRadius < 300) {
+			// 0 -> factor 5
+			// 250 -> factor 6
+			int offset = innerRadius - 50;
+
+			innerRadius *= 250;
+			innerRadius /= (5 * 250 + offset);
+		} else
+			innerRadius /= 6;
+
 		int wheelWidth = 92; // in mm
-		//int wheelWidth = 500; // in mm
+
 		int outerRadius = innerRadius + wheelWidth;
 
-		System.out.println("Driving (inner/outer): " + innerRadius+"mm / "+outerRadius+"mm");
-		
-		/*int factorUpper = 2;
-		int factorLower = 6;
-		int virtualInner = (innerRadius*factorUpper)/factorLower;
-		int virtualOuter = (outerRadius*factorUpper)/factorLower;*/
-		
-		//System.out.println("Virtual  (inner/outer): " + virtualInner+"mm / "+virtualOuter+"mm");
+		System.out.println("Driving (inner/outer): " + innerRadius + "mm / "
+				+ outerRadius + "mm with real inner: " + oldInner);
 
 		int outerSpeed = speed;
 
