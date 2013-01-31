@@ -2,8 +2,8 @@ package strategies;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
+import static robot.Platform.ULTRASONIC_PORT;
 import lejos.nxt.UltrasonicSensor;
-import robot.Platform;
 import utils.Utils;
 
 // TODO SB should work for right and left looking sensor head
@@ -43,15 +43,15 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	protected void doInit() {
-		realSensor = new lejos.nxt.UltrasonicSensor(Platform.ULTRASONIC_PORT);
+		realSensor = new UltrasonicSensor(ULTRASONIC_PORT);
 		realSensor.setMode(UltrasonicSensor.MODE_CONTINUOUS);
 		headOn = HeadOn.LEFT_SIDE;
 		
-		Platform.HEAD.stopSweeping();
+		HEAD.stopSweeping();
 		if(headOn == HeadOn.LEFT_SIDE)
-			Platform.HEAD.moveTo(-1000, 0, false);
+			HEAD.moveTo(-1000, 0, false);
 		else
-			Platform.HEAD.moveTo(1000, 0, false);
+			HEAD.moveTo(1000, 0, false);
 	}
 
 	protected void doRun() {
