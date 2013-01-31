@@ -4,7 +4,7 @@ import static robot.Platform.ENGINE;
 import static robot.Platform.LIGHT_SENSOR;
 import lejos.nxt.LCD;
 
-public class StrategyCalibrateLight extends Strategy {
+public class LightCalibrationStrategy extends Strategy {
 
 	final double LINEFOUND_FACTOR = 5;
 	final int LINEFOUND_COUNT = 20;

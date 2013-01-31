@@ -187,7 +187,7 @@ public class Head implements Sensor<Integer> {
 	private int doCalibrateDirection(int power) {
 		MOTOR.suspendRegulation();
 		RAW_MOTOR.setPower(power);
-		// MOTOR.forward();
+
 		Delay.msDelay(100);
 		int lastPosition = RAW_MOTOR.getTachoCount();
 		int position = RAW_MOTOR.getTachoCount();
@@ -195,7 +195,6 @@ public class Head implements Sensor<Integer> {
 		int max = Integer.MIN_VALUE;
 		do {
 			int diff = Math.abs(lastPosition - position);
-			// System.out.println("moving: " + diff);
 			if (diff < min)
 				min = diff;
 			if (diff > max)
@@ -203,10 +202,6 @@ public class Head implements Sensor<Integer> {
 			Delay.msDelay(100);
 			lastPosition = position;
 			position = RAW_MOTOR.getTachoCount();
-			//if (Button.ENTER.isDown()) {
-			//	System.out.println("Pos: " + position);
-			//}
-			//System.out.println("Speed: "+(position-lastPosition));
 		} while (Math.abs(position - lastPosition) >= MIN_MOVEMENT);
 
 		MOTOR.stop();
@@ -233,7 +228,6 @@ public class Head implements Sensor<Integer> {
 	 * Recalibrate the top left corner
 	 */
 	public void calibrateTopLeft() {
-		//System.out.println("Recalibrate");
 		topLeftPos = doCalibrateDirection(-CALIBRATION_POWER) + 140;
 		System.out.println("topLeft: "+topLeftPos);
 		System.out.flush();
@@ -244,7 +238,6 @@ public class Head implements Sensor<Integer> {
 		positionY = 0;
 		currentHorizontalBorderPos = topLeftPos;
 		currentHorizontalBorderIsLeft = true;
-		//System.out.println("Recalibrate finished");
 	}
 	
 	//Recalculate the positions after recalibrating one of the corners
