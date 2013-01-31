@@ -4,6 +4,23 @@ import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.util.Delay;
 
+/**
+ * This class encapsulates the whole underbody of the robot which consists of
+ * two regulated motors that move the robot in a tank-like fashion. This way
+ * you can for example turn without moving forward.
+ * <p>
+ * To facilitate working with this rather non-intuitive way of transportation
+ * this class provides some functions that do the necessary calculations.
+ * <p>
+ * Calling methods such as {@link #rotate(int) rotate}, {@link #move(int) move}
+ * or {@link #stop() stop} do <b>not</b> change the motors' speed directly.
+ * This was introduced to make sure that no conflicting commands will be
+ * executed within short periods of time. Instead, call {@link #commit()
+ * commit} at the end of your main loop to execute the last given command.
+ * <p>
+ * To make sure there is no interference, the motors used by this class should
+ * <b>never</b> be manipulated by anyone else.
+ */
 public class Engine implements Actor {
 
 	private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
@@ -43,20 +60,25 @@ public class Engine implements Actor {
 	}
 
 	/**
-	 * Return, whether we are moving (or rotating)
+	 * Return whether the robot is moving (or rotating).
 	 * 
-	 * @return True, iff the robot is either moving or rotating.
+	 * This represents the current state of the motors, regardless of any
+	 * commands that have been given but not committed.
+	 * 
+	 * @return <tt>true</tt>, iff the robot is either moving or rotating.
 	 */
 	public boolean isMoving() {
 		return LEFT_MOTOR.isMoving() || RIGHT_MOTOR.isMoving();
 	}
 
 	/**
-	 * Rotate the robot
+	 * Rotate the robot on the spot.
+	 * <p>
+	 * This is just a convenience function for {@link #move(int, int)}.
 	 * 
 	 * @param speed
-	 *            The speed used for rotation. If -1000<=speed<0, we rotate left
-	 *            If 0<speed<1000, we rotate right
+	 *            The speed used for rotation. If between -1000 and 0, the
+	 *            robot rotates left. If between 0 and 1000, it rotates right.
 	 */
 	public void rotate(int speed) {
 		if (speed < 0)
@@ -66,11 +88,13 @@ public class Engine implements Actor {
 	}
 
 	/**
-	 * Move straight forward with a given speed
+	 * Move straight forward with a given speed.
+	 * <p>
+	 * This is just a convenience function for {@link #move(int, int)}.
 	 * 
 	 * @param speed
-	 *            The speed to move with. If -1000<=speed<0, it moves backward.
-	 *            If 0<speed<1000, it moves forward.
+	 *            The speed to move with. If between -1000 and 0, the robot
+	 *            moves backward. If between 0 it 1000, it moves forward.
 	 */
 	public void move(int speed) {
 		move(speed, 0);
@@ -130,15 +154,25 @@ public class Engine implements Actor {
 	}
 
 	/**
-	 * Move forward or backward See also #moveCircle
+	 * Move forward or backward in a curved path.
+	 * See also #moveCircle
+	 * 
+	 * This can be used to move in any way the engine setup allows ranging
+	 * from a straight line to a turn on the spot.
+	 * <p>
+	 * Note that <tt>speed</tt> doesn't refer exclusively to forward/backward
+	 * movement but also to rotation speed while <tt>direction</tt> determines
+	 * whether the robot will move in a straight line, in a curve or on the
+	 * spot. Therefore a <tt>speed</tt> of 0 always means that the robot will
+	 * not move at all.
 	 * 
 	 * @param speed
-	 *            The speed. If -1000<=speed<0, it moves backward. If
-	 *            0<speed<1000, it moves forward.
+	 *            The speed. If between -1000 and 0, it moves backward. If
+	 *            between 0 and 1000, it moves forward.
 	 * @param direction
 	 *            The direction to move (speed difference between left and right
-	 *            chain). -1000<=direction<0 for moving left 0<direction<1000
-	 *            for moving right.
+	 *            chain). Between -1000 and 0 for moving left and between 0
+	 *            and 1000 for moving right.
 	 */
 	public void move(int speed, int direction) {
 		if (1000 < speed || -1000 > speed || 1000 < direction

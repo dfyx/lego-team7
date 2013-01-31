@@ -1,17 +1,18 @@
 package strategies;
 
-import lejos.nxt.UltrasonicSensor;
-import robot.Platform;
-import utils.Utils;
 import static robot.Platform.ENGINE;
+import static robot.Platform.HEAD;
+import static robot.Platform.ULTRASONIC_PORT;
+import lejos.nxt.UltrasonicSensor;
+import utils.Utils;
 
 // TODO SB should work for right and left looking sensor head
 public class WallFollowerStrategy extends Strategy {
 	// TODO SB calibrate?
 	/**
-	 * desired distance to wall (in mm)
+	 * desired distance to wall (in cm)
 	 */
-	private int referenceValue = 150;
+	private int referenceValue = 15;
 
 	private static final int MAX_SPEED = 500;
 	private int speed = MAX_SPEED;
@@ -23,17 +24,17 @@ public class WallFollowerStrategy extends Strategy {
 	private static HeadOn headOn;
 
 	/**
-	 * Turn on max speed outside of +- 5cm corridor 50*_20_ = 1000
+	 * Turn on max speed outside of +- 5cm corridor 5*_200_ = 1000
 	 */
-	private static final int LINEAR_FACTOR = 10;
+	private static final int LINEAR_FACTOR = 100;
 
-	private static final int LINEAR_FACTOR_MOVE_AWAY = 7;
-	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 5;
+	private static final int LINEAR_FACTOR_MOVE_AWAY = 70;
+	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 50;
 
 	UltrasonicSensor realSensor;
 
 	/**
-	 * distance to wall (in mm)
+	 * distance to wall (in cm)
 	 */
 	private int actualValue;
 
@@ -42,21 +43,25 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	protected void doInit() {
-		realSensor = new lejos.nxt.UltrasonicSensor(Platform.ULTRASONIC_PORT);
+		realSensor = new UltrasonicSensor(ULTRASONIC_PORT);
 		realSensor.setMode(UltrasonicSensor.MODE_CONTINUOUS);
 		headOn = HeadOn.LEFT_SIDE;
 		
-		Platform.HEAD.pauseSweeping();
+		HEAD.stopSweeping();
 		if(headOn == HeadOn.LEFT_SIDE)
-			Platform.HEAD.moveTo(-1000, 0);
+			HEAD.moveTo(-1000, 0, false);
 		else
-			Platform.HEAD.moveTo(1000, 0);
+			HEAD.moveTo(1000, 0, false);
 	}
 
 	protected void doRun() {
-		// TODO SB set to real sensor data
-		// read data and convert to mm
-		actualValue = realSensor.getDistance() * 10;
+	    // doInit is moving the sensor head nonblocking, skip control loop
+	    // until the sensor head arrived at its final position 
+	    if (HEAD.isMoving()) {
+	        return;
+	    }
+	    
+		actualValue = realSensor.getDistance();
 
 		int direction = getMotorSpeed();
 
@@ -78,7 +83,7 @@ public class WallFollowerStrategy extends Strategy {
 		int diff = (actualValue - referenceValue);
 		int linearValue = 0;
 		// move to wall
-		if (linearValue > 0)
+		if (diff > 0)
 			linearValue = diff * LINEAR_FACTOR_MOVE_TOWARDS;
 		else
 			linearValue = diff * LINEAR_FACTOR_MOVE_AWAY;

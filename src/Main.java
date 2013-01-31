@@ -3,6 +3,7 @@ import robot.Platform;
 import strategies.WallFollowerStrategy;
 import strategies.Strategy;
 import static robot.Platform.ENGINE;
+import static robot.Platform.HEAD;
 
 /**
  * @author markus
@@ -12,7 +13,6 @@ import static robot.Platform.ENGINE;
 public class Main {
 
 	public static void main(String[] args) {
-		Platform.HEAD.pauseSweeping();
 		Button.waitForAnyPress();
 		ENGINE.moveCircle(500, 50);
 		ENGINE.commit();
