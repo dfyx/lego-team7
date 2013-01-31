@@ -178,6 +178,11 @@ public class Head implements Sensor<Integer> {
 			moveSync(x,y);
 		}
 	}
+	
+	private int lastCalibrationTopLeft=0;
+	private int lastCalibrationBottomRight=0;
+	//How long to wait at least between recalibration attempts (in ms)
+	private static final int RECALIBRATION_MIN_INTERVAL = 10000;
 
 	/**
 	 * Move the head manually to a given position.
@@ -250,11 +255,13 @@ public class Head implements Sensor<Integer> {
 				moveSync(x, y);
 		}
 
-		if (x == -1000 && y == 0) {
+		if (x == -1000 && y == 0 && lastCalibrationTopLeft+RECALIBRATION_MIN_INTERVAL<Utils.getSystemTime()) {
 			calibrateTopLeft();
+			lastCalibrationTopLeft = Utils.getSystemTime();
 		}
-		else if (x == 1000 && y == -1000) {
+		else if (x == 1000 && y == -1000 && lastCalibrationBottomRight+RECALIBRATION_MIN_INTERVAL<Utils.getSystemTime()) {
 			calibrateBottomRight();
+			lastCalibrationBottomRight = Utils.getSystemTime();
 		}
 		// Button.waitForAnyPress();
 	}
