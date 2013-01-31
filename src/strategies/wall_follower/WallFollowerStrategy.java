@@ -30,8 +30,6 @@ public class WallFollowerStrategy extends Strategy {
 	private static final int LINEAR_FACTOR_MOVE_AWAY = 70;
 	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 50;
 
-	UltrasonicSensor realSensor;
-
 	/**
 	 * distance to wall (in cm)
 	 */
@@ -42,8 +40,6 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	protected void doInit() {
-		realSensor = new UltrasonicSensor(ULTRASONIC_PORT);
-		realSensor.setMode(UltrasonicSensor.MODE_CONTINUOUS);
 		headOn = HeadOn.LEFT_SIDE;
 		
 		HEAD.stopSweeping();
@@ -60,7 +56,7 @@ public class WallFollowerStrategy extends Strategy {
 	        return;
 	    }
 	    
-		actualValue = realSensor.getDistance();
+		actualValue = HEAD.getValue();
 
 		int direction = getMotorSpeed();
 

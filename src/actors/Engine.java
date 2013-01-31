@@ -128,8 +128,8 @@ public class Engine implements Actor {
 
 		int outerRadius = innerRadius + wheelWidth;
 
-		System.out.println("Driving (inner/outer): " + innerRadius + "mm / "
-				+ outerRadius + "mm with real inner: " + oldInner + "mm");
+//		System.out.println("Driving (inner/outer): " + innerRadius + "mm / "
+//				+ outerRadius + "mm with real inner: " + oldInner + "mm");
 
 		int outerSpeed = speed;
 
@@ -148,9 +148,9 @@ public class Engine implements Actor {
 
 		Delay.msDelay(100);
 
-		System.out.println("desL / realL  ||  desR / realR: " + newLeftSpeed
-				+ " / " + LEFT_MOTOR.getRotationSpeed() + "  ||  "
-				+ newRightSpeed + " / " + RIGHT_MOTOR.getRotationSpeed());
+//		System.out.println("desL / realL  ||  desR / realR: " + newLeftSpeed
+//				+ " / " + LEFT_MOTOR.getRotationSpeed() + "  ||  "
+//				+ newRightSpeed + " / " + RIGHT_MOTOR.getRotationSpeed());
 	}
 
 	/**
