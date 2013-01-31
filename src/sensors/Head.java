@@ -1,6 +1,5 @@
 package sensors;
 
-import lejos.nxt.Button;
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
@@ -52,14 +51,52 @@ public class Head implements Sensor<Integer> {
 		return null;
 	}
 	
+	/**
+	 * Return the x coordinate of the current head position
+	 * 
+	 * -1000<=result<=1000 whereas -1000: leftmost, 0: centered, 1000: rightmost
+	 */
+	public int getPositionX() {
+		return positionX;
+	}
+	
+	/**
+	 * Return the y coordinate of the current head position
+	 * 
+	 * -1000<=result<=0 whereas -1000: bottom, 0: top
+	 */
+	public int getPositionY() {
+		return positionY;
+	}
+	
+	/**
+	 * Return the current value of the distance sensor
+	 */
+	public int getDistance() {
+		return SENSOR.getDistance();
+	}
+	
+	/**
+	 * Stop sweeping. Call this function, if you want to position the head
+	 * manually using moveTo(x,y)
+	 */
 	public void pauseSweeping() {
 		sweepThread.pause();
 	}
 	
+	/**
+	 * Restart sweeping after it was stopped with pauseSweeping().
+	 */
 	public void continueSweeping() {
 		sweepThread.restart();
 	}
 
+	/**
+	 * Move the head manually to a given position
+	 * 
+	 * @param x The x coordinate. Range as given in Javadoc for getPositionX()
+	 * @param y The y coordinate. Range as given in Javadoc for getPositionY()
+	 */
 	public void moveTo(int x, int y) {
 		System.out.println("Move from "+positionX+"/"+positionY+" to "+x+"/"+y);
 		System.out.flush();
@@ -124,9 +161,19 @@ public class Head implements Sensor<Integer> {
 		//Button.waitForAnyPress();
 	}
 	
+	/**
+	 * The minimal movement per cycle when calibrating.
+	 * If this movement isn't done, the algorithm stops
+	 * and says it's at the corner and can't move anymore.
+	 */
 	private final static int MIN_MOVEMENT = 12;
+	
+	/**
+	 * The voltage to use for calibration
+	 */
 	private final int CALIBRATION_POWER = 40;
 	
+	//Perform a motor rotation to the given motor coordinates
 	private void doRotateTo(int motorPos) {
 		if(motorPos>bottomRightPos || motorPos<topLeftPos)
 			throw new IllegalStateException("Move out of range: "+motorPos);
@@ -135,10 +182,12 @@ public class Head implements Sensor<Integer> {
 		MOTOR.rotateTo(motorPos);
 	}
 	
+	//Calibrate one of the corners using the given power
+	//The sign of the power determines fixes the direction.
 	private int doCalibrateDirection(int power) {
 		MOTOR.suspendRegulation();
 		RAW_MOTOR.setPower(power);
-		// MOTOR.forward();
+
 		Delay.msDelay(100);
 		int lastPosition = RAW_MOTOR.getTachoCount();
 		int position = RAW_MOTOR.getTachoCount();
@@ -146,7 +195,6 @@ public class Head implements Sensor<Integer> {
 		int max = Integer.MIN_VALUE;
 		do {
 			int diff = Math.abs(lastPosition - position);
-			// System.out.println("moving: " + diff);
 			if (diff < min)
 				min = diff;
 			if (diff > max)
@@ -154,16 +202,15 @@ public class Head implements Sensor<Integer> {
 			Delay.msDelay(100);
 			lastPosition = position;
 			position = RAW_MOTOR.getTachoCount();
-			//if (Button.ENTER.isDown()) {
-			//	System.out.println("Pos: " + position);
-			//}
-			//System.out.println("Speed: "+(position-lastPosition));
 		} while (Math.abs(position - lastPosition) >= MIN_MOVEMENT);
 
 		MOTOR.stop();
 		return position;
 	}
 	
+	/**
+	 * Recalibrate the bottom right corner
+	 */
 	public void calibrateBottomRight() {
 		bottomRightPos = doCalibrateDirection(CALIBRATION_POWER) - 100;
 		System.out.println("bottomRight: "+bottomRightPos);
@@ -177,8 +224,10 @@ public class Head implements Sensor<Integer> {
 		currentHorizontalBorderIsLeft = false;
 	}
 	
+	/**
+	 * Recalibrate the top left corner
+	 */
 	public void calibrateTopLeft() {
-		//System.out.println("Recalibrate");
 		topLeftPos = doCalibrateDirection(-CALIBRATION_POWER) + 140;
 		System.out.println("topLeft: "+topLeftPos);
 		System.out.flush();
@@ -189,9 +238,9 @@ public class Head implements Sensor<Integer> {
 		positionY = 0;
 		currentHorizontalBorderPos = topLeftPos;
 		currentHorizontalBorderIsLeft = true;
-		//System.out.println("Recalibrate finished");
 	}
 	
+	//Recalculate the positions after recalibrating one of the corners
 	private void recalcPositions() {
 		int distance = bottomRightPos - topLeftPos;
 		VERTICAL_ANGLE_DOWN = (int)(VERTICAL_FACTOR_DOWN*distance);
@@ -204,84 +253,53 @@ public class Head implements Sensor<Integer> {
 		bottomCentered = bottomRightPos - HORIZONTAL_ANGLE_RIGHT / 2;
 	}
 
+	/**
+	 * Recalibrate the complete head movement
+	 */
 	public void calibrate() {
-		
 		calibrateBottomRight();
 		calibrateTopLeft();
-		
-		//System.out.println("topleft: "+topLeftPos);
-		//System.out.println("bottomright: "+bottomRightPos);
-		
-		//System.out.println("TO TOP CENTER");
-		/*moveTo(0,0);
-		Button.waitForAnyPress();		
-		moveTo(-1000,0);
-		Button.waitForAnyPress();
-		moveTo(0,0);
-		Button.waitForAnyPress();
-		moveTo(1000,0);
-		Button.waitForAnyPress();
-		moveTo(0,0);
-		Button.waitForAnyPress();
-		
-		moveTo(0,-1000);
-		Button.waitForAnyPress();
-		moveTo(-1000,-1000);
-		Button.waitForAnyPress();
-		moveTo(0,-1000);
-		Button.waitForAnyPress();
-		moveTo(1000,-1000);
-		Button.waitForAnyPress();
-		moveTo(0,-1000);*/
-		//Button.waitForAnyPress();
-		
-		/*while(true) {
-			System.out.println("TO TOP LEFT");
-			moveTo(-1000,0);
-			System.out.println("TO BOTTOM LEFT");
-			moveTo(-1000,-1000);
-			System.out.println("TO BOTTOM CENTER");
-			moveTo(0,-1000);
-			System.out.println("TO TOP CENTER");
-			moveTo(0,0);
-			System.out.println("TO TOP RIGHT");
-			moveTo(1000,0);
-			System.out.println("TO BOTTOM RIGHT");
-			moveTo(1000,-1000);
-		}*/
-
-		/*System.out.println("BR: " + bottomRightPos);
-		System.out.println("BL: " + bottomLeftPos);
-		System.out.println("TR: " + topRightPos);
-		System.out.println("TL: " + topLeftPos);
-
-		int HORIZONTAL_SPEED = 1000;
-		int VERTICAL_SPEED = 500;
-
-		int basePosition = MOTOR.getTachoCount();
-		MOTOR.setSpeed(HORIZONTAL_SPEED);
-		MOTOR.rotateTo(topRightPos);
-		MOTOR.rotateTo(topLeftPos);
-		MOTOR.rotateTo(topRightPos);
-		MOTOR.setSpeed(VERTICAL_SPEED);
-		MOTOR.rotateTo(bottomRightPos);
-		MOTOR.setSpeed(HORIZONTAL_SPEED);
-		MOTOR.rotateTo(bottomLeftPos);
-		MOTOR.rotateTo(bottomRightPos);
-		MOTOR.rotateTo(bottomLeftPos);
-		MOTOR.setSpeed(VERTICAL_SPEED);
-		MOTOR.rotateTo(topLeftPos);
-		MOTOR.setSpeed(HORIZONTAL_SPEED);
-		MOTOR.rotateTo((topLeftPos + topRightPos) / 2);
-		MOTOR.stop();*/
 	}
 	
-	static final int VALUECOUNT=10;
+	/**
+	 * Number of values that are stored in one horizontal sweep.
+	 * The complete horizontal range is divided into VALUECOUNT
+	 * measurement points.
+	 */
+	private static final int VALUECOUNT=10;
 	
+	//The upper horizontal line of measurement values
 	private int distancesUp[] = new int[VALUECOUNT];
+	//The lower horizontal line of measurement values
 	private int distancesDown[] = new int[VALUECOUNT];
+	
+	/**
+	 * Return, how many values are measured in one horizontal line
+	 */
+	public int getHorizontalValueCount() {
+		return VALUECOUNT;
+	}
+	
+	/**
+	 * Return one of the measured values in the upper sweep line.
+	 * 
+	 * @param xPos The index of the value to return. Must be >=0 and <getHorizontalValueCount().
+	 */
+	public int getUpperValue(int xPos) {
+		return distancesUp[xPos];
+	}
 
-	class SweepThread extends Thread {
+	/**
+	 * Return one of the measured values in the lower sweep line.
+	 * 
+	 * @param xPos The index of the value to return. Must be >=0 and <getHorizontalValueCount().
+	 */
+	public int getLowerValue(int xPos) {
+		return distancesDown[xPos];
+	}
+
+	//The thread used for sweeping
+	private class SweepThread extends Thread {
 		
 		private boolean isRunning=true;
 		
@@ -304,12 +322,12 @@ public class Head implements Sensor<Integer> {
 				//Scan upper line
 				for(int i=0;i<VALUECOUNT;++i) {
 					doPause();
-					moveTo(-1000+i*2000/VALUECOUNT,0);
+					moveTo(-1000+i*2000/(VALUECOUNT-1),0);
 					distancesUp[i]=SENSOR.getDistance();
 				}
 				for(int i=0;i<VALUECOUNT;++i) {
 					doPause();
-					moveTo(1000-i*2000/VALUECOUNT,-1000);
+					moveTo(1000-i*2000/(VALUECOUNT-1),-1000);
 					distancesDown[VALUECOUNT-i-1]=SENSOR.getDistance();
 				}
 			}

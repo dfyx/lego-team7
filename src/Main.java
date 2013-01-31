@@ -1,6 +1,6 @@
 import lejos.nxt.Button;
 import robot.Platform;
-import strategies.FollowWallStrategy;
+import strategies.WallFollowerStrategy;
 import strategies.Strategy;
 import static robot.Platform.ENGINE;
 
