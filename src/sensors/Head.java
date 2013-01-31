@@ -18,20 +18,19 @@ public class Head implements Sensor<Integer> {
 	private static final double VERTICAL_FACTOR_DOWN = 0.7;
 	private static final double VERTICAL_FACTOR_UP = 0.79;
 
-	int positionX; // -1000: full left, 0: centered, 1000: full right
-	int positionY; // -1000: bottom, 0: top
-	int currentHorizontalBorderPos;
-	boolean currentHorizontalBorderIsLeft;
-	int HORIZONTAL_ANGLE_RIGHT;
-	int VERTICAL_ANGLE_DOWN;
-	int HORIZONTAL_ANGLE_LEFT;
-	int VERTICAL_ANGLE_UP;
-	int topLeftPos;
-	int topCentered;
-	int topRightPos;
-	int bottomLeftPos;
-	int bottomCentered;
-	int bottomRightPos;
+	private int positionX; // -1000: full left, 0: centered, 1000: full right
+	private int positionY; // -1000: bottom, 0: top
+	private int currentHorizontalBorderPos; //The motor position origin for x movement. This is the motor position of either the left or the right border of the current horizontal movement. 
+	private boolean currentHorizontalBorderIsLeft; //True, iff currentHorizontalBorderPos stores the left border of the current horizontal movement.
+	private int horizontalAngleRight; //The horizontal movement range (in motor pos), when currentHorizontalBorderIsLeft==false
+	private int verticalAngleDown; //The vertical movement range when moving down
+	private int horizontalAngleLeft; //The horizontal movement range (in motor pos), when currentHorizontalBorderIsLeft==true
+	private int verticalAngleUp; //The vertical movement range when moving up
+	//Some motor positions
+	private int topLeftPos;
+	private int topRightPos;
+	private int bottomLeftPos;
+	private int bottomRightPos;
 
 	private SweepThread sweepThread = new SweepThread();
 
@@ -124,13 +123,13 @@ public class Head implements Sensor<Integer> {
 		//Move horizontally
 		else if (y==positionY) {
 			if(currentHorizontalBorderIsLeft) {
-				int moveTarget = currentHorizontalBorderPos + HORIZONTAL_ANGLE_LEFT/2 + x*HORIZONTAL_ANGLE_LEFT/2000;
+				int moveTarget = currentHorizontalBorderPos + horizontalAngleLeft/2 + x*horizontalAngleLeft/2000;
 				positionX=x;
 				System.out.println("-> Move horizontally (from left) to "+moveTarget);
 				System.out.flush();
 				doRotateTo(moveTarget);
 			} else {
-				int moveTarget = currentHorizontalBorderPos - HORIZONTAL_ANGLE_RIGHT/2 + x*HORIZONTAL_ANGLE_RIGHT/2000;
+				int moveTarget = currentHorizontalBorderPos - horizontalAngleRight/2 + x*horizontalAngleRight/2000;
 				positionX=x;
 				System.out.println("-> Move horizontally (from right) to "+moveTarget);
 				System.out.flush();
@@ -250,14 +249,12 @@ public class Head implements Sensor<Integer> {
 	//Recalculate the positions after recalibrating one of the corners
 	private void recalcPositions() {
 		int distance = bottomRightPos - topLeftPos;
-		VERTICAL_ANGLE_DOWN = (int)(VERTICAL_FACTOR_DOWN*distance);
-		HORIZONTAL_ANGLE_RIGHT = distance-VERTICAL_ANGLE_DOWN;
-		VERTICAL_ANGLE_UP = (int)(VERTICAL_FACTOR_UP*distance);
-		HORIZONTAL_ANGLE_LEFT = distance-VERTICAL_ANGLE_UP;		
-		topCentered = topLeftPos + HORIZONTAL_ANGLE_LEFT / 2;
-		topRightPos = topLeftPos + HORIZONTAL_ANGLE_LEFT;
-		bottomLeftPos = bottomRightPos - HORIZONTAL_ANGLE_RIGHT;
-		bottomCentered = bottomRightPos - HORIZONTAL_ANGLE_RIGHT / 2;
+		verticalAngleDown = (int)(VERTICAL_FACTOR_DOWN*distance);
+		horizontalAngleRight = distance-verticalAngleDown;
+		verticalAngleUp = (int)(VERTICAL_FACTOR_UP*distance);
+		horizontalAngleLeft = distance-verticalAngleUp;		
+		topRightPos = topLeftPos + horizontalAngleLeft;
+		bottomLeftPos = bottomRightPos - horizontalAngleRight;
 	}
 
 	/**
