@@ -20,13 +20,6 @@ public class StrategyFollowLine extends Strategy {
         final int exponential = (int) (error * error * error * EXP_FACTOR);
         final int out = Math.min(1000, Math.max(-1000, linear + exponential));
 
-        /*
-         * LCD.drawString("out: " + out + "    ", 0, 0);
-         * LCD.drawString("lin: " + linear + "    ", 0, 1);
-         * LCD.drawString("exp: " + exponential + "    ", 0, 2);
-         * LCD.drawString("err: " + error + "    ", 0, 3);
-         */
-
         ENGINE.move(MOVE_SPEED, out);
     }
 }
