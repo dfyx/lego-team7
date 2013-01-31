@@ -83,7 +83,7 @@ public class WallFollowerStrategy extends Strategy {
 		int diff = (actualValue - referenceValue);
 		int linearValue = 0;
 		// move to wall
-		if (linearValue > 0)
+		if (diff > 0)
 			linearValue = diff * LINEAR_FACTOR_MOVE_TOWARDS;
 		else
 			linearValue = diff * LINEAR_FACTOR_MOVE_AWAY;
