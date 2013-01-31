@@ -21,6 +21,9 @@ public class Head implements Sensor<Integer> {
 	// Factor of horizontal movement of the complete movement range
 	private static final double VERTICAL_FACTOR_DOWN = 0.7;
 	private static final double VERTICAL_FACTOR_UP = 0.79;
+	
+	private static final int HORIZONTAL_SPEED = 1000;
+	private static final int VERTICAL_SPEED = 1000;
 
 	private int positionX; // -1000: full left, 0: centered, 1000: full right
 	private int positionY; // -1000: bottom, 0: top
@@ -176,6 +179,8 @@ public class Head implements Sensor<Integer> {
 		if (x == positionX && positionX == 1000 && y <= positionY) {
 			int moveTarget = topRightPos - y * (bottomRightPos - topRightPos)
 					/ 1000;
+			MOTOR.stop();
+			MOTOR.setSpeed(VERTICAL_SPEED);
 			doRotateTo(moveTarget);
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = false;
@@ -185,6 +190,8 @@ public class Head implements Sensor<Integer> {
 		else if (x == positionX && positionX == -1000 && y >= positionY) {
 			int moveTarget = topLeftPos - y * (bottomLeftPos - topLeftPos)
 					/ 1000;
+			MOTOR.stop();
+			MOTOR.setSpeed(VERTICAL_SPEED);
 			doRotateTo(moveTarget);
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = true;
@@ -196,12 +203,16 @@ public class Head implements Sensor<Integer> {
 				int moveTarget = currentHorizontalBorderPos
 						+ horizontalAngleLeft / 2 + x * horizontalAngleLeft
 						/ 2000;
+				MOTOR.stop();
+				MOTOR.setSpeed(HORIZONTAL_SPEED);
 				doRotateTo(moveTarget);
 				positionX = x;
 			} else {
 				int moveTarget = currentHorizontalBorderPos
 						- horizontalAngleRight / 2 + x * horizontalAngleRight
 						/ 2000;
+				MOTOR.stop();
+				MOTOR.setSpeed(HORIZONTAL_SPEED);
 				doRotateTo(moveTarget);
 				positionX = x;
 			}
