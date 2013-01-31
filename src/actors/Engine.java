@@ -1,5 +1,6 @@
 package actors;
 
+import utils.Utils;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 
@@ -152,33 +153,48 @@ public class Engine implements Actor {
 	 *            and 1000 for moving right.
 	 */
 	public void move(int speed, int direction) {
-		if (1000 < speed || -1000 > speed || 1000 < direction
-				|| -1000 > direction)
-			throw new IllegalStateException("Incorrect parameters speed:"+speed+", direction:"+direction);
-
 		final int MAX = 1000;
 
-		int left = 500, right = 500;
+		if (speed < -MAX || speed > MAX) {
+			throw new IllegalArgumentException("Speed must be between "
+					+ -MAX	+ " and " + MAX);
+		}
 
-		left += direction;
-		right -= direction;
+		if (direction < -MAX || direction > MAX) {
+			throw new IllegalArgumentException("Direction must be between "
+					+ -MAX + " and " + MAX);
+		}
 
-		left *= 2;
-		right *= 2;
+		// Calculate linear function
+		int left = MAX + 2 * direction;
+		int right = MAX - 2 * direction;
 
-		left = Math.min(MAX, Math.max(-MAX, left));
-		right = Math.min(MAX, Math.max(-MAX, right));
+		// Clamp to valid region
+		left = Utils.clamp(left, -MAX, MAX);
+		right = Utils.clamp(right, -MAX, MAX);
 
-		if (1000 < right || -1000 > right || 1000 < left || -1000 > left)
-			throw new IllegalStateException("Incorrect intermediate values");
+		/* This results in following function for the right motor
+		 *
+		 *  1000 :---------:          :
+		 *       :         :\         :
+		 *       :         : \        :
+		 *       :         :  \       :
+		 *       :         :   \      :
+		 *     0.:.........:....\.....:.
+		 *       :         :     \    :
+		 *       :         :      \   :
+		 *       :         :       \  :
+		 *       :         :        \ :
+		 * -1000 :         :         \:
+		 *
+		 *    -1000       0        1000
+		 *
+		 * For the left motor this is mirrored on the x-axis.
+		 */
 
-		left *= speed;
-		right *= speed;
-		left /= MAX;
-		right /= MAX;
-
-		if (1000 < right || -1000 > right || 1000 < left || -1000 > left)
-			throw new IllegalStateException("Incorrect intermediate 2 values");
+		// Fix point multiplication with speed
+		left = left * speed / MAX;
+		right = right * speed / MAX;
 
 		newLeftSpeed = left;
 		newRightSpeed = right;
