@@ -22,8 +22,8 @@ public class Main {
 		//loop.run(calibrate);
 	    //RConsole.println("start");
 	    System.out.println("start");
-	    Strategy followWall = new FollowWallStrategy();
-	    loop.run(followWall);
+	    //Strategy followWall = new FollowWallStrategy();
+	    //loop.run(followWall);
 	    System.out.println("finished");
 	    //RConsole.println("finished");
 		Button.waitForAnyPress();
