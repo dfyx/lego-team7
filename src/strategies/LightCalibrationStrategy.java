@@ -20,9 +20,9 @@ import utils.Utils;
 public class LightCalibrationStrategy extends Strategy {
 
     /** Time to sample light sensor. */
-	private static final int SEARCH_TIME = 5 * 1000;
+	private static final int SEARCH_TIME = 2 * 1000;
 	/** Driving speed while sampling light sensor. */
-	private static final int BASE_SPEED = 500;
+	private static final int BASE_SPEED = 50;
 	/** Number of samples to collect. */
 	private static final int SAMPLE_SIZE = 200;
 	/** Number of largest/smallest samples to ignore. */
@@ -31,7 +31,7 @@ public class LightCalibrationStrategy extends Strategy {
      * Number of largest/smallest remaining samples to use for black-/whitePoint
      * calculation.
      */
-	private static final int ACCEPTED_SAMPLES = 15;
+	private static final int ACCEPTED_SAMPLES = 20;
 	/** Time per sample. */
 	private static final int SAMPLE_TIME = SEARCH_TIME / SAMPLE_SIZE;
 
@@ -59,10 +59,16 @@ public class LightCalibrationStrategy extends Strategy {
 	        final int sampleValue = LIGHT_SENSOR.getRawValue();
 	        samples[sampleCount++] = sampleValue;
 	        
-	        System.out.println("Sample " + sampleCount + ": " + sampleValue);
-	        
 	        if (sampleCount == SAMPLE_SIZE) {
+	            ENGINE.stop();
+	            
 	            Arrays.sort(samples);
+	            
+	            /*
+	            for (int sample : samples) {
+	                System.out.println(sample);
+	            }
+	            */
 
                 int blackPoint = 0;
                 int whitePoint = 0;
@@ -77,9 +83,11 @@ public class LightCalibrationStrategy extends Strategy {
 	            
 	            LIGHT_SENSOR.calibrate(blackPoint, whitePoint);
 	            
+	            /*
                 System.out.println("Min: " + samples[0] + " Max: "
                         + samples[SAMPLE_SIZE - 1] + " bp: " + blackPoint
                         + " wp: " + whitePoint);
+                */
 	            
 	            setFinished();
 	        }   
