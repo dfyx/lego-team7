@@ -1,5 +1,7 @@
 package sensors;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
@@ -7,6 +9,7 @@ import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.UltrasonicSensor;
 import lejos.util.Delay;
 import robot.Platform;
+import utils.Utils;
 
 public class Head implements Sensor<Integer> {
 
@@ -73,9 +76,11 @@ public class Head implements Sensor<Integer> {
 			if(polledPositionX<=-1000) {
 				polledPositionX=-1000;
 				polledPositionY=(int)((double)(-1000*(motorPos-topLeftPos))/verticalAngleUp);
+				polledPositionY=Utils.clamp(polledPositionY, -1000, 0);
 			} else if(polledPositionX>=1000) {
 				polledPositionX=1000;
-				polledPositionY=(int)((double)(-1000*(verticalAngleDown-(bottomRightPos-motorPos)))/verticalAngleDown);				
+				polledPositionY=(int)((double)(-1000*(verticalAngleDown-(bottomRightPos-motorPos)))/verticalAngleDown);
+				polledPositionY=Utils.clamp(polledPositionY, -1000, 0);
 			} else
 				polledPositionY = positionY;
 			polledDistance = SENSOR.getDistance();
@@ -90,6 +95,13 @@ public class Head implements Sensor<Integer> {
 	@Override
 	public Integer getValue() {
 		return polledDistance;
+	}
+	
+	/**
+	 * Returns true, iff the sensor head is currently moving
+	 */
+	public boolean isMoving() {
+		return motorThread.isMoving();
 	}
 
 	/**
@@ -126,7 +138,7 @@ public class Head implements Sensor<Integer> {
 	public void continueSweeping() {
 		sweepThread.restart();
 	}
-
+	
 	/**
 	 * Move the head manually to a given position
 	 * 
@@ -141,33 +153,42 @@ public class Head implements Sensor<Integer> {
 		if(async) {
 			motorThread.moveTo(x,y);
 			return;
+		} else {
+			while(motorThread.isMoving()) {
+				Delay.msDelay(10);
+			}
+			moveSync(x,y);
 		}
+	}
 
-		System.out.println("Move from " + positionX + "/" + positionY + " to "
-				+ x + "/" + y);
-		System.out.flush();
+	/**
+	 * Move the head manually to a given position.
+	 * The method is synchronous and returns only after the movement is complete.
+	 * 
+	 * @param x
+	 *            The x coordinate. Range as given in Javadoc for getPositionX()
+	 * @param y
+	 *            The y coordinate. Range as given in Javadoc for getPositionY()
+	 */
+	private synchronized void moveSync(int x, int y) {
 
 		// Move down on the right side
 		if (x == positionX && positionX == 1000 && y <= positionY) {
 			int moveTarget = topRightPos - y * (bottomRightPos - topRightPos)
 					/ 1000;
+			doRotateTo(moveTarget);
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = false;
 			positionY = y;
-			System.out.println("-> Move down (on right side) to " + moveTarget);
-			System.out.flush();
-			doRotateTo(moveTarget);
 		}
 		// Move up on the left side
 		else if (x == positionX && positionX == -1000 && y >= positionY) {
 			int moveTarget = topLeftPos - y * (bottomLeftPos - topLeftPos)
 					/ 1000;
+			doRotateTo(moveTarget);
 			currentHorizontalBorderPos = moveTarget;
 			currentHorizontalBorderIsLeft = true;
 			positionY = y;
-			System.out.println("-> Move up (on left side) to " + moveTarget);
-			System.out.flush();
-			doRotateTo(moveTarget);
 		}
 		// Move horizontally
 		else if (y == positionY) {
@@ -175,43 +196,39 @@ public class Head implements Sensor<Integer> {
 				int moveTarget = currentHorizontalBorderPos
 						+ horizontalAngleLeft / 2 + x * horizontalAngleLeft
 						/ 2000;
-				positionX = x;
-				System.out.println("-> Move horizontally (from left) to "
-						+ moveTarget);
-				System.out.flush();
 				doRotateTo(moveTarget);
+				positionX = x;
 			} else {
 				int moveTarget = currentHorizontalBorderPos
 						- horizontalAngleRight / 2 + x * horizontalAngleRight
 						/ 2000;
-				positionX = x;
-				System.out.println("-> Move horizontally (from right) to "
-						+ moveTarget);
-				System.out.flush();
 				doRotateTo(moveTarget);
+				positionX = x;
 			}
 		}
 		// Move arbitrarily down
 		else if (y <= positionY) {
-			moveTo(1000, positionY,false);
+			moveSync(1000, positionY);
 			if (y != positionY)
-				moveTo(1000, y,false);
+				moveSync(1000, y);
 			if (x != 1000)
-				moveTo(x, y,false);
+				moveSync(x, y);
 		}
 		// Move arbitratily up
 		else { // y>positionY
-			moveTo(-1000, positionY,false);
+			moveSync(-1000, positionY);
 			if (y != positionY)
-				moveTo(-1000, y,false);
+				moveSync(-1000, y);
 			if (x != -1000)
-				moveTo(x, y,false);
+				moveSync(x, y);
 		}
 
-		if (x == -1000 && y == 0)
+		if (x == -1000 && y == 0) {
 			calibrateTopLeft();
-		else if (x == 1000 && y == -1000)
+		}
+		else if (x == 1000 && y == -1000) {
 			calibrateBottomRight();
+		}
 		// Button.waitForAnyPress();
 	}
 
@@ -231,14 +248,15 @@ public class Head implements Sensor<Integer> {
 	private void doRotateTo(int motorPos) {
 		if (motorPos > bottomRightPos || motorPos < topLeftPos)
 			throw new IllegalStateException("Move out of range: " + motorPos);
-		System.out.println("--rotate to " + motorPos);
-		System.out.flush();
 		MOTOR.rotateTo(motorPos);
 	}
+	
+	private boolean calibrating;
 
 	// Calibrate one of the corners using the given power
 	// The sign of the power determines fixes the direction.
 	private int doCalibrateDirection(int power) {
+		calibrating = true;
 		MOTOR.suspendRegulation();
 		RAW_MOTOR.setPower(power);
 		// MOTOR.forward();
@@ -249,7 +267,6 @@ public class Head implements Sensor<Integer> {
 		int max = Integer.MIN_VALUE;
 		do {
 			int diff = Math.abs(lastPosition - position);
-			// System.out.println("moving: " + diff);
 			if (diff < min)
 				min = diff;
 			if (diff > max)
@@ -257,13 +274,10 @@ public class Head implements Sensor<Integer> {
 			Delay.msDelay(100);
 			lastPosition = position;
 			position = RAW_MOTOR.getTachoCount();
-			// if (Button.ENTER.isDown()) {
-			// System.out.println("Pos: " + position);
-			// }
-			// System.out.println("Speed: "+(position-lastPosition));
 		} while (Math.abs(position - lastPosition) >= MIN_MOVEMENT);
 
 		MOTOR.stop();
+		calibrating = false;
 		return position;
 	}
 
@@ -272,8 +286,6 @@ public class Head implements Sensor<Integer> {
 	 */
 	public void calibrateBottomRight() {
 		bottomRightPos = doCalibrateDirection(CALIBRATION_POWER) - 100;
-		System.out.println("bottomRight: " + bottomRightPos);
-		System.out.flush();
 		recalcPositions();
 
 		doRotateTo(bottomRightPos);
@@ -287,10 +299,7 @@ public class Head implements Sensor<Integer> {
 	 * Recalibrate the top left corner
 	 */
 	public void calibrateTopLeft() {
-		// System.out.println("Recalibrate");
 		topLeftPos = doCalibrateDirection(-CALIBRATION_POWER) + 140;
-		System.out.println("topLeft: " + topLeftPos);
-		System.out.flush();
 		recalcPositions();
 
 		doRotateTo(topLeftPos);
@@ -298,7 +307,6 @@ public class Head implements Sensor<Integer> {
 		positionY = 0;
 		currentHorizontalBorderPos = topLeftPos;
 		currentHorizontalBorderIsLeft = true;
-		// System.out.println("Recalibrate finished");
 	}
 
 	// Recalculate the positions after recalibrating one of the corners
@@ -360,6 +368,7 @@ public class Head implements Sensor<Integer> {
 		return distancesDown[xPos];
 	}
 	
+	//This thread handles asynchronous motor movements
 	private class MotorThread extends Thread {
 		private boolean isMoving = false;
 		private int targetX;
@@ -376,11 +385,13 @@ public class Head implements Sensor<Integer> {
 		}
 		
 		public void run() {
-			while(!isMoving) {
-				Delay.msDelay(10);
+			while(true) {
+				while(!isMoving || calibrating) {
+					Delay.msDelay(10);
+				}
+				Head.this.moveSync(targetX,targetY); //Move synchronously
+				isMoving=false;
 			}
-			Head.this.moveTo(targetX,targetY,false); //Move synchronously
-			isMoving=false;
 		}
 	}
 
