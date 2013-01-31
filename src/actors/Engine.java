@@ -78,7 +78,7 @@ public class Engine implements Actor {
 	}
 
 	/**
-	 * Return whether the robot is moving (or rotating).
+	 * Check whether the robot is moving (or rotating).
 	 * 
 	 * This represents the current state of the motors, regardless of any
 	 * commands that have been given but not committed.
