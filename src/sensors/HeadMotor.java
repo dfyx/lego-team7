@@ -98,7 +98,6 @@ class HeadMotor extends Thread {
 	// The sign of the power determines fixes the direction.
 	private int doCalibrateDirection(int power) {
 		MOTOR.suspendRegulation();
-		//Delay.msDelay(500);
 		RAW_MOTOR.setPower(power);
 
 		int lastPosition = RAW_MOTOR.getTachoCount();
@@ -146,6 +145,8 @@ class HeadMotor extends Thread {
 
 	public void run() {
 		try {
+			//Delay necessary, because motor commands are ignored when in debug mode and issued too early
+			Delay.msDelay(500);
 			calibrate();
 			while (true) {
 				// State is NOT_MOVING
