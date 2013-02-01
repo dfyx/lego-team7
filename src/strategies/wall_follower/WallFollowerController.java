@@ -23,9 +23,17 @@ public class WallFollowerController extends Strategy {
 	
 	static void targetWall() {
 		// TODO SB async
-		HEAD.moveTo(1000, false);
+		if(headOn == HeadOn.LEFT_SIDE)
+			HEAD.moveTo(-1000, false);
+		else
+			HEAD.moveTo(-1000, false);
 	}
 	
+	/**
+	 * 
+	 * LEFT_SIDE in driving direction
+	 *
+	 */
 	enum HeadOn {
 		RIGHT_SIDE, LEFT_SIDE
 	}
@@ -35,6 +43,8 @@ public class WallFollowerController extends Strategy {
 	@Override
 	protected void doInit() {
 		headOn = HeadOn.LEFT_SIDE;
+		
+		targetWall();
 		// TODO SB init in doRun?
 		wallFollower = new WallFollowerStrategy();
 		edgeFollower = new QuarterCircleStrategy();

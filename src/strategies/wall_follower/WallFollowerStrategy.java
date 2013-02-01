@@ -43,13 +43,13 @@ public class WallFollowerStrategy extends Strategy {
 
 		int direction = getMotorSpeed();
 
-		if (headOn == HeadOn.LEFT_SIDE)
+		if (WallFollowerController.headOn == WallFollowerController.HeadOn.LEFT_SIDE)
 			direction = -direction;
 
 		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
 				+ " -> " + direction);
 
-		ENGINE.move(speed, direction);
+		ENGINE.move(-speed, direction);
 	}
 
 	// TODO SB doesn't work on big distances
