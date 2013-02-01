@@ -7,14 +7,14 @@ import static java.lang.System.out;
 public class WallFollowerController extends Strategy {
 
 	private WallFollowerStrategy wallFollower;
-	private EdgeStrategy driveForward;
+	private EdgeFollowerStrategy edgeFollower;
 
 	// TODO SB marker of -1 is evil. Use boolean flag?
 	private int lastDistance = -1;
 	/**
 	 * No wall in sight
 	 */
-	private int NO_WALL_DISTANCE = 255;
+	private int NO_WALL_DISTANCE = 50;
 
 	private boolean firstTime = true;
 
@@ -22,7 +22,7 @@ public class WallFollowerController extends Strategy {
 	protected void doInit() {
 		// TODO SB init in doRun?
 		wallFollower = new WallFollowerStrategy();
-		driveForward = new EdgeStrategy();
+		edgeFollower = new EdgeFollowerStrategy();
 		wallFollower.init();
 	}
 
@@ -30,16 +30,18 @@ public class WallFollowerController extends Strategy {
 	protected void doRun() {
 		// TODO SB use curve strategy in this case
 		if (justAtEnd()) {
-			out.println("=== NO WALL ===");
-			driveForward.init();
-			driveForward.run();
+			System.out.println("-  just -");
+			edgeFollower.init();
+			edgeFollower.run();
 		} else if (atEnd()) {
-			out.println("===  DRIVE  ===");
-			driveForward.run();
+			System.out.println("-  end  -");
+			edgeFollower.run();
 		} else {
+			System.out.println("- follow -");
+			firstTime = true;
 			wallFollower.run();
-			lastDistance = HEAD.getValue();
 		}
+		lastDistance = HEAD.getValue();
 	}
 	
 	/**

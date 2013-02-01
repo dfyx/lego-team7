@@ -15,7 +15,7 @@ public class WallFollowerStrategy extends Strategy {
 	 */
 	private int referenceValue = 15;
 
-	private static final int MAX_SPEED = 500;
+	private static final int MAX_SPEED = 1000;
 	private int speed = MAX_SPEED;
 
 	private enum HeadOn {
@@ -50,6 +50,7 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	protected void doRun() {
+		System.out.println("follow");
 	    // doInit is moving the sensor head nonblocking, skip control loop
 	    // until the sensor head arrived at its final position 
 	    if (HEAD.isMoving()) {
