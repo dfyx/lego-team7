@@ -20,6 +20,9 @@ public class Head implements Sensor<Integer> {
 	private static final double VERTICAL_FACTOR_DOWN = 0.7;
 	private static final double VERTICAL_FACTOR_UP = 0.79;
 
+	// private static final double VERTICAL_FACTOR_DOWN = 0.7;
+	// private static final double VERTICAL_FACTOR_UP = 0.79;
+
 	private static final int HORIZONTAL_SPEED = 1000;
 	private static final int VERTICAL_SPEED = 1000;
 
@@ -55,10 +58,32 @@ public class Head implements Sensor<Integer> {
 	private int polledPositionX;
 	private int polledPositionY;
 
-	private class Monitor {
-	}
+	private class SyncArray {
+		private int[] data = new int[0];
 
-	private Monitor sweepValuesMonitor = new Monitor();
+		public synchronized int[] getCopy() {
+			int[] copy = new int[data.length];
+			for (int i = 0; i < data.length; ++i) {
+				copy[i] = data[i];
+			}
+			return copy;
+		}
+
+		public synchronized void init(int size) {
+			data = new int[size];
+			for (int i = 0; i < size; ++i) {
+				data[i] = 255;
+			}
+		}
+		
+		public synchronized void write(int index, int value) {
+			data[index]=value;
+		}
+		
+		public synchronized int size() {
+			return data.length;
+		}
+	}
 
 	private MotorThread motorThread = new MotorThread();
 	private SweepThread sweepThread = new SweepThread();
@@ -148,7 +173,7 @@ public class Head implements Sensor<Integer> {
 		sweepThread.pause();
 	}
 
-	private int[] sweepValues=new int[0];
+	private SyncArray sweepValues = new SyncArray();
 	boolean sweepAtTop;
 	int sweepFromX;
 	int sweepToX;
@@ -394,14 +419,7 @@ public class Head implements Sensor<Integer> {
 	 * more to the left
 	 */
 	public int[] getSweepValues() {
-		int[] copy;
-		synchronized (sweepValuesMonitor) {
-			copy = new int[sweepValues.length];
-			for (int i = 0; i < sweepValues.length; ++i) {
-				copy[i] = sweepValues[i];
-			}
-		}
-		return copy;
+		return sweepValues.getCopy();
 	}
 
 	// This thread handles asynchronous motor movements
@@ -474,12 +492,7 @@ public class Head implements Sensor<Integer> {
 						moveTo(from, y, false);
 
 						// Init sweepValues
-						synchronized (sweepValuesMonitor) {
-							sweepValues = new int[valueCount];
-							for (int i = 0; i < valueCount; ++i) {
-								sweepValues[i] = 255;
-							}
-						}
+						sweepValues.init(valueCount);
 						restart = false;
 					}
 					// Scan left to right
@@ -491,15 +504,15 @@ public class Head implements Sensor<Integer> {
 							break;
 						int x = calcXPos();
 						if (x >= from + (to - from) * currentIndex
-								/ (sweepValues.length - 1)) {
-							sweepValues[currentIndex] = SENSOR.getDistance();
+								/ (sweepValues.size() - 1)) {
+							sweepValues.write(currentIndex,SENSOR.getDistance());
 							++currentIndex;
 						}
 						Delay.msDelay(1);
 					}
 					if (restart)
 						continue;
-					if (currentIndex != sweepValues.length)
+					if (currentIndex != sweepValues.size())
 						throw new IllegalStateException(
 								"sweepValues.length!=currentIndex");
 					currentIndex -= 2;
@@ -510,8 +523,8 @@ public class Head implements Sensor<Integer> {
 							break;
 						int x = calcXPos();
 						if (x <= from + (to - from) * currentIndex
-								/ (sweepValues.length - 1)) {
-							sweepValues[currentIndex] = SENSOR.getDistance();
+								/ (sweepValues.size() - 1)) {
+							sweepValues.write(currentIndex, SENSOR.getDistance());
 							--currentIndex;
 						}
 						Delay.msDelay(1);
