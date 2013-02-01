@@ -1,9 +1,8 @@
-package strategies;
+package strategies.wall_follower;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
-import static robot.Platform.ULTRASONIC_PORT;
-import lejos.nxt.UltrasonicSensor;
+import strategies.Strategy;
 import utils.Utils;
 
 // TODO SB should work for right and left looking sensor head
@@ -14,7 +13,7 @@ public class WallFollowerStrategy extends Strategy {
 	 */
 	private int referenceValue = 15;
 
-	private static final int MAX_SPEED = 500;
+	private static final int MAX_SPEED = 1000;
 	private int speed = MAX_SPEED;
 
 	private enum HeadOn {
@@ -26,12 +25,8 @@ public class WallFollowerStrategy extends Strategy {
 	/**
 	 * Turn on max speed outside of +- 5cm corridor 5*_200_ = 1000
 	 */
-	private static final int LINEAR_FACTOR = 100;
-
 	private static final int LINEAR_FACTOR_MOVE_AWAY = 70;
 	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 50;
-
-	UltrasonicSensor realSensor;
 
 	/**
 	 * distance to wall (in cm)
@@ -43,25 +38,24 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	protected void doInit() {
-		realSensor = new UltrasonicSensor(ULTRASONIC_PORT);
-		realSensor.setMode(UltrasonicSensor.MODE_CONTINUOUS);
 		headOn = HeadOn.LEFT_SIDE;
 		
 		HEAD.stopSweeping();
 		if(headOn == HeadOn.LEFT_SIDE)
-			HEAD.moveTo(-1000, 0, false);
+			HEAD.moveTo(-1000, 0, true);
 		else
-			HEAD.moveTo(1000, 0, false);
+			HEAD.moveTo(1000, 0, true);
 	}
 
 	protected void doRun() {
-	    // doInit is moving the sensor head nonblocking, skip control loop
+		System.out.println("follow");
+	    // doInit is moving the sensor head nonblocking -> skip control loop
 	    // until the sensor head arrived at its final position 
 	    if (HEAD.isMoving()) {
 	        return;
 	    }
 	    
-		actualValue = realSensor.getDistance();
+		actualValue = HEAD.getValue();
 
 		int direction = getMotorSpeed();
 
