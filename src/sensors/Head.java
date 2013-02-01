@@ -163,10 +163,10 @@ public class Head implements Sensor<Integer> {
 	 * 
 	 * @param xFrom
 	 *            The leftmost x position to sweep. See getPositionX() for
-	 *            range.
+	 *            range. Needs to be smaller than xTo.
 	 * @param xTo
 	 *            The rightmost x position to sweep. See getPositionX() for
-	 *            range.
+	 *            range. Needs to be bigger than xFrom.
 	 * @param top
 	 *            True, if the y position for sweeping should be top. False, if
 	 *            it should be bottom.

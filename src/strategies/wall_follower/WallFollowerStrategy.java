@@ -16,12 +16,6 @@ public class WallFollowerStrategy extends Strategy {
 	private static final int MAX_SPEED = 1000;
 	private int speed = MAX_SPEED;
 
-	private enum HeadOn {
-		RIGHT_SIDE, LEFT_SIDE
-	}
-
-	private static HeadOn headOn;
-
 	/**
 	 * Turn on max speed outside of +- 5cm corridor 5*_200_ = 1000
 	 */
@@ -38,24 +32,14 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	protected void doInit() {
-		headOn = HeadOn.LEFT_SIDE;
-		
-		HEAD.stopSweeping();
-		if(headOn == HeadOn.LEFT_SIDE)
-			HEAD.moveTo(-1000, 0, true);
-		else
-			HEAD.moveTo(1000, 0, true);
 	}
 
 	protected void doRun() {
 		System.out.println("follow");
 	    // doInit is moving the sensor head nonblocking -> skip control loop
 	    // until the sensor head arrived at its final position 
-	    if (HEAD.isMoving()) {
-	        return;
-	    }
 	    
-		actualValue = HEAD.getValue();
+		actualValue = WallFollowerController.getWallDistance();
 
 		int direction = getMotorSpeed();
 
