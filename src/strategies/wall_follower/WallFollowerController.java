@@ -7,7 +7,7 @@ import static java.lang.System.out;
 public class WallFollowerController extends Strategy {
 
 	private WallFollowerStrategy wallFollower;
-	private EdgeFollowerStrategy edgeFollower;
+	private QuarterCircleStrategy edgeFollower;
 
 	// TODO SB marker of -1 is evil. Use boolean flag?
 	private int lastDistance = -1;
@@ -22,7 +22,7 @@ public class WallFollowerController extends Strategy {
 	protected void doInit() {
 		// TODO SB init in doRun?
 		wallFollower = new WallFollowerStrategy();
-		edgeFollower = new EdgeFollowerStrategy();
+		edgeFollower = new QuarterCircleStrategy();
 		wallFollower.init();
 	}
 

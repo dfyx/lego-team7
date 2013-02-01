@@ -9,7 +9,7 @@ import strategies.Strategy;
  * @author sebastian
  *
  */
-public class EdgeFollowerStrategy extends Strategy {
+public class LineRotateStrategy extends Strategy {
 	/**
 	 * count of the motor, when the robot looses the wall
 	 */
