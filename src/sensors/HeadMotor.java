@@ -1,5 +1,6 @@
 package sensors;
 
+import lejos.nxt.Battery;
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
@@ -22,15 +23,15 @@ class HeadMotor extends Thread {
 	 * done, the algorithm stops and says it's at the corner and can't move
 	 * anymore.
 	 */
-	private final static int MIN_MOVEMENT = 5;
+	private final static int MIN_MOVEMENT = 1;
 
 	// How much of space to spare on the left and on the right (in motor units)
-	private final static int CALIBRATION_OFFSET = 10;
+	private final static int CALIBRATION_OFFSET = 25;
 
 	/**
 	 * The voltage to use for calibration
 	 */
-	private final int CALIBRATION_POWER = 40;
+	private final int CALIBRATION_POWER = 50;
 
 	// When was the last head calibration?
 	private int lastCalibrationLeft = 0;
@@ -97,24 +98,17 @@ class HeadMotor extends Thread {
 	// The sign of the power determines fixes the direction.
 	private int doCalibrateDirection(int power) {
 		MOTOR.suspendRegulation();
+		//Delay.msDelay(500);
 		RAW_MOTOR.setPower(power);
 
-		Delay.msDelay(100);
 		int lastPosition = RAW_MOTOR.getTachoCount();
+		Delay.msDelay(200);
 		int position = RAW_MOTOR.getTachoCount();
-		int min = Integer.MAX_VALUE;
-		int max = Integer.MIN_VALUE;
-		do {
-			int diff = Math.abs(lastPosition - position);
-			if (diff < min)
-				min = diff;
-			if (diff > max)
-				max = diff;
+		while (Math.abs(position - lastPosition) >= MIN_MOVEMENT) {
 			Delay.msDelay(200);
 			lastPosition = position;
 			position = RAW_MOTOR.getTachoCount();
-			System.out.println("Diff: "+Math.abs(position-lastPosition));
-		} while (Math.abs(position - lastPosition) >= MIN_MOVEMENT);
+		};
 
 		MOTOR.stop();
 		return position;
@@ -127,11 +121,7 @@ class HeadMotor extends Thread {
 		mostRightPos = doCalibrateDirection(CALIBRATION_POWER)
 				- CALIBRATION_OFFSET;
 		lastCalibrationRight = Utils.getSystemTime();
-		System.out.println("Most right: "+mostRightPos);
-		System.out.flush();
 		MOTOR.rotateTo(mostRightPos);
-		System.out.println("Right calibrated");
-		System.out.flush();
 	}
 
 	/**
@@ -141,11 +131,7 @@ class HeadMotor extends Thread {
 		mostLeftPos = doCalibrateDirection(-CALIBRATION_POWER)
 				+ CALIBRATION_OFFSET;
 		lastCalibrationLeft = Utils.getSystemTime();
-		System.out.println("Most left: "+mostLeftPos);
-		System.out.flush();
 		MOTOR.rotateTo(mostLeftPos);
-		System.out.println("Left calibrated");
-		System.out.flush();
 	}
 
 	/**
