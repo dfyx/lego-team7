@@ -4,6 +4,9 @@ import static robot.Platform.ENGINE;
 import lejos.nxt.Motor;
 import strategies.Strategy;
 
+
+// TODO SB remove?
+
 /**
  * Used to adjust the robot at the end of a wall
  * @author sebastian

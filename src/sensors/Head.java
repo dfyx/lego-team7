@@ -24,6 +24,8 @@ public class Head implements Sensor<Integer> {
 
 	private static final int HORIZONTAL_SPEED = 1000;
 	private static final int VERTICAL_SPEED = 1000;
+	
+	public static final int NOT_SCANNED_YET = Integer.MAX_VALUE;
 
 	private int positionX; // -1000: full left, 0: centered, 1000: full right
 	private int positionY; // -1000: bottom, 0: top
@@ -476,7 +478,7 @@ public class Head implements Sensor<Integer> {
 						synchronized (sweepValuesMonitor) {
 							sweepValues = new int[valueCount];
 							for (int i = 0; i < valueCount; ++i) {
-								sweepValues[i] = 255;
+								sweepValues[i] = NOT_SCANNED_YET;
 							}
 						}
 						//System.out.println("5");

@@ -2,8 +2,6 @@ package strategies.wall_follower;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
-import static robot.Platform.ULTRASONIC_PORT;
-import lejos.nxt.UltrasonicSensor;
 import strategies.Strategy;
 import utils.Utils;
 
@@ -44,14 +42,14 @@ public class WallFollowerStrategy extends Strategy {
 		
 		HEAD.stopSweeping();
 		if(headOn == HeadOn.LEFT_SIDE)
-			HEAD.moveTo(-1000, 0, false);
+			HEAD.moveTo(-1000, 0, true);
 		else
-			HEAD.moveTo(1000, 0, false);
+			HEAD.moveTo(1000, 0, true);
 	}
 
 	protected void doRun() {
 		System.out.println("follow");
-	    // doInit is moving the sensor head nonblocking, skip control loop
+	    // doInit is moving the sensor head nonblocking -> skip control loop
 	    // until the sensor head arrived at its final position 
 	    if (HEAD.isMoving()) {
 	        return;

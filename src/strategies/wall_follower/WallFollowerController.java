@@ -1,8 +1,7 @@
 package strategies.wall_follower;
 
-import strategies.Strategy;
 import static robot.Platform.HEAD;
-import static java.lang.System.out;
+import strategies.Strategy;
 
 public class WallFollowerController extends Strategy {
 
@@ -43,18 +42,20 @@ public class WallFollowerController extends Strategy {
 		}
 		lastDistance = HEAD.getValue();
 	}
-	
+
 	/**
 	 * At end, if last to measurements signaled a wall
+	 * 
 	 * @return
 	 */
 	private boolean atEnd() {
-		return lastDistance >= NO_WALL_DISTANCE && HEAD.getValue() >= NO_WALL_DISTANCE;
+		return lastDistance >= NO_WALL_DISTANCE
+				&& HEAD.getValue() >= NO_WALL_DISTANCE;
 	}
 
 	private boolean justAtEnd() {
 		boolean result = atEnd() && firstTime;
-		if(result)
+		if (result)
 			firstTime = false;
 		return result;
 	}
