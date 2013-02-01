@@ -14,19 +14,13 @@ class SyncArray {
 	}
 
 	public synchronized void init(int size) {
-		System.out.println("Init "+size);
-		System.out.flush();
 		data = new int[size];
 		for (int i = 0; i < size; ++i) {
 			data[i] = Integer.MAX_VALUE;
 		}
-		System.out.println("inited");
-		System.out.flush();
 	}
 	
 	public synchronized void write(int index, int value) {
-		System.out.println("write "+index);
-		System.out.flush();
 		data[index]=value;
 	}
 	

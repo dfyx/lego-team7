@@ -78,30 +78,16 @@ public class SweepThread extends Thread {
 				MOTOR.moveTo(to, true);
 				int currentIndex = 0;
 				while (currentIndex<sweepValues.size()) {
-					System.out.println("1");
-					System.out.flush();
 					doPause();
-					System.out.println("2");
-					System.out.flush();
 					if (restart)
 						break;
-					System.out.println("3");
-					System.out.flush();
 					int x = MOTOR.getPosition();
 					if (x >= from + (to - from) * currentIndex
 							/ (sweepValues.size() - 1)) {
-						System.out.println("4");
-						System.out.flush();
 						sweepValues.write(currentIndex, SENSOR.getDistance());
-						System.out.println("5");
-						System.out.flush();
 						++currentIndex;
 					}
-					System.out.println("6");
-					System.out.flush();
 					Delay.msDelay(1);
-					System.out.println("7");
-					System.out.flush();
 				}
 				if (restart)
 					continue;
@@ -111,32 +97,16 @@ public class SweepThread extends Thread {
 				currentIndex -= 2;
 				MOTOR.moveTo(from, true);
 				while (currentIndex>0) {
-					System.out.println("8");
-					System.out.flush();
 					doPause();
-					System.out.println("9");
-					System.out.flush();
 					if (restart)
 						break;
-					System.out.println("10");
-					System.out.flush();
 					int x = MOTOR.getPosition();
-					System.out.println("11 ("+x+")");
-					System.out.flush();
 					if (x <= from + (to - from) * currentIndex
 							/ (sweepValues.size() - 1)) {
-						System.out.println("12");
-						System.out.flush();
 						sweepValues.write(currentIndex, SENSOR.getDistance());
-						System.out.println("13");
-						System.out.flush();
 						--currentIndex;
 					}
-					System.out.println("14");
-					System.out.flush();
 					Delay.msDelay(1);
-					System.out.println("15");
-					System.out.flush();
 				}
 				if (restart)
 					continue;
