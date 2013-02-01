@@ -11,7 +11,7 @@ public class WallFollowerStrategy extends Strategy {
 	/**
 	 * desired distance to wall (in cm)
 	 */
-	private int referenceValue = 15;
+	private int referenceValue = 14;
 
 	private static final int MAX_SPEED = 1000;
 	private int speed = MAX_SPEED;
@@ -19,8 +19,8 @@ public class WallFollowerStrategy extends Strategy {
 	/**
 	 * Turn on max speed outside of +- 5cm corridor 5*_200_ = 1000
 	 */
-	private static final int LINEAR_FACTOR_MOVE_AWAY = 70;
-	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 50;
+	private static final int LINEAR_FACTOR_MOVE_AWAY = 55;
+	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 37;
 
 	/**
 	 * distance to wall (in cm)

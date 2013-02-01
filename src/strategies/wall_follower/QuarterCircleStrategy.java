@@ -59,7 +59,7 @@ public class QuarterCircleStrategy extends Strategy {
 	protected void doRun() {
 		if(shouldTurn()) {
 			System.out.println("turn");
-			ENGINE.move(-ROTATION_SPEED, ROTATION_DIRECTION);
+			ENGINE.move(ROTATION_SPEED, ROTATION_DIRECTION);
 		} else {
 			System.out.println("move");
 			hasTurned = true;
