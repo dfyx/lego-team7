@@ -1,7 +1,5 @@
 package sensors;
 
-import java.util.Arrays;
-
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
@@ -152,7 +150,7 @@ public class Head implements Sensor<Integer> {
 		sweepThread.pause();
 	}
 
-	private int[] sweepValues;
+	private int[] sweepValues=new int[0];
 	boolean sweepAtTop;
 	int sweepFromX;
 	int sweepToX;
@@ -398,9 +396,14 @@ public class Head implements Sensor<Integer> {
 	 * more to the left
 	 */
 	public int[] getSweepValues() {
+		int[] copy;
 		synchronized (sweepValuesMonitor) {
-			return Arrays.copyOf(sweepValues, sweepValues.length);
+			copy = new int[sweepValues.length];
+			for (int i = 0; i < sweepValues.length; ++i) {
+				copy[i] = sweepValues[i];
+			}
 		}
+		return copy;
 	}
 
 	// This thread handles asynchronous motor movements
@@ -430,6 +433,7 @@ public class Head implements Sensor<Integer> {
 				}
 			} finally {
 				MOTOR.stop();
+				Delay.msDelay(1000);
 			}
 		}
 	}
@@ -459,20 +463,17 @@ public class Head implements Sensor<Integer> {
 			try {
 				int y = 0, from = 0, to = 0;
 				while (true) {
-//System.out.println("1");
-					while(isMoving())
-						Delay.msDelay(1);
 					doPause();
-					//System.out.println("2");
 					if (restart) {
-						//System.out.println("3");
 						if (sweepAtTop)
 							y = 0;
 						else
 							y = -1000;
 						from = sweepFromX;
 						to = sweepToX;
-						//System.out.println("4");
+						// Move synchronously to the first point (necessary for
+						// the following loop)
+						moveTo(from, y, false);
 
 						// Init sweepValues
 						synchronized (sweepValuesMonitor) {
@@ -481,23 +482,16 @@ public class Head implements Sensor<Integer> {
 								sweepValues[i] = NOT_SCANNED_YET;
 							}
 						}
-						//System.out.println("5");
 						restart = false;
 					}
 					// Scan left to right
-					/*
-					 * while(isMoving()) { Delay.msDelay(1); }
-					 */
 					moveTo(to, y, true);
-					//System.out.println("6");
 					int currentIndex = 0;
 					while (isMoving()/* && currentIndex<sweepValues.length */) {
-						//System.out.println("7");
 						doPause();
 						if (restart)
 							break;
 						int x = calcXPos();
-						//System.out.println("8");
 						if (x >= from + (to - from) * currentIndex
 								/ (sweepValues.length - 1)) {
 							sweepValues[currentIndex] = SENSOR.getDistance();
@@ -505,48 +499,34 @@ public class Head implements Sensor<Integer> {
 						}
 						Delay.msDelay(1);
 					}
-					//System.out.println("9");
 					if (restart)
 						continue;
-					//System.out.println("10");
 					if (currentIndex != sweepValues.length)
 						throw new IllegalStateException(
 								"sweepValues.length!=currentIndex");
 					currentIndex -= 2;
-					//System.out.println("11");
-					/*
-					 * while(isMoving()) { Delay.msDelay(1); }
-					 */
 					moveTo(from, y, true);
-					//System.out.println("12");
 					while (isMoving()/* && currentIndex>=0 */) {
-						//System.out.println("13");
 						doPause();
-						//System.out.println("14");
 						if (restart)
 							break;
-						//System.out.println("15");
 						int x = calcXPos();
-						//System.out.println("16");
 						if (x <= from + (to - from) * currentIndex
 								/ (sweepValues.length - 1)) {
-							//System.out.println("17");
 							sweepValues[currentIndex] = SENSOR.getDistance();
 							--currentIndex;
 						}
-						//System.out.println("18");
 						Delay.msDelay(1);
 					}
 					if (restart)
 						continue;
-					//System.out.println("19");
 					if (currentIndex != -1)
 						throw new IllegalStateException("-1!=currentIndex=="
 								+ currentIndex);
 				}
 			} finally {
-				System.out.println("Motor stopped");
 				MOTOR.stop();
+				Delay.msDelay(1000);
 			}
 		}
 	}
