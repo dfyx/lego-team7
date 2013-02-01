@@ -16,8 +16,19 @@ public class Main {
 	    Loop loop = new Loop();
 	    
 	    System.out.println("start");
-	    Strategy followWall = new WallFollowerStrategy();
-	    loop.run(followWall);
+	    Platform.HEAD.moveTo(-1000, true);
+	    Button.waitForAnyPress();
+	    Platform.HEAD.moveTo(0, true);
+	    Button.waitForAnyPress();
+	    Platform.HEAD.moveTo(1000, true);
+	    Button.waitForAnyPress();
+	    Platform.HEAD.moveTo(0, true);
+	    Button.waitForAnyPress();
+	    Platform.HEAD.moveTo(-1000, true);
+	    Button.waitForAnyPress();
+	    Platform.HEAD.startSweeping(-500, 500, 10);
+	    //Strategy followWall = new WallFollowerStrategy();
+	    //loop.run(followWall);
 	    System.out.println("finished");
 	    
 		Button.waitForAnyPress();
