@@ -6,56 +6,75 @@ import utils.Utils;
 
 public class LineFollowerStrategy extends Strategy {
 
-    //private static final int CONTROLLER_SLOWDOWN = 5;
+    private static final int LINE_LOSS_LIMIT = 5;
+    private static final int LINE_LOSS_THRESHOLD = 50;
+    
     private static final double P = 0.5;
     private static final double D = 5.0;
-    private static final double D_DECREASE = 0.5;
-    
-    //private static final int SAMPLE_COUNT = 5;
-    
-    //private int sampleCounter = 0;
-    //private int sampleValues[] = new int[SAMPLE_COUNT];
-    
-    //private int slowdownCounter = 0;
+    private static final double D_DECREASE = 0.75;
     
     private int speed = 500;
     
-    private int oldError = 0;
-    private int dSum = 0;
+    private boolean onLine;
+    private int lineLossCounter;
+    
+    private int oldError;
+    private int dSum;
+    
+    private int lastSpeed;
+    private int lastDirection;
 
     public LineFollowerStrategy() {
-        // Nothing to do
+        doInit();
     }
     
     public LineFollowerStrategy(final int motorSpeed) {
+        this();
+        
         if (motorSpeed < 0 || motorSpeed > 1000) {
             throw new IllegalArgumentException("motorSpeed out of range");
-        }
+        }        
         
         this.speed = motorSpeed;
     }
     
     protected void doInit() {
-        LIGHT_SENSOR.setFloodlight(true);
+        onLine = true;
+        lineLossCounter = 0;
+        
+        oldError = 0;
+        dSum = 0;
+        
+        lastSpeed = 0;
+        lastDirection = 0;
     }
 
     protected void doRun() {
-        //sampleValues[sampleCounter] = LIGHT_SENSOR.getValue();
-        //sampleCounter = (sampleCounter + 1) % SAMPLE_COUNT;
+        final int value = LIGHT_SENSOR.getValue();
         
-        //slowdownCounter = (slowdownCounter + 1) % CONTROLLER_SLOWDOWN;
+        if (onLine && value < LINE_LOSS_THRESHOLD) {
+            onLine = ++lineLossCounter <= LINE_LOSS_LIMIT;
+        }
         
-        //if (slowdownCounter == 0) {  
-        //    int meanValue = 0;
-            
-        //    for (int val : sampleValues) {
-        //        meanValue += val;
-        //    }
-            
-        //    meanValue /= SAMPLE_COUNT;
-            
-        //    final int error = 500 - meanValue;
-            final int error = 500 - LIGHT_SENSOR.getValue();
+        if (onLine) {
+            controlLoop(value);
+        } else {
+            if (lineLossCounter > 0) {
+                lineLossCounter--;
+                
+                // Try to undo the last LINE_LOSS_LIMIT movements, assuming a
+                // constant (maximum) controller output value
+                ENGINE.move(lastSpeed, -lastDirection);
+            } else {
+                ENGINE.stop();
+                
+                setFinished(); // line lost, stop work
+            }
+        }
+    }
+    
+    private void controlLoop(final int value) {
+            final int error = 500 - value;
             final int errorD = error - oldError;
             
             final int linear = (int) (P * error);
@@ -68,8 +87,10 @@ public class LineFollowerStrategy extends Strategy {
             System.out.println("err: " + error + " lin: " + linear + " errorD: "
                     + errorD + " dSum: " + dSum + " out: " + out);
     
-            ENGINE.move(speed, out);
-        //}
+            lastSpeed = speed;
+            lastDirection = out;
+            
+            ENGINE.move(lastSpeed, lastDirection);
     }
     
     public int getSpeed() {
