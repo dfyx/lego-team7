@@ -1,9 +1,6 @@
 package strategies;
 
-import static robot.Platform.ENGINE;
-import static robot.Platform.LIGHT_SENSOR;
 import robot.Platform;
-import utils.Utils;
 
 public class TestStrategy extends Strategy {
 

@@ -1,6 +1,5 @@
 package sensors;
 
-import lejos.nxt.Battery;
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
