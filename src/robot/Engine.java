@@ -1,4 +1,4 @@
-package actors;
+package robot;
 
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
@@ -21,15 +21,14 @@ import lejos.util.Delay;
  * To make sure there is no interference, the motors used by this class should
  * <b>never</b> be manipulated by anyone else.
  */
-public class Engine implements Actor {
+public class Engine {
 
 	private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
 	private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
 
 	int newLeftSpeed = 0;
 	int newRightSpeed = 0;
-
-	@Override
+	
 	public void commit() {
 		if (newLeftSpeed == 0) {
 			LEFT_MOTOR.stop();
