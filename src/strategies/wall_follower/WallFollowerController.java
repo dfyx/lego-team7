@@ -9,7 +9,7 @@ public class WallFollowerController extends Strategy {
 	private WallFollowerStrategy wallFollower;
 	private QuarterCircleStrategy edgeFollower;
 	private static boolean sweeping = true;
-	
+
 	/**
 	 * in ms
 	 */
@@ -17,7 +17,7 @@ public class WallFollowerController extends Strategy {
 	/**
 	 * in ms
 	 */
-	private static final long DONT_SWEEP_TIME = 1000000;
+	private static final long DONT_SWEEP_TIME = 1000;
 
 	// TODO SB marker of -1 is evil. Use boolean flag?
 	static int lastDistance = -1;
@@ -27,64 +27,66 @@ public class WallFollowerController extends Strategy {
 	private int NO_WALL_DISTANCE = 50;
 
 	private boolean firstTime = true;
-	
+
 	static int getWallDistance() {
 		int[] values = HEAD.getUltrasonicSweepValues();
-		
+
 		// TODO SM (SB) should never happen. Fix this in 'HEAD'
 		// No value found
-		if(values.length == 0) {
+		if (values.length == 0) {
 			System.out.println("no value");
 			return 256;
 		}
 		// TODO SB gibt es ein isSweeping?
-		if(!HEAD.isMoving() && !sweeping)
+		if (!HEAD.isMoving() && !sweeping)
 			return HEAD.getDistance();
-		//System.out.println("distance: "+values[0]);
+		// System.out.println("distance: "+values[0]);
 		return values[0];
 	}
-	
+
 	static void targetWall() {
 		// TODO SB async
-//		if(headOn == HeadOn.LEFT_SIDE)
-//			HEAD.moveTo(-1000, false);
-//		else
-//			HEAD.moveTo(1000, false);
-		if(!sweeping && lastNonSweepTime + DONT_SWEEP_TIME < System.currentTimeMillis()) {
+		// if(headOn == HeadOn.LEFT_SIDE)
+		// HEAD.moveTo(-1000, false);
+		// else
+		// HEAD.moveTo(1000, false);
+		if (!sweeping
+				&& lastNonSweepTime + DONT_SWEEP_TIME >= System
+						.currentTimeMillis()) {
 			System.out.println("not sweeping");
 			return;
-		} else 
+		} else
 			System.out.println("sweeping");
 		sweeping = true;
-		if(headOn == HeadOn.LEFT_SIDE)
+		if (headOn == HeadOn.LEFT_SIDE)
 			HEAD.startSweeping(-1000, 0, 2, 2);
 		else
 			HEAD.startSweeping(1000, 0, 2, 2);
 	}
-	
+
 	static void stopSweeping() {
 		HEAD.stopSweeping();
 		HEAD.moveTo(-1000, true);
 		sweeping = false;
 	}
-	
+
 	/**
 	 * 
 	 * LEFT_SIDE in driving direction
-	 *
+	 * 
 	 */
 	enum HeadOn {
 		RIGHT_SIDE, LEFT_SIDE
 	}
-	
+
 	static HeadOn headOn;
 
 	@Override
 	protected void doInit() {
 		headOn = HeadOn.LEFT_SIDE;
-		
+
 		targetWall();
-		
+
 		// TODO SB init in doRun?
 		wallFollower = new WallFollowerStrategy();
 		edgeFollower = new QuarterCircleStrategy();
@@ -102,7 +104,7 @@ public class WallFollowerController extends Strategy {
 			edgeFollower.run();
 			lastNonSweepTime = System.currentTimeMillis();
 		} else {
-			if(!sweeping)
+			if (!sweeping)
 				targetWall();
 			firstTime = true;
 			wallFollower.run();
