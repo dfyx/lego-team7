@@ -113,6 +113,7 @@ public class SweepThread extends Thread {
 					break;
 				if (restart)
 					continue;
+				//TODO Remove exception
 				if(lightMeasureThread.isRunning() || ultrasonicMeasureThread.isRunning())
 					throw new IllegalStateException("Measurement still running");
 				
@@ -128,6 +129,7 @@ public class SweepThread extends Thread {
 				}
 				if(terminate)
 					break;
+				//TODO Remove exception
 				if(lightMeasureThread.isRunning() || ultrasonicMeasureThread.isRunning())
 					throw new IllegalStateException("Measurement still running");
 			}
