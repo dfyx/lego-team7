@@ -18,7 +18,7 @@ public class WallFollowerController extends Strategy {
 	private boolean firstTime = true;
 	
 	static int getWallDistance() {
-		return HEAD.getValue();
+		return HEAD.getDistance();
 	}
 	
 	static void targetWall() {
