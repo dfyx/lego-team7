@@ -3,7 +3,6 @@ package robot;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.util.Delay;
-import utils.Utils;
 
 /**
  * This class encapsulates the whole underbody of the robot which consists of
@@ -24,7 +23,7 @@ import utils.Utils;
  */
 public class Engine {
 
-    private static final double DISTANCE_SCALE_FACTOR = 37.5 * Math.PI / 360;
+    private static final double DISTANCE_SCALE_FACTOR = 40.5 * Math.PI / 360;
     
 	private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
 	private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
@@ -32,7 +31,8 @@ public class Engine {
 	int newLeftSpeed = 0;
 	int newRightSpeed = 0;
 	
-	int lastTime = Utils.getSystemTime();
+	int lastTachoLeft = LEFT_MOTOR.getTachoCount();
+	int lastTachoRight = RIGHT_MOTOR.getTachoCount();
 	
 	public void commit() {
 		if (newLeftSpeed == 0) {
@@ -54,7 +54,8 @@ public class Engine {
 			RIGHT_MOTOR.backward();
 		}
 		
-		lastTime = Utils.getSystemTime();
+		lastTachoLeft = LEFT_MOTOR.getTachoCount();
+		lastTachoRight = RIGHT_MOTOR.getTachoCount();
 	}
 
 	/**
@@ -215,11 +216,14 @@ public class Engine {
 	
 	/**
 	 * Returns an estimate of the distance which has been covered since the last
-	 * call to {@link #commit()}.
+	 * call to {@link #commit()}. The estimate will be more accurate for high
+	 * driving speeds.
 	 * 
 	 * @return the estimated distance in mm
 	 */
 	public int estimateDistance() {
-	    return (int) ((newLeftSpeed + newRightSpeed) / 2 * DISTANCE_SCALE_FACTOR);
+        return (int) ((LEFT_MOTOR.getTachoCount() - lastTachoLeft
+                + RIGHT_MOTOR.getTachoCount() - lastTachoRight) 
+                / 2 * DISTANCE_SCALE_FACTOR);
 	}
 }
