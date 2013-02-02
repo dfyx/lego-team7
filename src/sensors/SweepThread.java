@@ -14,6 +14,7 @@ public class SweepThread extends Thread {
 	private int sweepFrom;
 	private int sweepTo;
 	private int valueCount;
+	private int speed=1000;
 
 	private boolean isRunning = false;
 	private boolean restart;
@@ -31,6 +32,10 @@ public class SweepThread extends Thread {
 	
 	public int[] getLightValues() {
 		return lightValues.getCopy();
+	}
+	
+	public void setSpeed(int speed) {
+		this.speed=speed;
 	}
 
 	/**
@@ -75,7 +80,7 @@ public class SweepThread extends Thread {
 					to = sweepTo;
 					// Move synchronously to the first point (necessary for
 					// the following loop)
-					motor.moveTo(from, false);
+					motor.moveTo(from, false, speed);
 
 					// Init sweepValues
 					lightValues.init(valueCount);
@@ -83,7 +88,7 @@ public class SweepThread extends Thread {
 					restart = false;
 				}
 				// Scan left to right
-				motor.moveTo(to, true);
+				motor.moveTo(to, true, speed);
 				int currentIndex = 0;
 				while (currentIndex<lightValues.size()) {
 					doPause();
@@ -104,7 +109,7 @@ public class SweepThread extends Thread {
 					throw new IllegalStateException(
 							"sweepValues.length!=currentIndex");
 				currentIndex -= 2;
-				motor.moveTo(from, true);
+				motor.moveTo(from, true, speed);
 				while (currentIndex>0) {
 					doPause();
 					if (restart)
