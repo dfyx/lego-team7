@@ -42,7 +42,6 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	protected void doRun() {
-		System.out.println("follow");
 	    // doInit is moving the sensor head nonblocking -> skip control loop
 	    // until the sensor head arrived at its final position 
 	    
@@ -54,8 +53,8 @@ public class WallFollowerStrategy extends Strategy {
 		if (WallFollowerController.headOn == WallFollowerController.HeadOn.LEFT_SIDE)
 			direction = -direction;
 
-		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
-				+ " -> " + direction);
+//		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
+//				+ " -> " + direction);
 
 		if(actualValue != WallFollowerController.lastDistance) {
 			System.out.println("---- NEW VALUE ---"+actualValue + " ("+System.currentTimeMillis()+")");

@@ -8,7 +8,16 @@ public class WallFollowerController extends Strategy {
 
 	private WallFollowerStrategy wallFollower;
 	private QuarterCircleStrategy edgeFollower;
-	private static boolean sweeping = false;
+	private static boolean sweeping = true;
+	
+	/**
+	 * in ms
+	 */
+	private static long lastNonSweepTime = 0;
+	/**
+	 * in ms
+	 */
+	private static final long DONT_SWEEP_TIME = 1000000;
 
 	// TODO SB marker of -1 is evil. Use boolean flag?
 	static int lastDistance = -1;
@@ -31,7 +40,7 @@ public class WallFollowerController extends Strategy {
 		// TODO SB gibt es ein isSweeping?
 		if(!HEAD.isMoving() && !sweeping)
 			return HEAD.getDistance();
-		System.out.println("distance: "+values[0]);
+		//System.out.println("distance: "+values[0]);
 		return values[0];
 	}
 	
@@ -41,6 +50,11 @@ public class WallFollowerController extends Strategy {
 //			HEAD.moveTo(-1000, false);
 //		else
 //			HEAD.moveTo(1000, false);
+		if(!sweeping && lastNonSweepTime + DONT_SWEEP_TIME < System.currentTimeMillis()) {
+			System.out.println("not sweeping");
+			return;
+		} else 
+			System.out.println("sweeping");
 		sweeping = true;
 		if(headOn == HeadOn.LEFT_SIDE)
 			HEAD.startSweeping(-1000, 0, 2, 2);
@@ -81,16 +95,15 @@ public class WallFollowerController extends Strategy {
 	protected void doRun() {
 		// TODO SB use curve strategy in this case
 		if (justAtEnd()) {
-			System.out.println("-  just -");
 			edgeFollower.init();
 			edgeFollower.run();
+			lastNonSweepTime = System.currentTimeMillis();
 		} else if (atEnd()) {
-			System.out.println("-  end  -");
 			edgeFollower.run();
+			lastNonSweepTime = System.currentTimeMillis();
 		} else {
 			if(!sweeping)
 				targetWall();
-			System.out.println("- follow -");
 			firstTime = true;
 			wallFollower.run();
 		}
