@@ -55,7 +55,9 @@ public class WallFollowerStrategy extends Strategy {
 	        return;
 	    }
 	    
-		actualValue = HEAD.getDistance();
+		actualValue = WallFollowerController.getWallDistance();
+		if(actualValue != WallFollowerController.lastDistance)
+			System.out.println(actualValue);
 
 		int direction = getMotorSpeed();
 

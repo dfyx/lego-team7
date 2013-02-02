@@ -9,7 +9,7 @@ public class WallFollowerController extends Strategy {
 	private QuarterCircleStrategy edgeFollower;
 
 	// TODO SB marker of -1 is evil. Use boolean flag?
-	private int lastDistance = -1;
+	static int lastDistance = -1;
 	/**
 	 * No wall in sight
 	 */
@@ -18,15 +18,19 @@ public class WallFollowerController extends Strategy {
 	private boolean firstTime = true;
 	
 	static int getWallDistance() {
-		return HEAD.getDistance();
+		return HEAD.getUltrasonicSweepValues()[0];
 	}
 	
 	static void targetWall() {
 		// TODO SB async
+//		if(headOn == HeadOn.LEFT_SIDE)
+//			HEAD.moveTo(-1000, false);
+//		else
+//			HEAD.moveTo(1000, false);
 		if(headOn == HeadOn.LEFT_SIDE)
-			HEAD.moveTo(-1000, false);
+			HEAD.startSweeping(-1000, 0, 2);
 		else
-			HEAD.moveTo(1000, false);
+			HEAD.startSweeping(1000, 0, 2);
 	}
 	
 	/**
@@ -67,7 +71,7 @@ public class WallFollowerController extends Strategy {
 			firstTime = true;
 			wallFollower.run();
 		}
-		lastDistance = HEAD.getDistance();
+		lastDistance = getWallDistance();
 	}
 
 	/**
