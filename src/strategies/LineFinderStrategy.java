@@ -2,7 +2,6 @@ package strategies;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
-import static robot.Platform.LIGHT_SENSOR;
 import utils.Utils;
 
 /**
@@ -24,7 +23,7 @@ public class LineFinderStrategy extends Strategy {
     private static final int ALIGNMENT_TOLERANCE_ANGLE = 5;
     
     private static final double P = 1.0;
-    private static final double I = 0;
+    private static final double I = 0.05;
     private static final double I_DECREASE = 0.5;
     
     private State state = State.NOT_LOCKED;
@@ -52,26 +51,32 @@ public class LineFinderStrategy extends Strategy {
         
         // Sweep wildly until a line has been found
         final int range = degreeToHead(DETECTION_ANGLE);
-        HEAD.startSweeping(-range, range, 1); // FIXME: Set Head-Speed!
+        HEAD.setSweepSpeed(sweepSpeed);
+        HEAD.startSweeping(-range, range, 2, 2); 
     }
 
     @Override
     protected void doRun() {
-        final int value = LIGHT_SENSOR.getValue();
-        
-        if (value > DETECTION_THRESHOLD) {
-            // line found, stop engines and align
-            state = State.LINE_FOUND;
-            
-            ENGINE.stop();
-        }
+        final int value = HEAD.getLight();
         
         switch(state) {
+            case NOT_LOCKED:
+                if (value > DETECTION_THRESHOLD) {
+                    // line found, stop engines and align
+                    state = State.LINE_FOUND;
+                    
+                    System.out.println("Line found");
+                    
+                    ENGINE.stop();
+                }
+                break;
             case LINE_FOUND:
                 // move head to a position left of the line
                 HEAD.stopSweeping();
                 HEAD.moveTo(degreeToHead(headToDegrees(
                         HEAD.getPosition() + SEARCH_OFFSET_ANGLE)), true);
+                
+                System.out.println("Stopped sweeping");
                 
                 state = State.MOVE_TO_START;
                 break;
@@ -79,21 +84,26 @@ public class LineFinderStrategy extends Strategy {
                 if (!HEAD.isMoving()) {
                     // head arrived at the left hand side of the line
                     // start a slow sweep to the right
-                    // TODO: slow head sweep to the right
+                    HEAD.moveTo(degreeToHead(headToDegrees(HEAD.getPosition()
+                            - 2 * SEARCH_OFFSET_ANGLE)), true, sweepSpeed);
+                    
+                    state = State.SWEEP_LINE;
+                    
+                    System.out.println("Searching line again");
                 }
-                
-                state = State.SWEEP_LINE;
                 break;
             case SWEEP_LINE:
                 if (value > DETECTION_THRESHOLD) {
                     // head hit the line again, start alignment
                     state = State.ALIGN;
+                    
+                    System.out.println("Aligning");
                 }
                 break;
             case ALIGN:
                 if (isAligned()) {
                     ENGINE.stop();
-                    HEAD.stopSweeping();
+                    HEAD.stopMoving();
                     
                     setFinished();
                 } else {
@@ -160,7 +170,7 @@ public class LineFinderStrategy extends Strategy {
     /**
      * Gets the head sweep speed used for alignment.
      * 
-     * @return a speed value suitable for {@ WTF?!} TODO
+     * @return a speed value suitable for {@ sensors.Head}
      */
     public int getSweepSpeed() {
         return sweepSpeed;
@@ -171,7 +181,7 @@ public class LineFinderStrategy extends Strategy {
      * 
      * @param sweepSpeed
      *            the speed value, required to be within the value range
-     *            accepted by {@link WTF?!} TODO
+     *            accepted by {@link sensors.HEAD}
      */
     public void setSweepSpeed(int sweepSpeed) {
         this.sweepSpeed = sweepSpeed;
