@@ -1,6 +1,7 @@
 package strategies;
 
 import static robot.Platform.ENGINE;
+import static robot.Platform.HEAD;
 import static robot.Platform.LIGHT_SENSOR;
 import utils.Utils;
 
@@ -12,7 +13,15 @@ import utils.Utils;
  */
 public class LineFinderStrategy extends Strategy {
     
+    /** Brightness treshold used for line detection. */
     private static final int DETECTION_THRESHOLD = 500;
+    /** Sweep angle used during initial line search. */
+    private static final int DETECTION_ANGLE = 45;
+    /** Sensor head movement angle used to position the light sensor at the 
+     * required side of the line (left). */
+    private static final int SEARCH_OFFSET_ANGLE = -10;
+    /** Alignment tolerance used to end the alignment process. */
+    private static final int ALIGNMENT_TOLERANCE_ANGLE = 5;
     
     private static final double P = 1.0;
     private static final double I = 0;
@@ -20,16 +29,30 @@ public class LineFinderStrategy extends Strategy {
     
     private State state = State.NOT_LOCKED;
     
-    private int speed = 500;
+    private int driveSpeed = 500;
+    private int sweepSpeed = 400;
     
     private int iSum;
+    
+     // FIXME: calculation in head
+    private final int degreeToHead(final int degrees) {
+        return (degrees * 1000) / 90;
+    }
+    
+    // FIXME: calculation in head
+    private final int headToDegrees(final int head) {
+        return (head * 90) / 1000;
+    }
     
     @Override
     protected void doInit() {
         state = State.NOT_LOCKED;
         
         iSum = 0;
-        // TODO: HEAD-SWEEP +- 75°
+        
+        // Sweep wildly until a line has been found
+        final int range = degreeToHead(DETECTION_ANGLE);
+        HEAD.startSweeping(-range, range, 1); // FIXME: Set Head-Speed!
     }
 
     @Override
@@ -37,6 +60,7 @@ public class LineFinderStrategy extends Strategy {
         final int value = LIGHT_SENSOR.getValue();
         
         if (value > DETECTION_THRESHOLD) {
+            // line found, stop engines and align
             state = State.LINE_FOUND;
             
             ENGINE.stop();
@@ -44,22 +68,32 @@ public class LineFinderStrategy extends Strategy {
         
         switch(state) {
             case LINE_FOUND:
-                // head 10° nach links
+                // move head to a position left of the line
+                HEAD.stopSweeping();
+                HEAD.moveTo(degreeToHead(headToDegrees(
+                        HEAD.getPosition() + SEARCH_OFFSET_ANGLE)), true);
+                
                 state = State.MOVE_TO_START;
                 break;
             case MOVE_TO_START:
-                // head steht still? langsamer sweep nach rechts
+                if (!HEAD.isMoving()) {
+                    // head arrived at the left hand side of the line
+                    // start a slow sweep to the right
+                    // TODO: slow head sweep to the right
+                }
+                
                 state = State.SWEEP_LINE;
                 break;
             case SWEEP_LINE:
                 if (value > DETECTION_THRESHOLD) {
-                    // head anhalten
+                    // head hit the line again, start alignment
                     state = State.ALIGN;
                 }
                 break;
             case ALIGN:
                 if (isAligned()) {
                     ENGINE.stop();
+                    HEAD.stopSweeping();
                     
                     setFinished();
                 } else {
@@ -77,19 +111,70 @@ public class LineFinderStrategy extends Strategy {
         iSum += error * I;
         
         int out = linear + iSum;
-        out = Utils.clamp(out, -1000, 1000);
+        out = Utils.clamp(out, -driveSpeed, driveSpeed); // limit to drive speed
         
         iSum *= I_DECREASE;
         
-        ENGINE.moveCircle(speed, out);
+        ENGINE.move(out, 1000); // TODO: Test, but should work
     }
     
-    public boolean isAligned() {
-        // HEAD gerade?
-    }
-    
+    /**
+     * Checks if a line has been found.
+     * 
+     * @return true if a line has been found
+     */
     public boolean isLocked() {
         return state != State.NOT_LOCKED;
+    }
+    
+    /**
+     * Checks if the alignment process has been completed.
+     * 
+     * @return true if a line has been found and the alignment is done
+     */
+    public boolean isAligned() {
+        return isLocked()
+                && headToDegrees(HEAD.getPosition()) < ALIGNMENT_TOLERANCE_ANGLE;
+    }
+    
+    /**
+     * Gets the driving speed used for alignment.
+     * 
+     * @return a speed value suitable for {@link actors.Engine}
+     */
+    public int getDriveSpeed() {
+        return driveSpeed;
+    }
+    
+    /**
+     * Sets the driving speed used for alignment.
+     * 
+     * @param driveSpeed
+     *            the speed value, required to be within the value range
+     *            accepted by {@link actors.Engine}
+     */
+    public void setDriveSpeed(int driveSpeed) {
+        this.driveSpeed = driveSpeed;
+    }
+    
+    /**
+     * Gets the head sweep speed used for alignment.
+     * 
+     * @return a speed value suitable for {@ WTF?!} TODO
+     */
+    public int getSweepSpeed() {
+        return sweepSpeed;
+    }
+    
+    /**
+     * Sets the head sweep speed used for alignment.
+     * 
+     * @param sweepSpeed
+     *            the speed value, required to be within the value range
+     *            accepted by {@link WTF?!} TODO
+     */
+    public void setSweepSpeed(int sweepSpeed) {
+        this.sweepSpeed = sweepSpeed;
     }
     
     private enum State {
