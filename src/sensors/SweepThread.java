@@ -14,7 +14,7 @@ public class SweepThread extends Thread {
 	private int sweepTo;
 	private int lightValueCount;
 	private int ultrasonicValueCount;
-	private int speed=100;
+	private int speed=1000;
 
 	private boolean isRunning = false;
 	private boolean terminate = false;
@@ -78,7 +78,7 @@ public class SweepThread extends Thread {
 		try {
 			MeasureThread lightMeasureThread = new MeasureThread();
 			MeasureThread ultrasonicMeasureThread = new MeasureThread();
-			//ultrasonicMeasureThread.start();
+			ultrasonicMeasureThread.start();
 			int from = 0, to = 0;
 			while (!interrupted()) {
 				while (!isRunning)
@@ -90,7 +90,7 @@ public class SweepThread extends Thread {
 					to = sweepTo;
 					// Move synchronously to the first point (necessary for
 					// the following loop)
-					motor.moveTo(from, false, speed);
+					motor.moveTo(from, false, 1000);
 
 					// Init sweepValues
 					lightValues.init(lightValueCount);
@@ -100,7 +100,7 @@ public class SweepThread extends Thread {
 				// Scan left to right
 				motor.moveTo(to, true, speed);
 				lightMeasureThread.startMeasuring(0,lightValues.size()-1,1,from,to,motor.getPosition(),lightValues,lightSensor);
-				//ultrasonicMeasureThread.startMeasuring(0,ultrasonicValues.size()-1,1,from,to,motor.getPosition(),ultrasonicValues,ultrasonicSensor);
+				ultrasonicMeasureThread.startMeasuring(0,ultrasonicValues.size()-1,1,from,to,motor.getPosition(),ultrasonicValues,ultrasonicSensor);
 				
 				while(motor.isMoving() && !restart && !terminate) {
 					int motorPos = motor.getPosition();
@@ -115,26 +115,14 @@ public class SweepThread extends Thread {
 					continue;
 				if(lightMeasureThread.isRunning() || ultrasonicMeasureThread.isRunning())
 					throw new IllegalStateException("Measurement still running");
-				/*lightMeasureThread.stopMeasuring();
-				ultrasonicMeasureThread.stopMeasuring();
-				while(lightMeasureThread.isRunning() || ultrasonicMeasureThread.isRunning())
-					Delay.msDelay(10);*/
 				
-				System.out.println("start moving");
-				System.out.flush();
 				motor.moveTo(from, true, speed);
-				System.out.println("start");
-				System.out.flush();
 				lightMeasureThread.startMeasuring(lightValues.size()-1, 0, -1, to, from, motor.getPosition(), lightValues, lightSensor);
-				//ultrasonicMeasureThread.startMeasuring(ultrasonicValues.size()-1, 0, -1, to, from, motor.getPosition(), ultrasonicValues, ultrasonicSensor);
-				System.out.println("-start");
-				System.out.flush();
+				ultrasonicMeasureThread.startMeasuring(ultrasonicValues.size()-1, 0, -1, to, from, motor.getPosition(), ultrasonicValues, ultrasonicSensor);
 				while(motor.isMoving() && !restart && !terminate) {
 					int motorPos = motor.getPosition();
 					lightMeasureThread.setPosition(motorPos);
 					ultrasonicMeasureThread.setPosition(motorPos);
-					System.out.println("measure");
-					System.out.flush();
 					lightMeasureThread.measureSync();
 					Delay.msDelay(1);
 				}
@@ -142,10 +130,6 @@ public class SweepThread extends Thread {
 					break;
 				if(lightMeasureThread.isRunning() || ultrasonicMeasureThread.isRunning())
 					throw new IllegalStateException("Measurement still running");
-				/*lightMeasureThread.stopMeasuring();
-				ultrasonicMeasureThread.stopMeasuring();
-				while(lightMeasureThread.isRunning() || ultrasonicMeasureThread.isRunning())
-					Delay.msDelay(10);*/
 			}
 		} finally {
 			motor.stopMoving();

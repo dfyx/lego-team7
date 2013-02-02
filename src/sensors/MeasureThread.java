@@ -48,19 +48,11 @@ public class MeasureThread extends Thread {
 	int i = 0;
 
 	public void measureSync() {
-		// System.out.println("current:"+currentPos+", moving from "+moveFrom+" to "+moveTo+", currentIndex="+currentIndex+", nextPos: "+(moveFrom
-		// + (moveTo - moveFrom) * currentIndex / (values.size() -
-		// 1))+"        ");
 		if (isRunning && !interrupted())
-			if (currentPos >= moveFrom + (moveTo - moveFrom) * currentIndex
+			if (currentPos*indexInc >= moveFrom + (moveTo - moveFrom) * currentIndex
 					/ (values.size() - 1)) {
 				values.write(currentIndex, sensor.getValue());
 				currentIndex += indexInc;
-				if (i == 0) {
-					System.out.println("i=0, index="+currentIndex+", target="+targetIndex);
-					System.out.flush();
-				}
-				// System.out.println("Measuring "+currentIndex+", i: "+i);
 				i = 0;
 			} else
 				++i;

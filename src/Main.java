@@ -1,8 +1,8 @@
 import lejos.nxt.Button;
 import lejos.util.Delay;
 import robot.Platform;
-import strategies.LineFollowerStrategy;
 import strategies.Strategy;
+import strategies.TestStrategy;
 
 /**
  * @author markus
@@ -18,12 +18,10 @@ public class Main {
 			Delay.msDelay(1);
 		while (Platform.HEAD.isCalibrating())
 			Delay.msDelay(500);
-		System.out.println("Calibrated");
-		System.out.flush();
 
 		while (true) {
 			try {
-				Strategy test = new LineFollowerStrategy(300);
+				Strategy test = new TestStrategy();
 				Loop loop = new Loop(test);
 				loop.start();
 				Button.waitForAnyPress();
