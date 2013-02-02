@@ -12,7 +12,10 @@ public class TestStrategy extends Strategy {
 		System.out.print("\r");
 		int[] values = Platform.HEAD.getSweepValues();
 		for (int i = 0; i < values.length; ++i)
-			System.out.print("" + i + "  \t");
+			if(values[i]==Integer.MAX_VALUE)
+				System.out.print("-  \t");
+			else
+				System.out.print("" + values[i] + "  \t");
 		System.out.flush();
 	}
 }
