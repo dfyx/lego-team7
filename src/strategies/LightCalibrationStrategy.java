@@ -1,7 +1,7 @@
 package strategies;
 
 import static robot.Platform.ENGINE;
-import static robot.Platform.LIGHT_SENSOR;
+import static robot.Platform.HEAD;
 
 import java.util.Arrays;
 
@@ -43,9 +43,9 @@ public class LightCalibrationStrategy extends Strategy {
 	private int samples[] = new int[SAMPLE_SIZE];
 
 	protected void doInit() {
-	    LIGHT_SENSOR.setFloodlight(true);
+	    HEAD.setFloodlight(true);
 		// Switch off calibration
-		LIGHT_SENSOR.resetCalibration();
+		HEAD.resetLightCalibration();
 		
 		startTime = Utils.getSystemTime();
 		
@@ -56,7 +56,7 @@ public class LightCalibrationStrategy extends Strategy {
 	    if (elapsedTime() > SAMPLE_TIME) {
 	        resetTime();
 	        
-	        final int sampleValue = LIGHT_SENSOR.getRawValue();
+	        final int sampleValue = HEAD.getRawLightValue();
 	        samples[sampleCount++] = sampleValue;
 	        
 	        if (sampleCount == SAMPLE_SIZE) {
@@ -81,7 +81,7 @@ public class LightCalibrationStrategy extends Strategy {
 	            blackPoint /= ACCEPTED_SAMPLES;
 	            whitePoint /= ACCEPTED_SAMPLES;
 	            
-	            LIGHT_SENSOR.calibrate(blackPoint, whitePoint);
+	            HEAD.calibrateLight(blackPoint, whitePoint);
 	            
 	            /*
                 System.out.println("Min: " + samples[0] + " Max: "

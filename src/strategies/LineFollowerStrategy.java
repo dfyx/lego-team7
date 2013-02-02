@@ -1,7 +1,7 @@
 package strategies;
 
 import static robot.Platform.ENGINE;
-import static robot.Platform.LIGHT_SENSOR;
+import static robot.Platform.HEAD;
 import utils.Utils;
 
 public class LineFollowerStrategy extends Strategy {
@@ -19,11 +19,11 @@ public class LineFollowerStrategy extends Strategy {
     }
     
     protected void doInit() {
-        LIGHT_SENSOR.setFloodlight(true);
+        HEAD.setFloodlight(true);
     }
 
     protected void doRun() {
-        final int error = 500 - LIGHT_SENSOR.getValue();
+        final int error = 500 - HEAD.getLight();
 
         final int linear = (int) (LINEAR_FACTOR * error);
         final int exponential = (int) (error * error * error * EXP_FACTOR);

@@ -40,7 +40,7 @@ public class WallFollowerController extends Strategy {
 			firstTime = true;
 			wallFollower.run();
 		}
-		lastDistance = HEAD.getValue();
+		lastDistance = HEAD.getDistance();
 	}
 
 	/**
@@ -50,7 +50,7 @@ public class WallFollowerController extends Strategy {
 	 */
 	private boolean atEnd() {
 		return lastDistance >= NO_WALL_DISTANCE
-				&& HEAD.getValue() >= NO_WALL_DISTANCE;
+				&& HEAD.getDistance() >= NO_WALL_DISTANCE;
 	}
 
 	private boolean justAtEnd() {

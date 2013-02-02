@@ -3,7 +3,7 @@ package sensors;
 import lejos.nxt.SensorPort;
 import lejos.nxt.TouchSensor;
 
-public class Bumper implements Sensor<Boolean> {
+public class Bumper {
 
     private final TouchSensor realSensor;
     
@@ -13,13 +13,11 @@ public class Bumper implements Sensor<Boolean> {
         realSensor = new TouchSensor(port);
     }
     
-    @Override
     public void poll() {
         sensorValue = realSensor.isPressed();
     }
 
-    @Override
-    public Boolean getValue() {
+    public boolean getValue() {
         return sensorValue;
     }
     

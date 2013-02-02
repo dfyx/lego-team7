@@ -1,5 +1,6 @@
 import lejos.nxt.Button;
-import strategies.wall_follower.WallFollowerController;
+import robot.Platform;
+import strategies.TestStrategy;
 
 /**
  * @author markus
@@ -8,11 +9,13 @@ import strategies.wall_follower.WallFollowerController;
 
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {	
+		new Platform();
+		
 		Button.waitForAnyPress();
 		
 		Loop loop = new Loop();
-		WallFollowerController wall = new WallFollowerController();
-		loop.run(wall);
+		TestStrategy test = new TestStrategy();
+		loop.run(test);
 	}
 }
