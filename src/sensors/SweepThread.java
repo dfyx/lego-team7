@@ -105,6 +105,7 @@ public class SweepThread extends Thread {
 					int motorPos = motor.getPosition();
 					lightMeasureThread.setPosition(motorPos);
 					ultrasonicMeasureThread.setPosition(motorPos);
+					Delay.msDelay(10);
 				}
 				if(lightMeasureThread.isRunning() || ultrasonicMeasureThread.isRunning())
 					throw new IllegalStateException("Measurement still running");
@@ -124,6 +125,7 @@ public class SweepThread extends Thread {
 					int motorPos = motor.getPosition();
 					lightMeasureThread.setPosition(motorPos);
 					ultrasonicMeasureThread.setPosition(motorPos);
+					Delay.msDelay(10);
 				}
 				if(lightMeasureThread.isRunning() || ultrasonicMeasureThread.isRunning())
 					throw new IllegalStateException("Measurement still running");
