@@ -6,6 +6,8 @@ import utils.Utils;
 
 public class LineFollowerStrategy extends Strategy {
 
+    private static final int LIGHT_SETPOINT = 500;
+    
     private static final int LINE_LOSS_LIMIT = 5;
     private static final int LINE_LOSS_THRESHOLD = 50;
     
@@ -74,7 +76,7 @@ public class LineFollowerStrategy extends Strategy {
     }
     
     private void controlLoop(final int value) {
-            final int error = 500 - value;
+            final int error = LIGHT_SETPOINT - value;
             final int errorD = error - oldError;
             
             final int linear = (int) (P * error);
