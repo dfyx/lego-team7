@@ -1,5 +1,7 @@
 import lejos.nxt.Button;
+import lejos.util.Delay;
 import robot.Platform;
+import strategies.Strategy;
 import strategies.TestStrategy;
 
 /**
@@ -9,13 +11,30 @@ import strategies.TestStrategy;
 
 public class Main {
 
-	public static void main(String[] args) {	
+	public static void main(String[] args) {
 		new Platform();
-		
-		Button.waitForAnyPress();
-		
-		Loop loop = new Loop();
-		TestStrategy test = new TestStrategy();
-		loop.run(test);
+
+		while (!Platform.HEAD.isCalibrating())
+			Delay.msDelay(1);
+		while (Platform.HEAD.isCalibrating())
+			Delay.msDelay(500);
+
+		while (true) {
+			try {
+				Strategy test = new TestStrategy();
+				Loop loop = new Loop(test);
+				loop.start();
+				Button.waitForAnyPress();
+				loop.abort();
+				Platform.ENGINE.stop();
+				Platform.ENGINE.commit();
+				Button.waitForAnyPress();
+				while (loop.isRunning())
+					Delay.msDelay(100);
+			} finally {
+				Platform.ENGINE.stop();
+				Platform.ENGINE.commit();
+			}
+		}
 	}
 }
