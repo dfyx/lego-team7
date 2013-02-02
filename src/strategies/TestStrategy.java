@@ -5,7 +5,7 @@ import robot.Platform;
 public class TestStrategy extends Strategy {
 
 	protected void doInit() {
-		Platform.HEAD.startSweeping(-1000, 1000, 10);
+		Platform.HEAD.startSweeping(-1000, 1000, 20, 8);
 	}
 
 	protected void doRun() {

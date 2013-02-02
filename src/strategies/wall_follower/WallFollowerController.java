@@ -1,6 +1,7 @@
 package strategies.wall_follower;
 
 import static robot.Platform.HEAD;
+import lejos.nxt.Motor;
 import strategies.Strategy;
 
 public class WallFollowerController extends Strategy {
@@ -18,7 +19,15 @@ public class WallFollowerController extends Strategy {
 	private boolean firstTime = true;
 	
 	static int getWallDistance() {
-		return HEAD.getUltrasonicSweepValues()[0];
+		int[] values = HEAD.getUltrasonicSweepValues();
+		// TODO SM (SB) should never happen. Fix this in 'HEAD'
+		// No value found
+		if(values.length == 0) {
+			System.out.println("no value");
+			return 256;
+		}
+		System.out.println("distance: "+values[0]);
+		return values[0];
 	}
 	
 	static void targetWall() {
@@ -28,9 +37,9 @@ public class WallFollowerController extends Strategy {
 //		else
 //			HEAD.moveTo(1000, false);
 		if(headOn == HeadOn.LEFT_SIDE)
-			HEAD.startSweeping(-1000, 0, 2);
+			HEAD.startSweeping(-1000, 0, 2, 2);
 		else
-			HEAD.startSweeping(1000, 0, 2);
+			HEAD.startSweeping(1000, 0, 2, 2);
 	}
 	
 	/**

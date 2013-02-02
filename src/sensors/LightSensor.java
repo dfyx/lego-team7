@@ -4,7 +4,7 @@ import lejos.nxt.SensorPort;
 import utils.Utils;
 
 //Only used inside Head class
-class LightSensor {
+class LightSensor implements Sensor {
 
     private final lejos.nxt.LightSensor realSensor;
     
