@@ -33,8 +33,6 @@ public class CountLinesStrategy extends Strategy {
     
     @Override
     protected void doInit() {
-        // TODO: HEAD Positionieren
-        
         clearance = false;
         rising = false;
         peak = 1000;
