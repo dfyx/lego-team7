@@ -4,7 +4,7 @@ import robot.Platform;
 import strategies.Strategy;
 import utils.Utils;
 
-public class Loop {
+public class Loop extends Thread {
 	/**
 	 * Time the main loop needs per cycle (in ms)
 	 */
@@ -13,7 +13,14 @@ public class Loop {
 	/**
 	 * Counts main loop cycles
 	 */
-	private static int numCycles = 0;
+	private int numCycles = 0;
+	
+	private boolean isRunning = false;
+	private boolean abort = false;
+	
+	public void abort() {
+		abort = true;
+	}
 	
 	/**
 	 * Main loop
@@ -23,6 +30,8 @@ public class Loop {
 	 * 
 	 */
 	public void run(Strategy strategy) {
+		isRunning = true;
+		
 		Utils.resetTimer();
 		numCycles = 0;
 		
@@ -30,7 +39,7 @@ public class Loop {
 		
 		int lastEndTime = Utils.getSystemTime();
 		
-		while(strategy.isRunning()) {
+		while(strategy.isRunning() && !abort) {
 			// poll sensors
 			Platform.poll();
 			
@@ -45,9 +54,10 @@ public class Loop {
 			
 			numCycles++;
 		}
+		isRunning=false;
 	}
 	
-	public static int getNumCycles() {
+	public int getNumCycles() {
 		return numCycles;
 	}
 }
