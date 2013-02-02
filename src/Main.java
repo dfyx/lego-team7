@@ -17,5 +17,7 @@ public class Main {
 		Loop loop = new Loop();
 		TestStrategy test = new TestStrategy();
 		loop.run(test);
+		
+		Platform.HEAD.terminate();
 	}
 }

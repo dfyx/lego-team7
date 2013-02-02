@@ -46,6 +46,12 @@ class HeadMotor extends Thread {
 	private boolean stopMoving = false; //Abort current movement
 	private int speed = 1000;
 	
+	private boolean terminate = false;
+	
+	public void terminate() {
+		terminate = true;
+	}
+	
 	public HeadMotor() {
 		start();
 	}
@@ -153,16 +159,21 @@ class HeadMotor extends Thread {
 			calibrate();
 			while (true) {
 				// State is NOT_MOVING
-				while (!isMoving) {
+				while (!isMoving && !terminate) {
 					Delay.msDelay(10);
 				}
+				if(terminate)
+					break;
 				// State just switched to MOVING
 				doRotateTo(target, true);
-				while (MOTOR.isMoving() && !reMove && !stopMoving) {
+				while (MOTOR.isMoving() && !reMove && !stopMoving && !terminate) {
 					Delay.msDelay(10);
 				}
 				if(stopMoving) {
 					MOTOR.stop();
+				}
+				if(terminate) {
+					break;
 				}
 				// If state switched to reMove, remain MOVING state.
 				// Otherwise switch back to NOT_MOVING

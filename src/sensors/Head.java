@@ -1,6 +1,5 @@
 package sensors;
 
-import lejos.nxt.UltrasonicSensor;
 import robot.Platform;
 
 public class Head {
@@ -24,7 +23,7 @@ public class Head {
 
 	public void poll() {
 		polledPosition = headMotor.getPosition();
-		polledDistance = ultrasonicSensor.getDistance();
+		polledDistance = ultrasonicSensor.getValue();
 		polledLight = lightSensor.getValue();
 		polledUltrasonicValues = sweepThread.getUltrasonicValues();
 		polledLightValues = sweepThread.getLightValues();
@@ -36,6 +35,11 @@ public class Head {
 
 	public int getLight() {
 		return polledLight;
+	}
+	
+	public void terminate() {
+		sweepThread.terminate();
+		headMotor.terminate();
 	}
 
 	/**
@@ -81,12 +85,15 @@ public class Head {
 	 *            The leftmost position to sweep. See getPosition() for range.
 	 * @param to
 	 *            The rightmost position to sweep. See getPosition() for range.
-	 * @param valuecount
-	 *            The number of values to scan, distributed over the sweeping
+	 * @param lightValuecount
+	 *            The number of light values to scan, distributed over the sweeping
+	 *            area
+	 * @param ultrasonicValuecount
+	 *            The number of distance values to scan, distributed over the sweeping
 	 *            area
 	 */
-	public void startSweeping(int from, int to, int valuecount) {
-		sweepThread.startSweeping(from, to, valuecount);
+	public void startSweeping(int from, int to, int lightValuecount, int ultrasonicValuecount) {
+		sweepThread.startSweeping(from, to, lightValuecount, ultrasonicValuecount);
 	}
 
 	/**
