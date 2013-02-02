@@ -32,7 +32,7 @@ public class QuarterCircleStrategy extends Strategy {
 	 * The motor speed
 	 */
 	private static int MAX_SPEED = 1000;
-	private static int MOVE_ROTATION = -425;//-375
+	private static int MOVE_ROTATION = -375;//-425
 	
 	// TODO SB also for drive right
 	/**
