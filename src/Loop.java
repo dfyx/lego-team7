@@ -10,6 +10,8 @@ public class Loop extends Thread {
 	 */
 	private static int LOOP_TIME = 10;
 	
+	private Strategy strategy;
+	
 	/**
 	 * Counts main loop cycles
 	 */
@@ -18,8 +20,16 @@ public class Loop extends Thread {
 	private boolean isRunning = false;
 	private boolean abort = false;
 	
+	public Loop(Strategy strategy) {
+		this.strategy=strategy;
+	}
+	
 	public void abort() {
 		abort = true;
+	}
+	
+	public boolean isRunning() {
+		return isRunning;
 	}
 	
 	/**
@@ -29,7 +39,7 @@ public class Loop extends Thread {
 	 * @param strategy The strategy to perform
 	 * 
 	 */
-	public void run(Strategy strategy) {
+	public void run() {
 		isRunning = true;
 		
 		Utils.resetTimer();
