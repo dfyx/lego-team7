@@ -1,4 +1,4 @@
-package actors;
+package robot;
 
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
@@ -21,15 +21,19 @@ import lejos.util.Delay;
  * To make sure there is no interference, the motors used by this class should
  * <b>never</b> be manipulated by anyone else.
  */
-public class Engine implements Actor {
+public class Engine {
 
+    private static final double DISTANCE_SCALE_FACTOR = 40.5 * Math.PI / 360;
+    
 	private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
 	private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
 
 	int newLeftSpeed = 0;
 	int newRightSpeed = 0;
-
-	@Override
+	
+	int lastTachoLeft = LEFT_MOTOR.getTachoCount();
+	int lastTachoRight = RIGHT_MOTOR.getTachoCount();
+	
 	public void commit() {
 		if (newLeftSpeed == 0) {
 			LEFT_MOTOR.stop();
@@ -49,6 +53,9 @@ public class Engine implements Actor {
 			RIGHT_MOTOR.setSpeed(-newRightSpeed);
 			RIGHT_MOTOR.backward();
 		}
+		
+		lastTachoLeft = LEFT_MOTOR.getTachoCount();
+		lastTachoRight = RIGHT_MOTOR.getTachoCount();
 	}
 
 	/**
@@ -205,5 +212,18 @@ public class Engine implements Actor {
 
 		newLeftSpeed = left;
 		newRightSpeed = right;
+	}
+	
+	/**
+	 * Returns an estimate of the distance which has been covered since the last
+	 * call to {@link #commit()}. The estimate will be more accurate for high
+	 * driving speeds.
+	 * 
+	 * @return the estimated distance in mm
+	 */
+	public int estimateDistance() {
+        return (int) ((LEFT_MOTOR.getTachoCount() - lastTachoLeft
+                + RIGHT_MOTOR.getTachoCount() - lastTachoRight) 
+                / 2 * DISTANCE_SCALE_FACTOR);
 	}
 }
