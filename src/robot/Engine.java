@@ -3,6 +3,7 @@ package robot;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.util.Delay;
+import utils.Utils;
 
 /**
  * This class encapsulates the whole underbody of the robot which consists of
@@ -23,11 +24,15 @@ import lejos.util.Delay;
  */
 public class Engine {
 
+    private static final double DISTANCE_SCALE_FACTOR = 37.5 * Math.PI / 360;
+    
 	private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
 	private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
 
 	int newLeftSpeed = 0;
 	int newRightSpeed = 0;
+	
+	int lastTime = Utils.getSystemTime();
 	
 	public void commit() {
 		if (newLeftSpeed == 0) {
@@ -48,6 +53,8 @@ public class Engine {
 			RIGHT_MOTOR.setSpeed(-newRightSpeed);
 			RIGHT_MOTOR.backward();
 		}
+		
+		lastTime = Utils.getSystemTime();
 	}
 
 	/**
@@ -204,5 +211,15 @@ public class Engine {
 
 		newLeftSpeed = left;
 		newRightSpeed = right;
+	}
+	
+	/**
+	 * Returns an estimate of the distance which has been covered since the last
+	 * call to {@link #commit()}.
+	 * 
+	 * @return the estimated distance in mm
+	 */
+	public int estimateDistance() {
+	    return (int) ((newLeftSpeed + newRightSpeed) / 2 * DISTANCE_SCALE_FACTOR);
 	}
 }
