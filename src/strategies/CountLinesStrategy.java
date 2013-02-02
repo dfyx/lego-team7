@@ -18,7 +18,7 @@ import static robot.Platform.HEAD;
 public class CountLinesStrategy extends Strategy {
 
     /** Threshold required to detect a rising/falling edge */
-    private static final int DELTA_THRESHOLD = 250;
+    private static final int DELTA_THRESHOLD = 600;
     
     /** Free area before a barcode, in mm. */
     private static final int CLEARANCE_BEFORE = 200;
