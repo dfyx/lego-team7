@@ -45,6 +45,7 @@ public class WallFollowerController extends Strategy {
 		headOn = HeadOn.LEFT_SIDE;
 		
 		targetWall();
+		
 		// TODO SB init in doRun?
 		wallFollower = new WallFollowerStrategy();
 		edgeFollower = new QuarterCircleStrategy();
@@ -76,7 +77,7 @@ public class WallFollowerController extends Strategy {
 	 */
 	private boolean atEnd() {
 		return lastDistance >= NO_WALL_DISTANCE
-				&& getWallDistance() >= NO_WALL_DISTANCE;
+				&& HEAD.getValue() >= NO_WALL_DISTANCE;
 	}
 
 	private boolean justAtEnd() {
