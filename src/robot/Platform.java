@@ -2,7 +2,6 @@ package robot;
 import lejos.nxt.SensorPort;
 import sensors.Bumper;
 import sensors.Head;
-import actors.Engine;
 
 
 public class Platform {
