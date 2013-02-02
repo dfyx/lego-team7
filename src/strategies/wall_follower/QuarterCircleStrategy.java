@@ -49,6 +49,7 @@ public class QuarterCircleStrategy extends Strategy {
 		startTachoCount = Motor.A.getTachoCount();
 		endTachoCount = startTachoCount + DESIRED_ROTATION_DISTANCE;
 		hasTurned = false;
+		WallFollowerController.stopSweeping();
 	}
 	
 	private boolean shouldTurn() {

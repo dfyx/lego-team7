@@ -15,6 +15,7 @@ public class WallFollowerStrategy extends Strategy {
 
 	private static final int MAX_SPEED = 1000;
 	private int speed = MAX_SPEED;
+	private int speedWhileScanning = MAX_SPEED/2;
 
 	private enum HeadOn {
 		RIGHT_SIDE, LEFT_SIDE
@@ -46,10 +47,9 @@ public class WallFollowerStrategy extends Strategy {
 	    // until the sensor head arrived at its final position 
 	    
 		actualValue = WallFollowerController.getWallDistance();
-		if(actualValue != WallFollowerController.lastDistance)
-			System.out.println(actualValue);
+		
 
-		int direction = getMotorSpeed();
+		int direction = getMotorDirection();
 
 		if (WallFollowerController.headOn == WallFollowerController.HeadOn.LEFT_SIDE)
 			direction = -direction;
@@ -57,7 +57,11 @@ public class WallFollowerStrategy extends Strategy {
 		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
 				+ " -> " + direction);
 
-		ENGINE.move(speed, direction);
+		if(actualValue != WallFollowerController.lastDistance) {
+			System.out.println("---- NEW VALUE ---"+actualValue + " ("+System.currentTimeMillis()+")");
+			ENGINE.move(speed/2, 0);
+		} else
+			ENGINE.move(speedWhileScanning, direction);
 	}
 
 	// TODO SB doesn't work on big distances
@@ -65,7 +69,7 @@ public class WallFollowerStrategy extends Strategy {
 	 * 
 	 * @return positive = move to wall; negative = move away from wall
 	 */
-	private int getMotorSpeed() {
+	private int getMotorDirection() {
 		int diff = (actualValue - referenceValue);
 		int linearValue = 0;
 		// move to wall

@@ -8,6 +8,7 @@ public class WallFollowerController extends Strategy {
 
 	private WallFollowerStrategy wallFollower;
 	private QuarterCircleStrategy edgeFollower;
+	private static boolean sweeping = false;
 
 	// TODO SB marker of -1 is evil. Use boolean flag?
 	static int lastDistance = -1;
@@ -20,12 +21,16 @@ public class WallFollowerController extends Strategy {
 	
 	static int getWallDistance() {
 		int[] values = HEAD.getUltrasonicSweepValues();
+		
 		// TODO SM (SB) should never happen. Fix this in 'HEAD'
 		// No value found
 		if(values.length == 0) {
 			System.out.println("no value");
 			return 256;
 		}
+		// TODO SB gibt es ein isSweeping?
+		if(!HEAD.isMoving() && !sweeping)
+			return HEAD.getDistance();
 		System.out.println("distance: "+values[0]);
 		return values[0];
 	}
@@ -36,10 +41,17 @@ public class WallFollowerController extends Strategy {
 //			HEAD.moveTo(-1000, false);
 //		else
 //			HEAD.moveTo(1000, false);
+		sweeping = true;
 		if(headOn == HeadOn.LEFT_SIDE)
 			HEAD.startSweeping(-1000, 0, 2, 2);
 		else
 			HEAD.startSweeping(1000, 0, 2, 2);
+	}
+	
+	static void stopSweeping() {
+		HEAD.stopSweeping();
+		HEAD.moveTo(-1000, true);
+		sweeping = false;
 	}
 	
 	/**
@@ -76,6 +88,8 @@ public class WallFollowerController extends Strategy {
 			System.out.println("-  end  -");
 			edgeFollower.run();
 		} else {
+			if(!sweeping)
+				targetWall();
 			System.out.println("- follow -");
 			firstTime = true;
 			wallFollower.run();
