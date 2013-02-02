@@ -157,7 +157,7 @@ class HeadMotor extends Thread {
 			//Delay necessary, because motor commands are ignored when in debug mode and issued too early
 			Delay.msDelay(500);
 			calibrate();
-			while (true) {
+			while (!interrupted()) {
 				// State is NOT_MOVING
 				while (!isMoving && !terminate) {
 					Delay.msDelay(10);

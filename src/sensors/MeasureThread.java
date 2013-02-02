@@ -7,8 +7,8 @@ public class MeasureThread extends Thread {
 	private boolean isRunning = false;
 	private boolean shouldStop = false;
 
-	private int startIndex;
 	private int targetIndex;
+	private int currentIndex;
 	private int indexInc;
 	private int moveFrom;
 	private int moveTo;
@@ -23,8 +23,8 @@ public class MeasureThread extends Thread {
 	public void startMeasuring(int startIndex, int targetIndex, int indexInc,
 			int moveFrom, int moveTo, int currentPos, SyncArray values,
 			Sensor sensor) {
-		this.startIndex = startIndex;
 		this.targetIndex = targetIndex;
+		this.currentIndex = startIndex;
 		this.indexInc = indexInc;
 		this.moveFrom = moveFrom;
 		this.moveTo = moveTo;
@@ -43,7 +43,29 @@ public class MeasureThread extends Thread {
 	}
 
 	public MeasureThread() {
-		start();
+	}
+
+	int i = 0;
+
+	public void measureSync() {
+		// System.out.println("current:"+currentPos+", moving from "+moveFrom+" to "+moveTo+", currentIndex="+currentIndex+", nextPos: "+(moveFrom
+		// + (moveTo - moveFrom) * currentIndex / (values.size() -
+		// 1))+"        ");
+		if (isRunning && !interrupted())
+			if (currentPos >= moveFrom + (moveTo - moveFrom) * currentIndex
+					/ (values.size() - 1)) {
+				values.write(currentIndex, sensor.getValue());
+				currentIndex += indexInc;
+				if (i == 0) {
+					System.out.println("i=0, index="+currentIndex+", target="+targetIndex);
+					System.out.flush();
+				}
+				// System.out.println("Measuring "+currentIndex+", i: "+i);
+				i = 0;
+			} else
+				++i;
+		if (currentIndex == targetIndex)
+			isRunning = false;
 	}
 
 	@Override
@@ -52,20 +74,10 @@ public class MeasureThread extends Thread {
 			while (!isRunning) {
 				Delay.msDelay(10);
 			}
-			int currentIndex = startIndex;
-			int i=0;
-			System.out.println("Start measuring");
 			while (!shouldStop && currentIndex != targetIndex) {
 				if (shouldStop)
 					break;
-				System.out.println("current:"+currentPos+", moving from "+moveFrom+" to "+moveTo+", currentIndex="+currentIndex+", nextPos: "+(moveFrom + (moveTo - moveFrom) * currentIndex	/ (values.size() - 1))+"        ");
-				if (currentPos >= moveFrom + (moveTo - moveFrom) * currentIndex
-						/ (values.size() - 1)) {
-					values.write(currentIndex, sensor.getValue());
-					currentIndex += indexInc;
-					System.out.println("Measuring "+currentIndex+", i: "+i);
-					i=0;
-				} else ++i;
+				measureSync();
 				Delay.msDelay(1);
 			}
 			shouldStop = false;

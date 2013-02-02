@@ -9,13 +9,13 @@ public class TestStrategy extends Strategy {
 	}
 
 	protected void doRun() {
-		System.out.print("\r");
+		/*System.out.print("\r");
 		int[] values = Platform.HEAD.getLightSweepValues();
 		for (int i = 0; i < values.length; ++i)
 			if(values[i]==Integer.MAX_VALUE)
 				System.out.print("-  \t");
 			else
 				System.out.print("" + values[i] + "  \t");
-		System.out.flush();
+		System.out.flush();*/
 	}
 }
