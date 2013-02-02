@@ -52,7 +52,7 @@ public class Head implements Sensor<Integer> {
 
 	/**
 	 * Stop sweeping. Call this function, if you want to position the head
-	 * manually using moveTo(x,y)
+	 * manually using moveTo(pos)
 	 */
 	public void stopSweeping() {
 		sweepThread.stopSweeping();
@@ -62,10 +62,10 @@ public class Head implements Sensor<Integer> {
 	 * Start sweeping
 	 * 
 	 * @param from
-	 *            The leftmost x position to sweep. See getPositionX() for
+	 *            The leftmost position to sweep. See getPosition() for
 	 *            range.
 	 * @param to
-	 *            The rightmost x position to sweep. See getPositionX() for
+	 *            The rightmost position to sweep. See getPosition() for
 	 *            range.
 	 * @param valuecount
 	 *            The number of values to scan, distributed over the sweeping
