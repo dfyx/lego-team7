@@ -1,6 +1,7 @@
 package strategies;
 
-import static robot.Platform.LIGHT_SENSOR;
+import static robot.Platform.ENGINE;
+import static robot.Platform.HEAD;
 
 /**
  * Counts lines/reads barcodes. 
@@ -43,9 +44,9 @@ public class CountLinesStrategy extends Strategy {
 
     @Override
     protected void doRun() {
-        final int value = LIGHT_SENSOR.getValue();
+        final int value = HEAD.getLight();
         
-        drivenDistance += deltaDistance; // TODO: Read from ENGINE
+        drivenDistance += ENGINE.estimateDistance();
         
         if (clearance && edgeCount > 0 && drivenDistance > CLEARANCE_AFTER) {
             clearance = false;
