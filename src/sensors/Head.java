@@ -3,31 +3,45 @@ package sensors;
 import lejos.nxt.UltrasonicSensor;
 import robot.Platform;
 
-public class Head implements Sensor<Integer> {
+public class Head {
 
-	private static final UltrasonicSensor SENSOR = new UltrasonicSensor(
+	private static final UltrasonicSensor ultrasonicSensor = new UltrasonicSensor(
 			Platform.ULTRASONIC_PORT);
+	private static final LightSensor lightSensor = new LightSensor(Platform.LIGHT_PORT);
 	
 	// Last polled sensor values
 	private int polledDistance;
+	private int polledLight;
 	private int polledPosition;
-	private int[] polledSweepValues;
+	private int[] polledUltrasonicValues;
+	private int[] polledLightValues;
 
 	//private MotorThread motorThread = new MotorThread();
 	private HeadMotor headMotor = new HeadMotor();
-	private SweepThread sweepThread = new SweepThread(headMotor,SENSOR);
+	private SweepThread sweepThread = new SweepThread(headMotor,ultrasonicSensor,lightSensor);
 
-	@Override
 	public void poll() {
 		polledPosition = headMotor.getPosition();
-		polledDistance = SENSOR.getDistance();
-		polledSweepValues = sweepThread.getValues();
+		polledDistance = ultrasonicSensor.getDistance();
+		polledLight = lightSensor.getValue();
+		polledUltrasonicValues = sweepThread.getUltrasonicValues();
+		polledLightValues = sweepThread.getLightValues();
 	}
 
-	@Override
-	public Integer getValue() {
+	public int getDistance() {
 		return polledDistance;
 	}
+	
+	public int getLight() {
+		return polledLight;
+	}
+	
+	/**
+	 * Switch floodlight on or off
+	 */
+    public void setFloodlight(boolean value) {
+        lightSensor.setFloodlight(value);
+    }
 
 	/**
 	 * Returns true, iff the sensor head is currently moving
@@ -92,7 +106,33 @@ public class Head implements Sensor<Integer> {
 	 * Return the measured sweep values Lower indices in the array are values
 	 * more to the left
 	 */
-	public int[] getSweepValues() {
-		return polledSweepValues;
+	public int[] getUltrasonicSweepValues() {
+		return polledUltrasonicValues;
 	}
+	
+	/**
+	 * Return the measured sweep values Lower indices in the array are values
+	 * more to the left
+	 */
+	public int[] getLightSweepValues() {
+		return polledLightValues;
+	}
+	
+    public int getRawLightValue() {
+    	return lightSensor.getRawValue();
+    }
+ 
+    /**
+     * Calibrate the light sensor
+     * 
+     * @param minValue The value mapped to 0
+     * @param maxValue The value mapped to 1000
+     */
+    public void calibrateLight(int minValue, int maxValue) {
+    	lightSensor.calibrate(minValue,maxValue);
+    }
+    
+    public void resetLightCalibration() {
+    	lightSensor.resetCalibration();
+    }
 }

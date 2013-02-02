@@ -1,7 +1,6 @@
 import static robot.Platform.ENGINE;
-import static robot.Platform.SENSORS;
 import lejos.util.Delay;
-import sensors.Sensor;
+import robot.Platform;
 import strategies.Strategy;
 import utils.Utils;
 
@@ -33,9 +32,7 @@ public class Loop {
 		
 		while(strategy.isRunning()) {
 			// poll sensors
-			for (Sensor<?> s : SENSORS) {
-			    s.poll();
-			}
+			Platform.poll();
 			
 			// run strategy and commit changes
 			strategy.run();

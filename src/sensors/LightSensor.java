@@ -3,15 +3,13 @@ package sensors;
 import lejos.nxt.SensorPort;
 import utils.Utils;
 
-public class LightSensor implements Sensor<Integer> {
+//Only used inside Head class
+class LightSensor {
 
     private final lejos.nxt.LightSensor realSensor;
     
     private int maxLight;
     private int minLight;
-    
-    private int rawSensorValue;
-    private int normalizedValue;
     
     public LightSensor(final SensorPort port) {
         realSensor = new lejos.nxt.LightSensor(port);
@@ -19,28 +17,16 @@ public class LightSensor implements Sensor<Integer> {
         resetCalibration();
         setFloodlight(true);
     }
-    
-    @Override
-    public void poll() {
-        rawSensorValue = realSensor.getNormalizedLightValue();
-        
-        normalizedValue = Utils.clamp(1000 * (rawSensorValue - minLight) / (maxLight - minLight),0,1000);
-    }
 
     /**
      * Returns the light value, normalized between 0 and 1000.
      */
-    @Override
-    public Integer getValue() {
-        return normalizedValue;
+    public int getValue() {
+        return Utils.clamp(1000 * (realSensor.getNormalizedLightValue() - minLight) / (maxLight - minLight),0,1000);
     }
     
-    public Integer getRawValue() {
-        return rawSensorValue;
-    }
-    
-    public lejos.nxt.LightSensor getRealSensor() {
-        return realSensor;
+    public int getRawValue() {
+        return realSensor.getNormalizedLightValue();
     }
     
     public void setFloodlight(boolean value) {
@@ -62,4 +48,5 @@ public class LightSensor implements Sensor<Integer> {
         maxLight = 1023; // maximum sensor value according to lejos.nxt.LightSensor
         minLight = 0;
     }
+
 }

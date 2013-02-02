@@ -10,7 +10,7 @@ public class TestStrategy extends Strategy {
 
 	protected void doRun() {
 		System.out.print("\r");
-		int[] values = Platform.HEAD.getSweepValues();
+		int[] values = Platform.HEAD.getLightSweepValues();
 		for (int i = 0; i < values.length; ++i)
 			if(values[i]==Integer.MAX_VALUE)
 				System.out.print("-  \t");
