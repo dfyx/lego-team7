@@ -5,25 +5,37 @@ import lejos.util.Delay;
 
 public class SweepThread extends Thread {
 	
-	private HeadMotor MOTOR;
-	private UltrasonicSensor SENSOR;
+	private HeadMotor motor;
+	private UltrasonicSensor ultrasonicSensor;
+	private LightSensor lightSensor;
 	
-	private SyncArray sweepValues = new SyncArray();
+	private SyncArray ultrasonicValues = new SyncArray();
+	private SyncArray lightValues = new SyncArray();
 	private int sweepFrom;
 	private int sweepTo;
 	private int valueCount;
+	private int speed=1000;
 
 	private boolean isRunning = false;
 	private boolean restart;
 	
-	public SweepThread(HeadMotor motor, UltrasonicSensor sensor) {
-		MOTOR=motor;
-		SENSOR=sensor;
+	public SweepThread(HeadMotor motor, UltrasonicSensor uS, LightSensor lS) {
+		this.motor=motor;
+		ultrasonicSensor=uS;
+		lightSensor=lS;
 		start();
 	}
 	
-	public int[] getValues() {
-		return sweepValues.getCopy();
+	public int[] getUltrasonicValues() {
+		return ultrasonicValues.getCopy();
+	}
+	
+	public int[] getLightValues() {
+		return lightValues.getCopy();
+	}
+	
+	public void setSpeed(int speed) {
+		this.speed=speed;
 	}
 
 	/**
@@ -68,42 +80,45 @@ public class SweepThread extends Thread {
 					to = sweepTo;
 					// Move synchronously to the first point (necessary for
 					// the following loop)
-					MOTOR.moveTo(from, false);
+					motor.moveTo(from, false, speed);
 
 					// Init sweepValues
-					sweepValues.init(valueCount);
+					lightValues.init(valueCount);
+					ultrasonicValues.init(valueCount);
 					restart = false;
 				}
 				// Scan left to right
-				MOTOR.moveTo(to, true);
+				motor.moveTo(to, true, speed);
 				int currentIndex = 0;
-				while (currentIndex<sweepValues.size()) {
+				while (currentIndex<lightValues.size()) {
 					doPause();
 					if (restart)
 						break;
-					int x = MOTOR.getPosition();
+					int x = motor.getPosition();
 					if (x >= from + (to - from) * currentIndex
-							/ (sweepValues.size() - 1)) {
-						sweepValues.write(currentIndex, SENSOR.getDistance());
+							/ (lightValues.size() - 1)) {
+						ultrasonicValues.write(currentIndex, ultrasonicSensor.getDistance());
+						lightValues.write(currentIndex, lightSensor.getValue());
 						++currentIndex;
 					}
 					Delay.msDelay(1);
 				}
 				if (restart)
 					continue;
-				if (currentIndex != sweepValues.size())
+				if (currentIndex != lightValues.size())
 					throw new IllegalStateException(
 							"sweepValues.length!=currentIndex");
 				currentIndex -= 2;
-				MOTOR.moveTo(from, true);
+				motor.moveTo(from, true, speed);
 				while (currentIndex>0) {
 					doPause();
 					if (restart)
 						break;
-					int x = MOTOR.getPosition();
+					int x = motor.getPosition();
 					if (x <= from + (to - from) * currentIndex
-							/ (sweepValues.size() - 1)) {
-						sweepValues.write(currentIndex, SENSOR.getDistance());
+							/ (lightValues.size() - 1)) {
+						ultrasonicValues.write(currentIndex, ultrasonicSensor.getDistance());
+						lightValues.write(currentIndex, lightSensor.getValue());
 						--currentIndex;
 					}
 					Delay.msDelay(1);
@@ -115,7 +130,7 @@ public class SweepThread extends Thread {
 							+ currentIndex);
 			}
 		} finally {
-			MOTOR.stopMoving();
+			motor.stopMoving();
 			Delay.msDelay(1000);
 		}
 	}

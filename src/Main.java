@@ -9,7 +9,7 @@ import strategies.wall_follower.WallFollowerController;
 
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) {	
 		new Platform();
 	    System.out.println("start");
 		Button.waitForAnyPress();

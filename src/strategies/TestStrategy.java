@@ -1,9 +1,6 @@
 package strategies;
 
-import static robot.Platform.ENGINE;
-import static robot.Platform.LIGHT_SENSOR;
 import robot.Platform;
-import utils.Utils;
 
 public class TestStrategy extends Strategy {
 
@@ -13,9 +10,12 @@ public class TestStrategy extends Strategy {
 
 	protected void doRun() {
 		System.out.print("\r");
-		int[] values = Platform.HEAD.getSweepValues();
+		int[] values = Platform.HEAD.getLightSweepValues();
 		for (int i = 0; i < values.length; ++i)
-			System.out.print("" + i + "  \t");
+			if(values[i]==Integer.MAX_VALUE)
+				System.out.print("-  \t");
+			else
+				System.out.print("" + values[i] + "  \t");
 		System.out.flush();
 	}
 }

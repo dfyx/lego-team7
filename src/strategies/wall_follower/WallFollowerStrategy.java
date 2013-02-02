@@ -42,9 +42,9 @@ public class WallFollowerStrategy extends Strategy {
 		
 		HEAD.stopSweeping();
 		if(headOn == HeadOn.LEFT_SIDE)
-			HEAD.moveTo(-1000, 0, true);
+			HEAD.moveTo(-1000, true);
 		else
-			HEAD.moveTo(1000, 0, true);
+			HEAD.moveTo(1000, true);
 	}
 
 	protected void doRun() {
@@ -55,7 +55,7 @@ public class WallFollowerStrategy extends Strategy {
 	        return;
 	    }
 	    
-		actualValue = HEAD.getValue();
+		actualValue = HEAD.getDistance();
 
 		int direction = getMotorSpeed();
 
