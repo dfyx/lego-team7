@@ -63,7 +63,7 @@ public class QuarterCircleStrategy extends Strategy {
 		} else {
 			System.out.println("move");
 			hasTurned = true;
-			ENGINE.move(-MAX_SPEED, MOVE_ROTATION);
+			ENGINE.move(MAX_SPEED, MOVE_ROTATION);
 		}
 	}
 	

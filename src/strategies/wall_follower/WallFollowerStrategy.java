@@ -65,7 +65,7 @@ public class WallFollowerStrategy extends Strategy {
 		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
 				+ " -> " + direction);
 
-		ENGINE.move(-speed, direction);
+		ENGINE.move(speed, direction);
 	}
 
 	// TODO SB doesn't work on big distances

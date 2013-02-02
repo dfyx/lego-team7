@@ -26,7 +26,7 @@ public class WallFollowerController extends Strategy {
 		if(headOn == HeadOn.LEFT_SIDE)
 			HEAD.moveTo(-1000, false);
 		else
-			HEAD.moveTo(-1000, false);
+			HEAD.moveTo(1000, false);
 	}
 	
 	/**
