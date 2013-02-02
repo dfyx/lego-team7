@@ -1,7 +1,7 @@
 package strategies;
 
 import static robot.Platform.ENGINE;
-import static robot.Platform.LIGHT_SENSOR;
+import static robot.Platform.HEAD;
 import utils.Utils;
 
 public class LineFollowerStrategy extends Strategy {
@@ -35,7 +35,7 @@ public class LineFollowerStrategy extends Strategy {
         
         if (motorSpeed < 0 || motorSpeed > 1000) {
             throw new IllegalArgumentException("motorSpeed out of range");
-        }        
+        }
         
         this.speed = motorSpeed;
     }
@@ -52,7 +52,7 @@ public class LineFollowerStrategy extends Strategy {
     }
 
     protected void doRun() {
-        final int value = LIGHT_SENSOR.getValue();
+        final int value = HEAD.getLight();
         
         if (onLine && value < LINE_LOSS_THRESHOLD) {
             onLine = ++lineLossCounter <= LINE_LOSS_LIMIT;

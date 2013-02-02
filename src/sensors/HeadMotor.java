@@ -1,6 +1,5 @@
 package sensors;
 
-import lejos.nxt.Battery;
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
@@ -12,8 +11,6 @@ import utils.Utils;
 class HeadMotor extends Thread {
 	private static final NXTRegulatedMotor MOTOR = Motor.C;
 	private static final NXTMotor RAW_MOTOR = new NXTMotor(MotorPort.C);
-	
-	private static final int SPEED = 1000;	
 
 	// How long to wait at least between recalibration attempts (in ms)
 	private static final int RECALIBRATION_MIN_INTERVAL = 10000;
@@ -26,7 +23,7 @@ class HeadMotor extends Thread {
 	private final static int MIN_MOVEMENT = 1;
 
 	// How much of space to spare on the left and on the right (in motor units)
-	private final static int CALIBRATION_OFFSET = 25;
+	private final static int CALIBRATION_OFFSET = 28;
 
 	/**
 	 * The voltage to use for calibration
@@ -47,6 +44,7 @@ class HeadMotor extends Thread {
 	private int target;
 	private boolean reMove = false; // Abort current movement and continue with next move command
 	private boolean stopMoving = false; //Abort current movement
+	private int speed = 1000;
 	
 	public HeadMotor() {
 		start();
@@ -55,7 +53,7 @@ class HeadMotor extends Thread {
 	private void doRotateTo(int target, boolean async) {
 		int motorPos=(mostLeftPos+mostRightPos)/2+target*(mostRightPos-mostLeftPos)/2000;
 		MOTOR.stop();
-		MOTOR.setSpeed(SPEED);
+		MOTOR.setSpeed(speed);
 		if (motorPos > mostRightPos || motorPos < mostLeftPos)
 			throw new IllegalArgumentException("Move out of range: " + motorPos);
 		MOTOR.rotateTo(motorPos,async);
@@ -76,6 +74,11 @@ class HeadMotor extends Thread {
 	public int getPosition() {
 		return -1000+2000 * (MOTOR.getTachoCount() - mostLeftPos)
 				/ (mostRightPos - mostLeftPos);
+	}
+	
+	public void moveTo(int position, boolean async, int speed) {
+		this.speed=speed;
+		moveTo(position, async);
 	}
 
 	public void moveTo(int position, boolean async) {
