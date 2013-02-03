@@ -63,7 +63,7 @@ public class SweepThread extends Thread {
 	 */
 	public void startSweeping(int from, int to, int lightValuecount, int ultrasonicValuecount) {
 		if(lightValueCount==1 || ultrasonicValueCount==1) {
-			throw new InvalidParameterException("We need at least two corner points for sweeping");
+			throw new IllegalArgumentException("We need at least two corner points for sweeping");
 		}
 		sweepFrom = from;
 		sweepTo = to;
