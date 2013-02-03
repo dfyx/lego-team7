@@ -2,6 +2,7 @@ package strategies;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
+import utils.RunningAverage;
 import utils.Utils;
 import utils.Utils.Side;
 
@@ -25,8 +26,8 @@ public class LineFollowerStrategy extends Strategy {
     private int oldError;
     private int dSum;
     
-    private int lastSpeed;
-    private int lastDirection;
+    private RunningAverage lastSpeeds;
+    private RunningAverage lastDirections;
 
     public LineFollowerStrategy() {
         doInit();
@@ -39,8 +40,8 @@ public class LineFollowerStrategy extends Strategy {
         oldError = 0;
         dSum = 0;
         
-        lastSpeed = 0;
-        lastDirection = 0;
+        lastSpeeds = new RunningAverage(LINE_LOSS_LIMIT);
+        lastDirections = new RunningAverage(LINE_LOSS_LIMIT);
     }
 
     protected void doRun() {
@@ -60,7 +61,7 @@ public class LineFollowerStrategy extends Strategy {
                 
                 // Try to undo the last LINE_LOSS_LIMIT movements, assuming a
                 // constant (maximum) controller output value
-                ENGINE.move(-lastSpeed, lastDirection);
+                ENGINE.move(-lastSpeeds.getAverage(), lastDirections.getAverage());
             } else {
                 ENGINE.stop();
                 
@@ -87,10 +88,10 @@ public class LineFollowerStrategy extends Strategy {
                 + out);
          */
 
-        lastSpeed = speed;
-        lastDirection = out;
+        lastSpeeds.addValue(speed);
+        lastDirections.addValue(out);
 
-        ENGINE.move(lastSpeed, lastDirection);
+        ENGINE.move(speed, out);
     }
     
     public int getSpeed() {
