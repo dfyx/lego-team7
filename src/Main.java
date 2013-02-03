@@ -1,6 +1,7 @@
 import lejos.nxt.Button;
 import lejos.util.Delay;
 import robot.Platform;
+import strategies.wall_follower.WallFollowerController;
 import strategies.Strategy;
 import strategies.TestStrategy;
 
@@ -21,8 +22,8 @@ public class Main {
 
 		while (true) {
 			try {
-				Strategy test = new TestStrategy();
-				Loop loop = new Loop(test);
+				WallFollowerController wall = new WallFollowerController();
+				Loop loop = new Loop(wall);
 				loop.start();
 				Button.waitForAnyPress();
 				loop.abort();

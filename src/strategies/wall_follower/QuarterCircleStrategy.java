@@ -32,7 +32,7 @@ public class QuarterCircleStrategy extends Strategy {
 	 * The motor speed
 	 */
 	private static int MAX_SPEED = 1000;
-	private static int MOVE_ROTATION = -425;//-375
+	private static int MOVE_ROTATION = -375;//-425
 	
 	// TODO SB also for drive right
 	/**
@@ -49,6 +49,7 @@ public class QuarterCircleStrategy extends Strategy {
 		startTachoCount = Motor.A.getTachoCount();
 		endTachoCount = startTachoCount + DESIRED_ROTATION_DISTANCE;
 		hasTurned = false;
+		WallFollowerController.stopSweeping();
 	}
 	
 	private boolean shouldTurn() {
@@ -58,10 +59,8 @@ public class QuarterCircleStrategy extends Strategy {
 	@Override
 	protected void doRun() {
 		if(shouldTurn()) {
-			System.out.println("turn");
 			ENGINE.move(ROTATION_SPEED, ROTATION_DIRECTION);
 		} else {
-			System.out.println("move");
 			hasTurned = true;
 			ENGINE.move(MAX_SPEED, MOVE_ROTATION);
 		}
