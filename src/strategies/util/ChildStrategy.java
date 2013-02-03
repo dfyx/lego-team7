@@ -20,8 +20,8 @@ public abstract class ChildStrategy extends Strategy{
 	 * Call only, if the strategy can control motors, etc.
 	 */
 	public final void doRun() {
-		runCount++;
 		work();
+		runCount++;
 	}
 	
 	public abstract void work();

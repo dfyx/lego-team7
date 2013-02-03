@@ -1,19 +1,20 @@
 package strategies.wall_follower.without_sweeping.edge;
 
 import strategies.util.ChildStrategy;
+import static robot.Platform.HEAD;
+import static robot.Platform.ENGINE;
 
 public class EdgeStrategy extends ChildStrategy {
 
 	@Override
 	public boolean willStart() {
-		// TODO Auto-generated method stub
-		return false;
+		return HEAD.getDistance() >= 255;
 	}
 
 	@Override
 	public boolean isStopped() {
 		// TODO Auto-generated method stub
-		return false;
+		return HEAD.getDistance() < 255;
 	}
 
 	@Override
@@ -31,7 +32,9 @@ public class EdgeStrategy extends ChildStrategy {
 	@Override
 	public void work() {
 		// TODO Auto-generated method stub
-		
+		if(justStarted()) {
+			ENGINE.stop();
+		}
 	}
 
 }
