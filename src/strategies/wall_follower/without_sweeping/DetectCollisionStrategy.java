@@ -94,8 +94,8 @@ public class DetectCollisionStrategy extends Strategy {
 		case DRIVING:
 			for (int side = 0; side < 2; ++side)
 				if (tachoDiff[side] < (averageSpeed(Side.valueOf(side)) * COLLISION_PERCENTAGE) / 100) {
-					System.out.println("Wall found: " + averageSpeed(Side.LEFT)
-							+ " / " + averageSpeed(Side.RIGHT));
+//					System.out.println("Wall found: " + averageSpeed(Side.LEFT)
+//							+ " / " + averageSpeed(Side.RIGHT));
 					newState = State.WALL_FOUND;
 				}
 			break;
@@ -105,7 +105,7 @@ public class DetectCollisionStrategy extends Strategy {
 		case STOPPING:
 			break;
 		}
-		System.out.println("State: " + newState);
+//		System.out.println("State: " + newState);
 		return newState;
 	}
 
@@ -125,12 +125,12 @@ public class DetectCollisionStrategy extends Strategy {
 		case START:
 			break;
 		case DRIVING:
-			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
-					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
+//			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
+//					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
 			break;
 		case WALL_FOUND:
-			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
-					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
+//			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
+//					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
 			ENGINE.stop();
 			break;
 		case STOPPING:
