@@ -37,6 +37,10 @@ public class Head {
 		return polledLight;
 	}
 	
+	public boolean isSweeping() {
+		return sweepThread.isRunning();
+	}
+	
 	public void stopMoving() {
 		headMotor.stopMoving();
 	}
@@ -101,7 +105,9 @@ public class Head {
 	}
 
 	/**
-	 * Move the head manually to a given position
+	 * Move the head manually to a given position.
+	 * Don't use this function while sweeping!
+	 * (after stopSweeping() wait until isSweeping()==false, before you call this function)
 	 * 
 	 * @param position
 	 *            The new position. Range as given in Javadoc for getPosition()
@@ -110,11 +116,15 @@ public class Head {
 	 *            moving.
 	 */
 	public void moveTo(int position, boolean async) {
+		if(isSweeping())
+			throw new IllegalStateException("moveTo() call while sweeping");
 		headMotor.moveTo(position, async);
 	}
 
 	/**
 	 * Move the head manually to a given position
+	 * Don't use this function while sweeping!
+	 * (after stopSweeping() wait until isSweeping()==false, before you call this function)
 	 * 
 	 * @param position
 	 *            The new position. Range as given in Javadoc for getPosition()
@@ -125,6 +135,8 @@ public class Head {
 	 *            The speed to move with (0<=speed<=1000)
 	 */
 	public void moveTo(int position, boolean async, int speed) {
+		if(isSweeping())
+			throw new IllegalStateException("moveTo() call while sweeping");
 		headMotor.moveTo(position, async, speed);
 	}
 

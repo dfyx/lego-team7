@@ -10,15 +10,16 @@ public class SweepThread extends Thread {
 	
 	private SyncArray ultrasonicValues = new SyncArray();
 	private SyncArray lightValues = new SyncArray();
-	private int sweepFrom;
-	private int sweepTo;
-	private int lightValueCount;
-	private int ultrasonicValueCount;
-	private int speed=1000;
+	private volatile int sweepFrom;
+	private volatile int sweepTo;
+	private volatile int lightValueCount;
+	private volatile int ultrasonicValueCount;
+	private volatile int speed=1000;
 
-	private boolean isRunning = false;
-	private boolean terminate = false;
-	private boolean restart;
+	private volatile boolean shouldBeRunning = false;
+	private volatile boolean isRunning=false;
+	private volatile boolean terminate = false;
+	private volatile boolean restart;
 	
 	public SweepThread(HeadMotor motor, UltrasonicSensor uS, LightSensor lS) {
 		this.motor=motor;
@@ -42,6 +43,10 @@ public class SweepThread extends Thread {
 	public void terminate() {
 		this.terminate=true;
 	}
+	
+	public boolean isRunning() {
+		return isRunning;
+	}
 
 	/**
 	 * Start sweeping
@@ -60,17 +65,20 @@ public class SweepThread extends Thread {
 	 *            area
 	 */
 	public void startSweeping(int from, int to, int lightValuecount, int ultrasonicValuecount) {
+		if(lightValueCount==1 || ultrasonicValueCount==1) {
+			throw new IllegalArgumentException("We need at least two corner points for sweeping");
+		}
 		sweepFrom = from;
 		sweepTo = to;
 		lightValueCount = lightValuecount;
 		ultrasonicValueCount = ultrasonicValuecount;
 
 		restart=true;
-		isRunning=true;
+		shouldBeRunning=true;
 	}
 
 	public void stopSweeping() {
-		isRunning = false;
+		shouldBeRunning = false;
 	}
 
 	@Override
@@ -81,8 +89,10 @@ public class SweepThread extends Thread {
 			ultrasonicMeasureThread.start();
 			int from = 0, to = 0;
 			while (!interrupted()) {
-				while (!isRunning)
+				isRunning=false;
+				while (!shouldBeRunning)
 					Delay.msDelay(100);
+				isRunning=true;
 				if(terminate)
 					break;
 				if (restart) {
