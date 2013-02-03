@@ -7,13 +7,27 @@ import lejos.nxt.NXTMotor;
 import lejos.nxt.NXTRegulatedMotor;
 import static robot.Platform.ENGINE;
 
-public class NoSweepingWallFollowerStrategy extends Strategy {
-	private static final int LAST_VALUES_COUNT = 10;
-	private static int[] lastValuesLeft = new int[LAST_VALUES_COUNT];
-	private static int[] lastValuesRight = new int[LAST_VALUES_COUNT];
+public class DetectCollisionStrategy extends Strategy {
+	private final int LAST_VALUES_COUNT;
+	private int[] lastValuesLeft;
+	private int[] lastValuesRight;
+
+	/**
+	 * Detect collisions via tacho count difference (motor speed).
+	 * 
+	 * @param valueCount
+	 *            The number of values used to calculate the average motor
+	 *            speed. If this value is big, there will be less false
+	 *            positives.
+	 */
+	public DetectCollisionStrategy(int valueCount) {
+		LAST_VALUES_COUNT = valueCount;
+		lastValuesLeft = new int[LAST_VALUES_COUNT];
+		lastValuesRight = new int[LAST_VALUES_COUNT];
+	}
 
 	private enum State {
-		START, START_MOTOR, BEGIN_DRIVING, DRIVING, WALL_FOUND, STOPPING
+		START, DRIVING, WALL_FOUND, STOPPING
 	}
 
 	private static State currentState;
@@ -23,24 +37,24 @@ public class NoSweepingWallFollowerStrategy extends Strategy {
 
 	private static int oldTachoCountLeft = 0;
 	private static int oldTachoCountRight = 0;
-	
-	private static int averageLeftSpeed() {
+
+	private int averageLeftSpeed() {
 		int average = 0;
-		for(int i : lastValuesLeft)
+		for (int i : lastValuesLeft)
 			average += i;
-		return average/LAST_VALUES_COUNT;
+		return average / LAST_VALUES_COUNT;
 	}
-	
-	private static int averageRightSpeed() {
+
+	private int averageRightSpeed() {
 		int average = 0;
-		for(int i : lastValuesRight)
+		for (int i : lastValuesRight)
 			average += i;
-		return average/LAST_VALUES_COUNT;
+		return average / LAST_VALUES_COUNT;
 	}
 
 	private int leftTachoDiff;
 	private int rightTachoDiff;
-	
+
 	private static final int INITIAL_VALUE = 0;
 
 	@Override
@@ -56,18 +70,13 @@ public class NoSweepingWallFollowerStrategy extends Strategy {
 		State newState = currentState;
 		switch (currentState) {
 		case START:
-			newState = State.START_MOTOR;
-			break;
-		case START_MOTOR:
-			newState = State.BEGIN_DRIVING;
-			break;
-		case BEGIN_DRIVING:
 			newState = State.DRIVING;
 			break;
 		case DRIVING:
-			if (leftTachoDiff < (averageLeftSpeed()*95)/100
-					|| rightTachoDiff < (averageRightSpeed()*95)/100) {
-				System.out.println("Wall found: " + averageLeftSpeed() + " / " + averageRightSpeed());
+			if (leftTachoDiff < (averageLeftSpeed() * 95) / 100
+					|| rightTachoDiff < (averageRightSpeed() * 95) / 100) {
+				System.out.println("Wall found: " + averageLeftSpeed() + " / "
+						+ averageRightSpeed());
 				newState = State.WALL_FOUND;
 			}
 			break;
@@ -88,26 +97,16 @@ public class NoSweepingWallFollowerStrategy extends Strategy {
 		currentState = checkState();
 		leftTachoDiff = (newTachoCountLeft - oldTachoCountLeft);
 		rightTachoDiff = (newTachoCountRight - oldTachoCountRight);
-		
+
 		switch (currentState) {
 		case START:
 			break;
-		case START_MOTOR:
-			ENGINE.move(1000, 400);
-			break;
-		case BEGIN_DRIVING:
-			System.out.println("Starting: "
-					+ leftTachoDiff + " , "
-					+ rightTachoDiff);
-			break;
 		case DRIVING:
-			System.out.println("Moving  : "
-					+ leftTachoDiff + " , "
+			System.out.println("Moving  : " + leftTachoDiff + " , "
 					+ rightTachoDiff);
 			break;
 		case WALL_FOUND:
-			System.out.println("Stopping: "
-					+ leftTachoDiff + " , "
+			System.out.println("Stopping: " + leftTachoDiff + " , "
 					+ rightTachoDiff);
 			ENGINE.stop();
 			break;
@@ -115,13 +114,13 @@ public class NoSweepingWallFollowerStrategy extends Strategy {
 			break;
 		}
 		// print curve for start driving
-		
-		for (int i = 0; i < LAST_VALUES_COUNT-1; ++i) {
-			lastValuesLeft[i] = lastValuesLeft[i+1];
-			lastValuesRight[i] = lastValuesRight[i+1];
+
+		for (int i = 0; i < LAST_VALUES_COUNT - 1; ++i) {
+			lastValuesLeft[i] = lastValuesLeft[i + 1];
+			lastValuesRight[i] = lastValuesRight[i + 1];
 		}
-		lastValuesLeft[LAST_VALUES_COUNT-1] = leftTachoDiff;
-		lastValuesRight[LAST_VALUES_COUNT-1] = rightTachoDiff;
+		lastValuesLeft[LAST_VALUES_COUNT - 1] = leftTachoDiff;
+		lastValuesRight[LAST_VALUES_COUNT - 1] = rightTachoDiff;
 
 		oldTachoCountLeft = newTachoCountLeft;
 		oldTachoCountRight = newTachoCountRight;
