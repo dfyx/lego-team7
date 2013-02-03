@@ -1,16 +1,39 @@
 package strategies.wall_follower.without_sweeping;
 
-import strategies.Strategy;
-import lejos.nxt.Motor;
-import lejos.nxt.MotorPort;
-import lejos.nxt.NXTMotor;
-import lejos.nxt.NXTRegulatedMotor;
 import static robot.Platform.ENGINE;
+import lejos.nxt.Motor;
+import lejos.nxt.NXTRegulatedMotor;
+import strategies.Strategy;
 
 public class DetectCollisionStrategy extends Strategy {
 	private final int LAST_VALUES_COUNT;
-	private int[] lastValuesLeft;
-	private int[] lastValuesRight;
+	private int[][] lastValues;
+
+	private enum Side {
+		LEFT(0), RIGHT(1);
+
+		private int value;
+
+		private Side(int value) {
+			this.value = value;
+		}
+
+		public int getValue() {
+			return value;
+		}
+
+		public static Side valueOf(int i) {
+			switch (i) {
+			case 0:
+				return LEFT;
+			case 1:
+				return RIGHT;
+			default:
+				throw new IllegalStateException(
+						"Side only has to values. 'i' was: " + i);
+			}
+		}
+	}
 
 	/**
 	 * Detect collisions via tacho count difference (motor speed).
@@ -22,8 +45,7 @@ public class DetectCollisionStrategy extends Strategy {
 	 */
 	public DetectCollisionStrategy(int valueCount) {
 		LAST_VALUES_COUNT = valueCount;
-		lastValuesLeft = new int[LAST_VALUES_COUNT];
-		lastValuesRight = new int[LAST_VALUES_COUNT];
+		lastValues = new int[2][LAST_VALUES_COUNT];
 	}
 
 	private enum State {
@@ -35,25 +57,16 @@ public class DetectCollisionStrategy extends Strategy {
 	private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
 	private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
 
-	private static int oldTachoCountLeft = 0;
-	private static int oldTachoCountRight = 0;
+	private static int[] oldTachoCount = new int[2];
 
-	private int averageLeftSpeed() {
+	private int averageSpeed(Side side) {
 		int average = 0;
-		for (int i : lastValuesLeft)
+		for (int i : lastValues[side.getValue()])
 			average += i;
 		return average / LAST_VALUES_COUNT;
 	}
 
-	private int averageRightSpeed() {
-		int average = 0;
-		for (int i : lastValuesRight)
-			average += i;
-		return average / LAST_VALUES_COUNT;
-	}
-
-	private int leftTachoDiff;
-	private int rightTachoDiff;
+	private int[] tachoDiff;
 
 	private static final int INITIAL_VALUE = 0;
 
@@ -61,8 +74,9 @@ public class DetectCollisionStrategy extends Strategy {
 	protected void doInit() {
 		currentState = State.START;
 		for (int i = 0; i < LAST_VALUES_COUNT; ++i) {
-			lastValuesLeft[i] = INITIAL_VALUE;
-			lastValuesRight[i] = INITIAL_VALUE;
+			for (int j = 0; j < 2; ++j) {
+				lastValues[j][i] = INITIAL_VALUE;
+			}
 		}
 	}
 
@@ -73,12 +87,12 @@ public class DetectCollisionStrategy extends Strategy {
 			newState = State.DRIVING;
 			break;
 		case DRIVING:
-			if (leftTachoDiff < (averageLeftSpeed() * 95) / 100
-					|| rightTachoDiff < (averageRightSpeed() * 95) / 100) {
-				System.out.println("Wall found: " + averageLeftSpeed() + " / "
-						+ averageRightSpeed());
-				newState = State.WALL_FOUND;
-			}
+			for (int side = 0; side < 2; ++side)
+				if (tachoDiff[side] < (averageSpeed(Side.valueOf(side)) * 95) / 100) {
+					System.out.println("Wall found: " + averageSpeed(Side.LEFT)
+							+ " / " + averageSpeed(Side.RIGHT));
+					newState = State.WALL_FOUND;
+				}
 			break;
 		case WALL_FOUND:
 			newState = State.STOPPING;
@@ -92,37 +106,37 @@ public class DetectCollisionStrategy extends Strategy {
 
 	@Override
 	protected void doRun() {
-		int newTachoCountLeft = LEFT_MOTOR.getTachoCount();
-		int newTachoCountRight = RIGHT_MOTOR.getTachoCount();
+		int[] newTachoCount = new int[2];
+		newTachoCount[0] = LEFT_MOTOR.getTachoCount();
+		newTachoCount[1] = RIGHT_MOTOR.getTachoCount();
+		
 		currentState = checkState();
-		leftTachoDiff = (newTachoCountLeft - oldTachoCountLeft);
-		rightTachoDiff = (newTachoCountRight - oldTachoCountRight);
+		for(int j = 0; j< 2; ++j) {
+			tachoDiff[j] = (newTachoCount[j] - oldTachoCount[j]);
+		}
 
 		switch (currentState) {
 		case START:
 			break;
 		case DRIVING:
-			System.out.println("Moving  : " + leftTachoDiff + " , "
-					+ rightTachoDiff);
+			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
+					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
 			break;
 		case WALL_FOUND:
-			System.out.println("Stopping: " + leftTachoDiff + " , "
-					+ rightTachoDiff);
+			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
+					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
 			ENGINE.stop();
 			break;
 		case STOPPING:
 			break;
 		}
-		// print curve for start driving
 
-		for (int i = 0; i < LAST_VALUES_COUNT - 1; ++i) {
-			lastValuesLeft[i] = lastValuesLeft[i + 1];
-			lastValuesRight[i] = lastValuesRight[i + 1];
-		}
-		lastValuesLeft[LAST_VALUES_COUNT - 1] = leftTachoDiff;
-		lastValuesRight[LAST_VALUES_COUNT - 1] = rightTachoDiff;
-
-		oldTachoCountLeft = newTachoCountLeft;
-		oldTachoCountRight = newTachoCountRight;
+		for (int j = 0; j < 2; ++j) {
+			for (int i = 0; i < LAST_VALUES_COUNT - 1; ++i) {
+				lastValues[j][i] = lastValues[j][i + 1];
+			}
+			lastValues[j][LAST_VALUES_COUNT - 1] = tachoDiff[j];
+			oldTachoCount[j] = newTachoCount[j];
+		}		
 	}
 }
