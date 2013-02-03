@@ -1,9 +1,9 @@
 package strategies.wall_follower;
 
 import static robot.Platform.ENGINE;
-import static robot.Platform.HEAD;
 import strategies.Strategy;
 import utils.Utils;
+import utils.Utils.Side;
 
 // TODO SB should work for right and left looking sensor head
 public class WallFollowerStrategy extends Strategy {
@@ -50,7 +50,7 @@ public class WallFollowerStrategy extends Strategy {
 
 		int direction = getMotorDirection();
 
-		if (WallFollowerController.headOn == WallFollowerController.HeadOn.LEFT_SIDE)
+		if (WallFollowerController.headOn == Side.LEFT)
 			direction = -direction;
 
 //		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue

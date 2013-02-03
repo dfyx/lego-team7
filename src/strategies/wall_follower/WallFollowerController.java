@@ -1,9 +1,9 @@
 package strategies.wall_follower;
 
 import static robot.Platform.HEAD;
-import lejos.nxt.Motor;
 import robot.Platform;
 import strategies.Strategy;
+import utils.Utils.Side;
 
 public class WallFollowerController extends Strategy {
 
@@ -59,7 +59,7 @@ public class WallFollowerController extends Strategy {
 						.currentTimeMillis())
 			return;
 		sweeping = true;
-		if (headOn == HeadOn.LEFT_SIDE)
+		if (headOn == Side.LEFT)
 			HEAD.startSweeping(-1000, 0, 2, 2);
 		else
 			HEAD.startSweeping(1000, 0, 2, 2);
@@ -77,20 +77,11 @@ public class WallFollowerController extends Strategy {
 		sweeping = false;
 	}
 
-	/**
-	 * 
-	 * LEFT_SIDE in driving direction
-	 * 
-	 */
-	enum HeadOn {
-		RIGHT_SIDE, LEFT_SIDE
-	}
-
-	static HeadOn headOn;
+	static Side headOn;
 
 	@Override
 	protected void doInit() {
-		headOn = HeadOn.LEFT_SIDE;
+		headOn = Side.LEFT;
 
 		targetWall();
 

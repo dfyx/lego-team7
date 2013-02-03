@@ -179,4 +179,28 @@ public class Head {
 	public void setSweepSpeed(int speed) {
 		sweepThread.setSpeed(speed);
 	}
+
+    /**
+     * Converts an angle in degress to a positional value compliant with
+     * {@link #getPosition()}.
+     * 
+     * @param degrees
+     *            an angle, {@code -90 <= angle <= 90}
+     * @return a position value, {@code -1000 <= result <= 1000}
+     */
+    public static int degreeToPosition(final int degrees) {
+        return (degrees * 1000) / 90;
+    }
+    
+    /**
+     * Converts a positional value as provided by {@link #getPosition()} to an
+     * angular value.
+     * 
+     * @param position
+     *            a position value, {@code -1000 <= position <= 1000}
+     * @return an angle, {@code -90 <= result <= 90}
+     */
+    public static int positionToDegrees(final int position) {
+        return (position * 90) / 1000;
+    }
 }
