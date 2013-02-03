@@ -50,7 +50,7 @@ public class Engine {
 	
 	public void commit() {
 		if (newLeftSpeed == 0) {
-			LEFT_MOTOR.stop();
+			LEFT_MOTOR.stop(true);
 		} else if (newLeftSpeed > 0) {
 			LEFT_MOTOR.setSpeed(newLeftSpeed);
 			LEFT_MOTOR.forward();
@@ -59,7 +59,7 @@ public class Engine {
 			LEFT_MOTOR.backward();
 		}
 		if (newRightSpeed == 0) {
-			RIGHT_MOTOR.stop();
+			RIGHT_MOTOR.stop(true);
 		} else if (newRightSpeed > 0) {
 			RIGHT_MOTOR.setSpeed(newRightSpeed);
 			RIGHT_MOTOR.forward();
