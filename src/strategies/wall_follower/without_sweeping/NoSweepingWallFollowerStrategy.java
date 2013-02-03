@@ -62,8 +62,6 @@ public class NoSweepingWallFollowerStrategy extends Strategy {
 			newState = State.BEGIN_DRIVING;
 			break;
 		case BEGIN_DRIVING:
-			/*if ((LEFT_MOTOR.getTachoCount() - oldSpeedLeft) > 6
-					&& (RIGHT_MOTOR.getTachoCount() - oldSpeedRight) > 6)*/
 			newState = State.DRIVING;
 			break;
 		case DRIVING:
