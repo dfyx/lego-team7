@@ -27,6 +27,7 @@ public class CountLinesStrategy extends Strategy {
     
     boolean clearance = false;
     boolean rising = false;
+    boolean changed = false;
     int peak = 1000;
     int edgeCount = 0;
     int lineCount = 0;
@@ -36,6 +37,7 @@ public class CountLinesStrategy extends Strategy {
     protected void doInit() {
         clearance = false;
         rising = false;
+        changed = false;
         peak = 1000;
         edgeCount = 0;
         lineCount = 0;
@@ -45,6 +47,8 @@ public class CountLinesStrategy extends Strategy {
     @Override
     protected void doRun() {
         final int value = HEAD.getLight();
+        
+        changed = false;
         
         drivenDistance += ENGINE.estimateDistance();
         
@@ -58,6 +62,8 @@ public class CountLinesStrategy extends Strategy {
             
             lineCount = edgeCount / 2;
             edgeCount = 0;
+            
+            changed = true;
         } else if (drivenDistance > CLEARANCE_BEFORE) {
             clearance = true;
             edgeCount = 0;
@@ -97,5 +103,13 @@ public class CountLinesStrategy extends Strategy {
      */
     public int getLineCount() {
         return lineCount;
+    }
+    
+    /**
+     * Returns true for exactly one cycle whenever a new barcode has been detected.
+     * @return true if a new barcode has been read this cycle
+     */
+    public boolean hasNewCode() {
+    	return changed;
     }
 }
