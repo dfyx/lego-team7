@@ -14,8 +14,7 @@ public class Platform {
     public static final Head HEAD = new Head();
     public static final Bumper LEFT_BUMPER = new Bumper(LEFT_TOUCH_PORT);
     public static final Bumper RIGHT_BUMPER = new Bumper(RIGHT_TOUCH_PORT);
-    
-    public static final Engine ENGINE = new Engine();    
+    public static final Engine ENGINE = Engine.getInstance();    
     
     public static void poll() {
     	HEAD.poll();
