@@ -62,9 +62,12 @@ public class EdgeStrategy extends ChildStrategy {
 			break;
 		case START_TURN:
 			endTurnTime = System.currentTimeMillis() + ROTATION_TIME;
+			System.out.println("start turning: " + System.currentTimeMillis()
+					+ " / " + (System.currentTimeMillis() + ROTATION_TIME));
 			ENGINE.move(ROTATION_SPEED, ROTATION_DIRECTION);
 			break;
 		case TURNING:
+			System.out.println("turning");
 			break;
 		case START_CURVE:
 			// TODO SB use head position
@@ -72,9 +75,6 @@ public class EdgeStrategy extends ChildStrategy {
 		case CURVING:
 			// TODO SB collision detection
 			break;
-		}
-		if (justStarted()) {
-			ENGINE.stop();
 		}
 	}
 
@@ -113,7 +113,8 @@ public class EdgeStrategy extends ChildStrategy {
 
 	@Override
 	public boolean isStopped() {
-		return !willStart();
+		return !willStart()
+				&& (currentState == State.START_CURVE || currentState == State.CURVING);
 	}
 
 	@Override

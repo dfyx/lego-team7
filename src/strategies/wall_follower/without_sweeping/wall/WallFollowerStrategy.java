@@ -40,7 +40,7 @@ public class WallFollowerStrategy extends ChildStrategy {
 
 		int direction = getMotorDirection();
 
-		if (headSide == Side.RIGHT)
+		if (headSide == Side.LEFT)
 			direction = -direction;
 
 		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
