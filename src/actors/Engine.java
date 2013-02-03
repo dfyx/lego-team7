@@ -32,7 +32,7 @@ public class Engine implements Actor {
 	private Engine() {
 	}
 	
-	private static Engine instance = null;
+	private static final Engine INSTANCE = new Engine();
 	
 	/**
 	 * Get an instance of Engine
@@ -40,11 +40,7 @@ public class Engine implements Actor {
 	 * @return an instance
 	 */
 	public static Engine getInstance() {
-		if(instance == null) {
-			instance = new Engine();
-		}
-		
-		return instance;
+		return INSTANCE;
 	}
 
 	@Override
