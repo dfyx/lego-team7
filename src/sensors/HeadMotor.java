@@ -23,7 +23,7 @@ class HeadMotor extends Thread {
 	private final static int MIN_MOVEMENT = 1;
 
 	// How much of space to spare on the left and on the right (in motor units)
-	private final static int CALIBRATION_OFFSET = 28;
+	private final static int CALIBRATION_OFFSET = 20;
 
 	/**
 	 * The voltage to use for calibration
