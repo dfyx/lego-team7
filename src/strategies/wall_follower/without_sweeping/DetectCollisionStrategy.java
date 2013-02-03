@@ -7,6 +7,7 @@ import strategies.Strategy;
 
 public class DetectCollisionStrategy extends Strategy {
 	private final int LAST_VALUES_COUNT;
+	private final int COLLISION_PERCENTAGE;
 	private int[][] lastValues;
 
 	private enum Side {
@@ -41,10 +42,14 @@ public class DetectCollisionStrategy extends Strategy {
 	 * @param valueCount
 	 *            The number of values used to calculate the average motor
 	 *            speed. If this value is big, there will be less false
-	 *            positives.
+	 *            positives. Should be around 5.
+	 * @param sensitivity
+	 *            The percentage of the tacho count, which will trigger as a
+	 *            collision. Should be around 95.
 	 */
-	public DetectCollisionStrategy(int valueCount) {
+	public DetectCollisionStrategy(int valueCount, int sensitivity) {
 		LAST_VALUES_COUNT = valueCount;
+		COLLISION_PERCENTAGE = sensitivity;
 		lastValues = new int[2][LAST_VALUES_COUNT];
 	}
 
@@ -88,7 +93,7 @@ public class DetectCollisionStrategy extends Strategy {
 			break;
 		case DRIVING:
 			for (int side = 0; side < 2; ++side)
-				if (tachoDiff[side] < (averageSpeed(Side.valueOf(side)) * 95) / 100) {
+				if (tachoDiff[side] < (averageSpeed(Side.valueOf(side)) * COLLISION_PERCENTAGE) / 100) {
 					System.out.println("Wall found: " + averageSpeed(Side.LEFT)
 							+ " / " + averageSpeed(Side.RIGHT));
 					newState = State.WALL_FOUND;
@@ -109,9 +114,10 @@ public class DetectCollisionStrategy extends Strategy {
 		int[] newTachoCount = new int[2];
 		newTachoCount[0] = LEFT_MOTOR.getTachoCount();
 		newTachoCount[1] = RIGHT_MOTOR.getTachoCount();
-		
+
+		// TODO SB move one line down?
 		currentState = checkState();
-		for(int j = 0; j< 2; ++j) {
+		for (int j = 0; j < 2; ++j) {
 			tachoDiff[j] = (newTachoCount[j] - oldTachoCount[j]);
 		}
 
@@ -137,6 +143,6 @@ public class DetectCollisionStrategy extends Strategy {
 			}
 			lastValues[j][LAST_VALUES_COUNT - 1] = tachoDiff[j];
 			oldTachoCount[j] = newTachoCount[j];
-		}		
+		}
 	}
 }
