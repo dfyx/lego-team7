@@ -39,12 +39,12 @@ class HeadMotor extends Thread {
 	private int mostRightPos;
 
 	// Current state
-	private boolean isMoving = false;
-	private boolean isCalibrating = false;
-	private int target;
-	private boolean reMove = false; // Abort current movement and continue with next move command
-	private boolean stopMoving = false; //Abort current movement
-	private int speed = 1000;
+	private volatile boolean isMoving = false;
+	private volatile boolean isCalibrating = false;
+	private volatile int target;
+	private volatile boolean reMove = false; // Abort current movement and continue with next move command
+	private volatile boolean stopMoving = false; //Abort current movement
+	private volatile int speed = 1000;
 	
 	private boolean terminate = false;
 	

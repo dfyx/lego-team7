@@ -4,17 +4,17 @@ import lejos.util.Delay;
 
 public class MeasureThread extends Thread {
 
-	private boolean isRunning = false;
-	private boolean shouldStop = false;
+	private volatile boolean isRunning = false;
+	private volatile boolean shouldStop = false;
 
-	private int targetIndex;
-	private int currentIndex;
-	private int indexInc;
-	private int moveFrom;
-	private int moveTo;
-	private int currentPos;
-	private SyncArray values;
-	private Sensor sensor;
+	private volatile int targetIndex;
+	private volatile int currentIndex;
+	private volatile int indexInc;
+	private volatile int moveFrom;
+	private volatile int moveTo;
+	private volatile int currentPos;
+	private volatile SyncArray values;
+	private volatile Sensor sensor;
 
 	public boolean isRunning() {
 		return isRunning;
