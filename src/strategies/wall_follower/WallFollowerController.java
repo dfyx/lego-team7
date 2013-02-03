@@ -2,12 +2,21 @@ package strategies.wall_follower;
 
 import static robot.Platform.HEAD;
 import lejos.nxt.Motor;
+import robot.Platform;
 import strategies.Strategy;
 
 public class WallFollowerController extends Strategy {
 
+	private enum State {
+		AVOID_CRASH, FOLLOW_WALL, FOLLOW_EDGE
+	}
+
+	// TODO SB set to find wall?
+	private static State currentState = State.FOLLOW_WALL;
+
 	private WallFollowerStrategy wallFollower;
 	private QuarterCircleStrategy edgeFollower;
+	private AvoidCrashStrategy avoidCrash;
 	private static boolean sweeping = true;
 
 	/**
@@ -17,7 +26,7 @@ public class WallFollowerController extends Strategy {
 	/**
 	 * in ms
 	 */
-	private static final long DONT_SWEEP_TIME = 1000;
+	private static final long DONT_SWEEP_TIME = 2000;
 
 	// TODO SB marker of -1 is evil. Use boolean flag?
 	static int lastDistance = -1;
@@ -45,23 +54,21 @@ public class WallFollowerController extends Strategy {
 	}
 
 	static void targetWall() {
-		// TODO SB async
-		// if(headOn == HeadOn.LEFT_SIDE)
-		// HEAD.moveTo(-1000, false);
-		// else
-		// HEAD.moveTo(1000, false);
 		if (!sweeping
 				&& lastNonSweepTime + DONT_SWEEP_TIME >= System
-						.currentTimeMillis()) {
-			System.out.println("not sweeping");
+						.currentTimeMillis())
 			return;
-		} else
-			System.out.println("sweeping");
 		sweeping = true;
 		if (headOn == HeadOn.LEFT_SIDE)
 			HEAD.startSweeping(-1000, 0, 2, 2);
 		else
 			HEAD.startSweeping(1000, 0, 2, 2);
+	}
+
+	static void faceForward() {
+		HEAD.stopSweeping();
+		HEAD.moveTo(0, true);
+		sweeping = false;
 	}
 
 	static void stopSweeping() {
@@ -90,20 +97,48 @@ public class WallFollowerController extends Strategy {
 		// TODO SB init in doRun?
 		wallFollower = new WallFollowerStrategy();
 		edgeFollower = new QuarterCircleStrategy();
+		avoidCrash = new AvoidCrashStrategy();
 		wallFollower.init();
 	}
 
 	@Override
 	protected void doRun() {
+		if (sweeping && HEAD.getUltrasonicSweepValues().length < 2
+				|| HEAD.getUltrasonicSweepValues()[0] > 255
+				|| HEAD.getUltrasonicSweepValues()[1] > 255) {
+			Platform.ENGINE.stop();
+			return;
+		}
+		System.out.println("sweeping: " + sweeping);
 		// TODO SB use curve strategy in this case
-		if (justAtEnd()) {
+		if (currentState != State.AVOID_CRASH && nearlyCrashing()) {
+			System.out.println("start avoiding crash");
+			currentState = State.AVOID_CRASH;
+			avoidCrash.init();
+			avoidCrash.run();
+			lastNonSweepTime = System.currentTimeMillis();
+		} else if (nearlyCrashing()) {
+			System.out.println("avoiding crash : "
+					+ HEAD.getUltrasonicSweepValues()[1] + " < "
+					+ AvoidCrashStrategy.CRASH_DISTANCE);
+			currentState = State.AVOID_CRASH;
+			avoidCrash.run();
+			lastNonSweepTime = System.currentTimeMillis();
+		} else if (justAtEnd()) {
+			System.out.println("start follow edge");
+			sweeping = false;
+			currentState = State.FOLLOW_EDGE;
 			edgeFollower.init();
 			edgeFollower.run();
 			lastNonSweepTime = System.currentTimeMillis();
 		} else if (atEnd()) {
+			System.out.println("follow edge");
+			currentState = State.FOLLOW_EDGE;
 			edgeFollower.run();
 			lastNonSweepTime = System.currentTimeMillis();
 		} else {
+			System.out.println("follow wall");
+			currentState = State.FOLLOW_WALL;
 			if (!sweeping)
 				targetWall();
 			firstTime = true;
@@ -127,6 +162,16 @@ public class WallFollowerController extends Strategy {
 		if (result)
 			firstTime = false;
 		return result;
+	}
+
+	private boolean nearlyCrashing() {
+		if (!sweeping)
+			return HEAD.getDistance() < AvoidCrashStrategy.CRASH_DISTANCE;
+		if (HEAD.getUltrasonicSweepValues().length < 2)
+			return true;
+		if (HEAD.getUltrasonicSweepValues()[1] > 255)
+			return true;
+		return HEAD.getUltrasonicSweepValues()[1] < AvoidCrashStrategy.CRASH_DISTANCE;
 	}
 
 }
