@@ -1,5 +1,9 @@
 *.class
 
+# leJOS-Files
+*.nxj
+*.nxd
+
 # Package Files #
 *.jar
 *.war
