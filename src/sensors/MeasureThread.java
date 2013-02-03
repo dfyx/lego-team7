@@ -48,6 +48,8 @@ public class MeasureThread extends Thread {
 	int i = 0;
 
 	public void measureSync() {
+		if(values.size()<2)
+			return;
 		if (isRunning && !interrupted())
 			if (currentPos*indexInc >= moveFrom + (moveTo - moveFrom) * currentIndex
 					/ (values.size() - 1)) {
