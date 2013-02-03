@@ -41,8 +41,6 @@ public class LineFollowerStrategy extends Strategy {
         
         lastSpeed = 0;
         lastDirection = 0;
-        
-        HEAD.moveTo(0, false);
     }
 
     protected void doRun() {
