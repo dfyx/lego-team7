@@ -1,5 +1,6 @@
 package robot;
 
+import utils.Utils;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.util.Delay;
@@ -22,14 +23,27 @@ import lejos.util.Delay;
  * <b>never</b> be manipulated by anyone else.
  */
 public class Engine {
-
     private static final double DISTANCE_SCALE_FACTOR = 40.5 * Math.PI / 360;
     
 	private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
 	private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
 
-	int newLeftSpeed = 0;
-	int newRightSpeed = 0;
+	protected int newLeftSpeed = 0;
+	protected int newRightSpeed = 0;
+	
+	private Engine() {
+	}
+	
+	private static final Engine INSTANCE = new Engine();
+	
+	/**
+	 * Get an instance of Engine
+	 * 
+	 * @return an instance
+	 */
+	public static Engine getInstance() {
+		return INSTANCE;
+	}
 	
 	int lastTachoLeft = LEFT_MOTOR.getTachoCount();
 	int lastTachoRight = RIGHT_MOTOR.getTachoCount();
@@ -67,7 +81,7 @@ public class Engine {
 	}
 
 	/**
-	 * Return whether the robot is moving (or rotating).
+	 * Check whether the robot is moving (or rotating).
 	 * 
 	 * This represents the current state of the motors, regardless of any
 	 * commands that have been given but not committed.
@@ -79,13 +93,27 @@ public class Engine {
 	}
 
 	/**
+	 * Check whether the robot will be moving (or rotating) in the next cycle.
+	 * 
+	 * Note that this only represents current knowledge. Someone might for
+	 * example call {@link #stop() stop} before the next call of {@link
+	 * #commit() commit}.
+	 * 
+	 * @return <tt>true</tt>, iff the robot will either either be moving or
+	 * rotating.
+	 */
+	public boolean willBeMoving() {
+		return newLeftSpeed * newRightSpeed != 0;
+	}
+
+	/**
 	 * Rotate the robot on the spot.
 	 * <p>
 	 * This is just a convenience function for {@link #move(int, int)}.
 	 * 
 	 * @param speed
-	 *            The speed used for rotation. If between -1000 and 0, the robot
-	 *            rotates left. If between 0 and 1000, it rotates right.
+	 *            The speed used for rotation. If between -1000 and 0, the
+	 *            robot rotates left. If between 0 and 1000, it rotates right.
 	 */
 	public void rotate(int speed) {
 		if (speed < 0)
@@ -188,27 +216,46 @@ public class Engine {
 
 		final int MAX = 1000;
 
-		int left = 500, right = 500;
+		if (speed < -MAX || speed > MAX) {
+			throw new IllegalArgumentException("Speed must be between "
+					+ -MAX	+ " and " + MAX);
+		}
 
-		left += direction;
-		right -= direction;
+		if (direction < -MAX || direction > MAX) {
+			throw new IllegalArgumentException("Direction must be between "
+					+ -MAX + " and " + MAX);
+		}
 
-		left *= 2;
-		right *= 2;
+		// Calculate linear function
+		int left = MAX + 2 * direction;
+		int right = MAX - 2 * direction;
 
-		left = Math.min(MAX, Math.max(-MAX, left));
-		right = Math.min(MAX, Math.max(-MAX, right));
+		// Clamp to valid region
+		left = Utils.clamp(left, -MAX, MAX);
+		right = Utils.clamp(right, -MAX, MAX);
 
-		if (1000 < right || -1000 > right || 1000 < left || -1000 > left)
-			throw new IllegalStateException("Incorrect intermediate values");
+		/* This results in following function for the right motor
+		 *
+		 *  1000 :---------:          :
+		 *       :         :\         :
+		 *       :         : \        :
+		 *       :         :  \       :
+		 *       :         :   \      :
+		 *     0.:.........:....\.....:.
+		 *       :         :     \    :
+		 *       :         :      \   :
+		 *       :         :       \  :
+		 *       :         :        \ :
+		 * -1000 :         :         \:
+		 *
+		 *    -1000       0        1000
+		 *
+		 * For the left motor this is mirrored on the x-axis.
+		 */
 
-		left *= speed;
-		right *= speed;
-		left /= MAX;
-		right /= MAX;
-
-		if (1000 < right || -1000 > right || 1000 < left || -1000 > left)
-			throw new IllegalStateException("Incorrect intermediate 2 values");
+		// Fix point multiplication with speed
+		left = left * speed / MAX;
+		right = right * speed / MAX;
 
 		newLeftSpeed = left;
 		newRightSpeed = right;
