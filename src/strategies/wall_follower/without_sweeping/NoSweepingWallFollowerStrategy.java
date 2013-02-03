@@ -40,13 +40,15 @@ public class NoSweepingWallFollowerStrategy extends Strategy {
 
 	private int leftTachoDiff;
 	private int rightTachoDiff;
+	
+	private static final int INITIAL_VALUE = 0;
 
 	@Override
 	protected void doInit() {
 		currentState = State.START;
 		for (int i = 0; i < LAST_VALUES_COUNT; ++i) {
-			lastValuesLeft[i] = 100;
-			lastValuesRight[i] = 100;
+			lastValuesLeft[i] = INITIAL_VALUE;
+			lastValuesRight[i] = INITIAL_VALUE;
 		}
 	}
 
@@ -65,8 +67,8 @@ public class NoSweepingWallFollowerStrategy extends Strategy {
 			newState = State.DRIVING;
 			break;
 		case DRIVING:
-			if (leftTachoDiff > (averageLeftSpeed()*125)/100
-					|| rightTachoDiff > (averageRightSpeed()*125)/100) {
+			if (leftTachoDiff < (averageLeftSpeed()*95)/100
+					|| rightTachoDiff < (averageRightSpeed()*95)/100) {
 				System.out.println("Wall found: " + averageLeftSpeed() + " / " + averageRightSpeed());
 				newState = State.WALL_FOUND;
 			}
@@ -93,7 +95,7 @@ public class NoSweepingWallFollowerStrategy extends Strategy {
 		case START:
 			break;
 		case START_MOTOR:
-			ENGINE.move(1000);
+			ENGINE.move(1000, 400);
 			break;
 		case BEGIN_DRIVING:
 			System.out.println("Starting: "
@@ -119,17 +121,9 @@ public class NoSweepingWallFollowerStrategy extends Strategy {
 		for (int i = 0; i < LAST_VALUES_COUNT-1; ++i) {
 			lastValuesLeft[i] = lastValuesLeft[i+1];
 			lastValuesRight[i] = lastValuesRight[i+1];
-			System.out.print(lastValuesLeft[i]+", ");
 		}
-		System.out.println();
 		lastValuesLeft[LAST_VALUES_COUNT-1] = leftTachoDiff;
 		lastValuesRight[LAST_VALUES_COUNT-1] = rightTachoDiff;
-		// for starting motor
-		// average would be to small otherwise
-		if(lastValuesLeft[LAST_VALUES_COUNT-1] < 4)
-			lastValuesLeft[LAST_VALUES_COUNT-1] = 100;
-		if(lastValuesRight[LAST_VALUES_COUNT-1] < 4)
-			lastValuesRight[LAST_VALUES_COUNT-1] = 100;
 
 		oldTachoCountLeft = newTachoCountLeft;
 		oldTachoCountRight = newTachoCountRight;
