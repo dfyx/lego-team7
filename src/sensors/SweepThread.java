@@ -1,7 +1,5 @@
 package sensors;
 
-import java.security.InvalidParameterException;
-
 import lejos.util.Delay;
 
 public class SweepThread extends Thread {
@@ -18,7 +16,8 @@ public class SweepThread extends Thread {
 	private volatile int ultrasonicValueCount;
 	private volatile int speed=1000;
 
-	private volatile boolean isRunning = false;
+	private volatile boolean shouldBeRunning = false;
+	private volatile boolean isRunning=false;
 	private volatile boolean terminate = false;
 	private volatile boolean restart;
 	
@@ -43,6 +42,10 @@ public class SweepThread extends Thread {
 	
 	public void terminate() {
 		this.terminate=true;
+	}
+	
+	public boolean isRunning() {
+		return isRunning;
 	}
 
 	/**
@@ -71,11 +74,11 @@ public class SweepThread extends Thread {
 		ultrasonicValueCount = ultrasonicValuecount;
 
 		restart=true;
-		isRunning=true;
+		shouldBeRunning=true;
 	}
 
 	public void stopSweeping() {
-		isRunning = false;
+		shouldBeRunning = false;
 	}
 
 	@Override
@@ -86,8 +89,10 @@ public class SweepThread extends Thread {
 			ultrasonicMeasureThread.start();
 			int from = 0, to = 0;
 			while (!interrupted()) {
-				while (!isRunning)
+				isRunning=false;
+				while (!shouldBeRunning)
 					Delay.msDelay(100);
+				isRunning=true;
 				if(terminate)
 					break;
 				if (restart) {

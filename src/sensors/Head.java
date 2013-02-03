@@ -37,6 +37,10 @@ public class Head {
 		return polledLight;
 	}
 	
+	public boolean isSweeping() {
+		return sweepThread.isRunning();
+	}
+	
 	public void stopMoving() {
 		headMotor.stopMoving();
 	}
