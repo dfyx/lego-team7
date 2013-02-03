@@ -2,6 +2,7 @@ package strategies;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
+import sensors.Head;
 import utils.Utils;
 
 /**
@@ -13,46 +14,27 @@ import utils.Utils;
 public class LineFinderStrategy extends Strategy {
     
     /** Brightness treshold used for line detection. */
-    private static final int DETECTION_THRESHOLD = 500;
+    private static final int DETECTION_THRESHOLD = 750;
     /** Sweep angle used during initial line search. */
     private static final int DETECTION_ANGLE = 45;
-    /** Sensor head movement angle used to position the light sensor at the 
-     * required side of the line (left). */
-    private static final int SEARCH_OFFSET_ANGLE = -10;
-    /** Alignment tolerance used to end the alignment process. */
-    private static final int ALIGNMENT_TOLERANCE_ANGLE = 5;
     
-    private static final double P = 1.0;
-    private static final double I = 0.05;
-    private static final double I_DECREASE = 0.5;
+    private static final int DRIVE_SPEED = 500;
+    private static final int ALIGN_SPEED = 200;
+    private static final int SEARCH_SWEEP_SPEED = 400;
+    
+    private static final double P = 0.4;
     
     private State state = State.NOT_LOCKED;
     
-    private int driveSpeed = 500;
-    private int sweepSpeed = 400;
+    private int driveSpeed = DRIVE_SPEED;
+    private int sweepSpeed = SEARCH_SWEEP_SPEED;
     
-    private int iSum;
-    
-     // FIXME: calculation in head
-    private final int degreeToHead(final int degrees) {
-        return (degrees * 1000) / 90;
-    }
-    
-    // FIXME: calculation in head
-    private final int headToDegrees(final int head) {
-        return (head * 90) / 1000;
-    }
-    
+    private int sweepTo = Head.degreeToPosition(DETECTION_ANGLE);
+    private int turnDir = -1;
+            
     @Override
     protected void doInit() {
         state = State.NOT_LOCKED;
-        
-        iSum = 0;
-        
-        // Sweep wildly until a line has been found
-        final int range = degreeToHead(DETECTION_ANGLE);
-        HEAD.setSweepSpeed(sweepSpeed);
-        HEAD.startSweeping(-range, range, 2, 2); 
     }
 
     @Override
@@ -63,69 +45,48 @@ public class LineFinderStrategy extends Strategy {
             case NOT_LOCKED:
                 if (value > DETECTION_THRESHOLD) {
                     // line found, stop engines and align
-                    state = State.LINE_FOUND;
-                    
-                    System.out.println("Line found");
+                    turnDir = HEAD.getPosition() < 0 ? -1 : 1;
                     
                     ENGINE.stop();
+                    HEAD.moveTo(0, true);
+                    
+                    state = State.WAIT_FOR_HEAD;
+                } else {
+                    if (!HEAD.isMoving()) {
+                        HEAD.moveTo(sweepTo, true, sweepSpeed);
+                        
+                        sweepTo = -sweepTo;
+                    }
                 }
                 break;
-            case LINE_FOUND:
-                // move head to a position left of the line
-                HEAD.stopSweeping();
-                HEAD.moveTo(degreeToHead(headToDegrees(
-                        HEAD.getPosition() + SEARCH_OFFSET_ANGLE)), true);
-                
-                System.out.println("Stopped sweeping");
-                
-                state = State.MOVE_TO_START;
-                break;
-            case MOVE_TO_START:
+            case WAIT_FOR_HEAD:
                 if (!HEAD.isMoving()) {
-                    // head arrived at the left hand side of the line
-                    // start a slow sweep to the right
-                    HEAD.moveTo(degreeToHead(headToDegrees(HEAD.getPosition()
-                            - 2 * SEARCH_OFFSET_ANGLE)), true, sweepSpeed);
-                    
-                    state = State.SWEEP_LINE;
-                    
-                    System.out.println("Searching line again");
+                    state = State.MOVE_TO_LINE;
                 }
                 break;
-            case SWEEP_LINE:
-                if (value > DETECTION_THRESHOLD) {
-                    // head hit the line again, start alignment
-                    state = State.ALIGN;
-                    
-                    System.out.println("Aligning");
-                }
-                break;
-            case ALIGN:
-                if (isAligned()) {
+            case MOVE_TO_LINE:
+                if (value < DETECTION_THRESHOLD) {
+                    alignmentControlLoop(value);
+                } else {
                     ENGINE.stop();
-                    HEAD.stopMoving();
                     
                     setFinished();
-                } else {
-                    alignmentControlLoop(value);
                 }
-                
                 break;
         }
     }
     
     private void alignmentControlLoop(final int value) {
-        final int error = DETECTION_THRESHOLD - value;
+        final int error = 1000 - value; // turn only in one direction
         
         final int linear = (int) (error * P);
-        iSum += error * I;
         
-        int out = linear + iSum;
-        out = Utils.clamp(out, -driveSpeed, driveSpeed); // limit to drive speed
+        int out = turnDir * linear;
+        out = Utils.clamp(out, -ALIGN_SPEED, ALIGN_SPEED); // limit to drive speed
         
-        iSum *= I_DECREASE;
+        // System.out.println("err: " + error + " lin: " + linear + " out: " + out);
         
-        ENGINE.move(out, 1000); // TODO: Test, but should work
+        ENGINE.rotate(out);
     }
     
     /**
@@ -135,16 +96,6 @@ public class LineFinderStrategy extends Strategy {
      */
     public boolean isLocked() {
         return state != State.NOT_LOCKED;
-    }
-    
-    /**
-     * Checks if the alignment process has been completed.
-     * 
-     * @return true if a line has been found and the alignment is done
-     */
-    public boolean isAligned() {
-        return isLocked()
-                && headToDegrees(HEAD.getPosition()) < ALIGNMENT_TOLERANCE_ANGLE;
     }
     
     /**
@@ -189,9 +140,7 @@ public class LineFinderStrategy extends Strategy {
     
     private enum State {
         NOT_LOCKED,
-        LINE_FOUND,
-        MOVE_TO_START,
-        SWEEP_LINE,
-        ALIGN
+        WAIT_FOR_HEAD,
+        MOVE_TO_LINE
     }
 }
