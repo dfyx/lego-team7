@@ -23,6 +23,13 @@ public abstract class ChildStrategy extends Strategy{
 		work();
 		runCount++;
 	}
+	protected abstract void work();
 	
-	public abstract void work();
+	public final void doInit() {
+		runCount = 0;
+		childInit();
+	}
+	protected abstract void childInit();
+	
+
 }

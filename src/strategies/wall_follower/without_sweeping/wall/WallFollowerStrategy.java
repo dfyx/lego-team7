@@ -4,9 +4,12 @@ import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
 import strategies.util.ChildStrategy;
 import utils.Utils;
+import utils.Utils.Side;
 
 // TODO SB should work for right and left looking sensor head
 public class WallFollowerStrategy extends ChildStrategy {
+	private Side headSide;
+
 	// TODO SB calibrate?
 	/**
 	 * desired distance to wall (in cm)
@@ -16,12 +19,6 @@ public class WallFollowerStrategy extends ChildStrategy {
 	private static final int MAX_SPEED = 1000;
 	private int speed = MAX_SPEED;
 
-	private enum HeadOn {
-		RIGHT_SIDE, LEFT_SIDE
-	}
-
-	private static HeadOn headOn;
-
 	private static final int LINEAR_FACTOR_MOVE_AWAY = 55;
 	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 37;
 
@@ -30,26 +27,25 @@ public class WallFollowerStrategy extends ChildStrategy {
 	 */
 	private int actualValue;
 
-	public WallFollowerStrategy() {
-
+	public WallFollowerStrategy(Side headSide) {
+		this.headSide = headSide;
 	}
 
-	protected void doInit() {
+	protected void childInit() {
 	}
 
 	public void work() {
 		// TODO wait while sensor head is moving
 		actualValue = HEAD.getDistance();
-		
 
 		int direction = getMotorDirection();
 
-		if (headOn == HeadOn.LEFT_SIDE)
+		if (headSide == Side.RIGHT)
 			direction = -direction;
 
 		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
 				+ " -> " + direction);
-		
+
 		ENGINE.move(speed, direction);
 	}
 

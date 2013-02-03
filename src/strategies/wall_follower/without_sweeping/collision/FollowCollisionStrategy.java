@@ -17,7 +17,7 @@ public class FollowCollisionStrategy extends ChildStrategy{
 	}
 
 	@Override
-	protected void doInit() {
+	protected void childInit() {
 		// TODO Auto-generated method stub
 		
 	}

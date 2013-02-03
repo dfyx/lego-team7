@@ -4,10 +4,13 @@ import strategies.Strategy;
 import strategies.wall_follower.without_sweeping.collision.FollowCollisionStrategy;
 import strategies.wall_follower.without_sweeping.edge.EdgeStrategy;
 import strategies.wall_follower.without_sweeping.wall.WallFollowerStrategy;
+import utils.Utils.Side;
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
 
 public class WallFollowerWithoutCollisionController extends Strategy {
+	private Side headSide;
+
 	private FollowCollisionStrategy collisionStrategy;
 	private EdgeStrategy edgeStrategy;
 	private WallFollowerStrategy wallStrategy;
@@ -18,9 +21,11 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 
 	private State currentState;
 
-	public WallFollowerWithoutCollisionController() {
+	public WallFollowerWithoutCollisionController(Side headSide) {
+		this.headSide = headSide;
 		collisionStrategy = new FollowCollisionStrategy();
-		edgeStrategy = new EdgeStrategy();
+		edgeStrategy = new EdgeStrategy(this.headSide, 50, 300, 1000, 100, 1000, 300);
+		wallStrategy = new WallFollowerStrategy(this.headSide);
 	}
 
 	private State checkState() {
@@ -53,9 +58,6 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 	@Override
 	protected void doInit() {
 		currentState = State.START;
-		collisionStrategy = new FollowCollisionStrategy();
-		edgeStrategy = new EdgeStrategy();
-		wallStrategy = new WallFollowerStrategy();
 
 		collisionStrategy.init();
 		edgeStrategy.init();
@@ -79,12 +81,12 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 			break;
 		case FOLLOW_EDGE:
 			if (edgeStrategy.justStarted()) {
-
+				wallStrategy.init();
 			}
 			edgeStrategy.run();
 		case WALL_COLLISION:
 			if (collisionStrategy.justStarted()) {
-
+				wallStrategy.init();
 			}
 			collisionStrategy.run();
 		}
