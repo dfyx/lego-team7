@@ -15,22 +15,19 @@ class LightSensor implements Sensor {
         realSensor = new lejos.nxt.LightSensor(port);
         
         resetCalibration();
-        setFloodlight(true);
     }
 
     /**
      * Returns the light value, normalized between 0 and 1000.
      */
     public int getValue() {
-        return Utils.clamp(1000 * (realSensor.getNormalizedLightValue() - minLight) / (maxLight - minLight),0,1000);
+        return Utils.clamp(1000
+                * (realSensor.getNormalizedLightValue() - minLight)
+                / (maxLight - minLight), 0, 1000);
     }
     
     public int getRawValue() {
         return realSensor.getNormalizedLightValue();
-    }
-    
-    public void setFloodlight(boolean value) {
-        realSensor.setFloodlight(value);
     }
     
     /**
