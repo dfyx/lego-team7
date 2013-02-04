@@ -38,14 +38,15 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 		edgeStrategy = new EdgeStrategy(this.headSide, 50 // wall distance
 				, 1000, 1000 // Rotation speed, direction
 				, 300 // Time
-				, 1000, 400);
+				, 1000, 300);
 		wallStrategy = new WallFollowerStrategy(this.headSide);
 	}
 
 	private State checkState() {
 		collisionStrategy.check();
+		edgeStrategy.check();
 
-//		State oldState = currentState;
+		State oldState = currentState;
 		switch (currentState) {
 		case START:
 			currentState = State.STARTED;
@@ -69,8 +70,8 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 			break;
 		}
 
-//		if (oldState != currentState)
-//			System.out.println(oldState.name() + " -> " + currentState.name());
+		if (oldState != currentState)
+			System.out.println(oldState.name() + " -> " + currentState.name());
 		return currentState;
 	}
 
