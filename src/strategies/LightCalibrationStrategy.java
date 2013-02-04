@@ -26,7 +26,7 @@ public class LightCalibrationStrategy extends Strategy {
 	/** Number of samples to collect. */
 	private static final int SAMPLE_SIZE = 200;
 	/** Number of smallest samples to ignore. */
-	private static final int DROPPED_DARK_SAMPLES = 10;
+	private static final int DROPPED_DARK_SAMPLES = 15;
 	/** Number of largest samples to ignore. */
 	private static final int DROPPED_LIGHT_SAMPLES = 5;
     /**
@@ -59,10 +59,21 @@ public class LightCalibrationStrategy extends Strategy {
 	        resetTime();
 	        
 	        final int sampleValue = HEAD.getRawLightValue();
-	        samples[sampleCount++] = sampleValue;
+	        
+	        if (sampleCount < SAMPLE_SIZE) {
+	            samples[sampleCount] = sampleValue;
+	        }
+            
+	        sampleCount++;
+
+            if (sampleCount == 3 * SAMPLE_SIZE) {
+                ENGINE.stop();
+                
+                setFinished();
+            }
 	        
 	        if (sampleCount == SAMPLE_SIZE) {
-	            ENGINE.stop();
+	            ENGINE.move(-BASE_SPEED);
 	            
 	            Arrays.sort(samples);
 	            
@@ -87,14 +98,11 @@ public class LightCalibrationStrategy extends Strategy {
 	            
 	            HEAD.calibrateLight(blackPoint, whitePoint);
 	            
-	            /*
+	            // FIXME: Disable debugging code
                 System.out.println("Min: " + samples[0] + " Max: "
                         + samples[SAMPLE_SIZE - 1] + " bp: " + blackPoint
                         + " wp: " + whitePoint);
-                */
-	            
-	            setFinished();
-	        }   
+	        }
 	    }
 	}
 	
