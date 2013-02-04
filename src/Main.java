@@ -18,7 +18,22 @@ public class Main {
 		while (Platform.HEAD.isCalibrating())
 			Delay.msDelay(500);
 
-		Strategy mainStrategy = new TestStrategy();
+		Strategy mainStrategy = new Strategy() {
+
+			@Override
+			protected void doInit() {
+				Platform.HEAD.moveTo(800, false);
+				Delay.msDelay(1000);
+				Platform.HEAD.detectCollisions(true);
+				Delay.msDelay(1000);
+			}
+
+			@Override
+			protected void doRun() {
+				System.out.println(Platform.HEAD.isColliding());
+			}
+			
+		};
 		Loop loop = new Loop(mainStrategy);
 		loop.run();
 	}

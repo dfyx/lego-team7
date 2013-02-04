@@ -62,15 +62,24 @@ public class Head {
 	}
 
 	/**
-	 * Set the motor to floating. You need to explicitly stop the floating.
+	 * Start collision detection. You need to explicitly stop this befor moving the head.
 	 * 
-	 * Used for collision detection.
-	 * 
-	 * @param floating
-	 *            True, iff the motor should float. False otherwise.
+	 * @param detect
+	 *            True, iff collisions should be detected. False otherwise.
 	 */
-	public void setFloating(boolean floating) {
-		headMotor.setFloating(floating);
+	public void detectCollisions(boolean detect) {
+		headMotor.detectCollisions(detect);
+	}
+	
+	/**
+	 * Ensure, that the motor is floating, when calling this method.
+	 * Otherwise it will always return false;
+	 * If the head is moving, while calling this method, the behaviour is undefined.
+	 * 
+	 * @return True, iff the head is turning due to a collision.
+	 */
+	public boolean isColliding() {
+		return headMotor.isColliding();
 	}
 
 	/**

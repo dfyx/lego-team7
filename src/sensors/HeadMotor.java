@@ -50,6 +50,10 @@ class HeadMotor extends Thread {
 	private volatile int speed = 1000;
 
 	private boolean terminate = false;
+	/**
+	 * the tacho count, when collision detection is started
+	 */
+	private int collisionTachoCount;
 
 	public void terminate() {
 		terminate = true;
@@ -59,11 +63,21 @@ class HeadMotor extends Thread {
 		start();
 	}
 	
-	public void setFloating(boolean floating) {
-		if(floating)
+	public void detectCollisions(boolean detect) {
+		collisionTachoCount = MOTOR.getTachoCount();
+		if(detect)
 			MOTOR.flt(true);
 		else
 			MOTOR.stop(true);
+	}
+	
+	public boolean isColliding() {
+		int currentTachoCount = MOTOR.getTachoCount();
+		System.out.println("Target: " + collisionTachoCount + " Position: " + currentTachoCount);
+		int diff = collisionTachoCount - currentTachoCount;
+		if(diff < 0)
+			diff *= -1;
+		return diff > 10;
 	}
 
 	private void doRotateTo(int target, boolean async) {
