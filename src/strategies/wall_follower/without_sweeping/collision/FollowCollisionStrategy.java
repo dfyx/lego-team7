@@ -10,6 +10,8 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	// TODO SB make this work for both head positions
 	DetectCollisionStrategy collisionStrategy;
 
+	private final int EPSILON = 5;
+	
 	private final int BACKWARD_SPEED;
 	private final long BACKWARD_TIME;
 	private long endBackwardTime;
@@ -34,7 +36,9 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		SEARCH_OBSTACLE, // look forward, if obstacle is there
 		AVOID_OBSTACE, // turn left until obstacle goes out of side
 		// obstacle out of sight -> turn head to wall
-		TURN_HEAD_SIDEWAYS, // turn head to wall (on right side)
+		START_TURN_HEAD_SIDEWAYS, // start turning head
+		TURN_HEAD_SIDEWAYS, // head turning to wall (on right side)
+		START_SEARCH_WALL, // start turning robot
 		SEARCH_WALL, // turn left until wall is found
 		WALL_FOUND
 	}
@@ -60,19 +64,25 @@ public class FollowCollisionStrategy extends ChildStrategy {
 				newState = State.TURN_HEAD_FORWARD;
 			break;
 		case TURN_HEAD_FORWARD:
-			if (!HEAD.isMoving() && HEAD.getPosition() == FRONT_POSITION)
-				newState = State.SEARCH_OBSTACLE;
+			newState = State.SEARCH_OBSTACLE;
 			break;
 		case SEARCH_OBSTACLE:
-			newState = State.AVOID_OBSTACE;
+			if (!HEAD.isMoving() && HEAD.getPosition() <= FRONT_POSITION + EPSILON && HEAD.getPosition() >= FRONT_POSITION - EPSILON)
+				newState = State.AVOID_OBSTACE;
 			break;
 		case AVOID_OBSTACE:
 			if (HEAD.getDistance() > OBSTACLE_DISTANCE)
 				newState = State.TURN_HEAD_SIDEWAYS;
 			break;
+		case START_TURN_HEAD_SIDEWAYS:
+			newState = State.TURN_HEAD_SIDEWAYS;
+			break;
 		case TURN_HEAD_SIDEWAYS:
-			if (!HEAD.isMoving() && HEAD.getPosition() == SIDE_POSITION)
+			if (!HEAD.isMoving() && HEAD.getPosition() <= SIDE_POSITION + EPSILON && HEAD.getPosition() >= SIDE_POSITION - EPSILON)
 				newState = State.SEARCH_WALL;
+			break;
+		case START_SEARCH_WALL:
+			newState = State.SEARCH_WALL;
 			break;
 		case SEARCH_WALL:
 			if (HEAD.getDistance() < WALL_DISTANCE)
@@ -81,8 +91,8 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		case WALL_FOUND:
 			break;
 		}
-		
-		if(currentState != newState)
+
+		if (currentState != newState)
 			System.out.println(currentState.name() + " -> " + newState.name());
 
 		return newState;
@@ -101,11 +111,14 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 		OBSTACLE_DISTANCE = obstacleDistance;
 		SEARCH_OBSTACLE_SPEED = searchObstacleSpeed;
-		SEARCH_OBSTACLE_DIRECTION = searchObstacleDirection * headSide.getValue(); // TODO SB correct?
+		SEARCH_OBSTACLE_DIRECTION = searchObstacleDirection
+				* -headSide.getValue();
 
 		WALL_DISTANCE = wallDistance;
 		SEARCH_WALL_SPEED = searchWallSpeed;
-		SEARCH_WALL_DIRECTION = searchWallDirection * headSide.getValue();// TODO SB correct?
+		SEARCH_WALL_DIRECTION = searchWallDirection * headSide.getValue();// TODO
+																			// SB
+																			// correct?
 	}
 
 	@Override
@@ -136,9 +149,9 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 		State oldState = currentState;
 		currentState = checkState();
-		if(oldState != currentState)
+		if (oldState != currentState)
 			System.out.println("running: " + currentState.name());
-		
+
 		switch (currentState) {
 		case START:
 			break;
@@ -157,17 +170,26 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			HEAD.moveTo(FRONT_POSITION, true);
 			break;
 		case SEARCH_OBSTACLE:
-			ENGINE.move(SEARCH_OBSTACLE_SPEED, SEARCH_OBSTACLE_DIRECTION);
+			// Turning head forward
 			break;
 		case AVOID_OBSTACE:
-			// intentionally left blank
+			// head turned forward. start turning
+			ENGINE.move(SEARCH_OBSTACLE_SPEED, SEARCH_OBSTACLE_DIRECTION);
 			break;
-		case TURN_HEAD_SIDEWAYS:
+		case START_TURN_HEAD_SIDEWAYS:
+			// Start turning head sideways
 			ENGINE.stop();
 			HEAD.moveTo(SIDE_POSITION, true);
 			break;
-		case SEARCH_WALL:
+		case TURN_HEAD_SIDEWAYS:
+			// head turning sideways
+			break;
+		case START_SEARCH_WALL:
+			// head turned sideways. start turning.
 			ENGINE.move(SEARCH_WALL_SPEED, SEARCH_WALL_DIRECTION);
+			break;
+		case SEARCH_WALL:
+			// turning
 			break;
 		case WALL_FOUND:
 			// TODO SB necessary?
