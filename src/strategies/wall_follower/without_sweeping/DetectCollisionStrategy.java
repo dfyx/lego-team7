@@ -94,6 +94,7 @@ public class DetectCollisionStrategy extends ChildStrategy {
 			}
 		}
 		foundWall = false;
+		endAccelerationTime = System.currentTimeMillis() + ACCELERATION_TIME;
 	}
 
 	private State checkState() {
@@ -142,7 +143,6 @@ public class DetectCollisionStrategy extends ChildStrategy {
 
 		switch (currentState) {
 		case START:
-			endAccelerationTime = System.currentTimeMillis() + ACCELERATION_TIME;
 			break;
 		case ACCELERATING:
 			// don't detect collisions
