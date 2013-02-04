@@ -24,7 +24,8 @@ import utils.Utils;
  * <b>never</b> be manipulated by anyone else.
  */
 public class Engine {
-    private static final double DISTANCE_SCALE_FACTOR = 40.5 * Math.PI / 360;
+    private static final float DISTANCE_SCALE_FACTOR = (float) (38.0 * Math.PI / 360);
+    private static final float ANGLE_SCALE_FACTOR = (float) (0.105);
     
     private static final MotorPortProxy LEFT_MOTOR_PORT = new MotorPortProxy(MotorPort.A);
     private static final MotorPortProxy RIGHT_MOTOR_PORT = new MotorPortProxy(MotorPort.B);
@@ -265,17 +266,27 @@ public class Engine {
 	
 	/**
 	 * Returns an estimate of the distance which has been covered since the last
-	 * call to {@link #commit()}. The estimate will be more accurate for high
-	 * driving speeds.
+	 * call to {@link #commit()}.
 	 * 
 	 * @return the estimated distance in mm
 	 */
-	public int estimateDistance() {
-        return (int) ((LEFT_MOTOR.getTachoCount() - lastTachoLeft
+	public float estimateDistance() {
+        return ((LEFT_MOTOR.getTachoCount() - lastTachoLeft
                 + RIGHT_MOTOR.getTachoCount() - lastTachoRight) 
                 / 2 * DISTANCE_SCALE_FACTOR);
 	}
-	
+
+	/**
+     * Returns an estimate of the angle which has been covered since the last
+     * call to {@link #commit()}.
+     * 
+     * @return the estimated angle in degrees
+     */
+    public float estimateAngle() {
+        return ((LEFT_MOTOR.getTachoCount() - lastTachoLeft) - (RIGHT_MOTOR
+                .getTachoCount() - lastTachoRight)) * ANGLE_SCALE_FACTOR;
+    }
+
 	public void poll() {
 	    final int l_dm = LEFT_MOTOR_PORT.getDriveMode();
 	    final int l_p = LEFT_MOTOR_PORT.getPower();
