@@ -128,8 +128,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	@Override
 	public boolean isStopped() {
-		// TODO SB return currentState == State.WALL_FOUND;
-		return false;
+		return currentState == State.WALL_FOUND;
 	}
 
 	@Override
