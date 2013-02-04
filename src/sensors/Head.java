@@ -33,10 +33,6 @@ public class Head {
 		return polledDistance;
 	}
 
-	/**
-     * Returns the light value, normalized between 0 and 1000. Backlight effects
-     * are suppressed.
-     */
 	public int getLight() {
 		return polledLight;
 	}
@@ -170,12 +166,13 @@ public class Head {
 	}
 
 	/**
-     * Calibrate the light sensor. The passed values must have been obtained by
-     * {@link #getLight()} because of the backlight-subtraction applied there.
-     * 
-     * @param minValue The value mapped to 0
-     * @param maxValue The value mapped to 1000
-     */
+	 * Calibrate the light sensor
+	 * 
+	 * @param minValue
+	 *            The value mapped to 0
+	 * @param maxValue
+	 *            The value mapped to 1000
+	 */
 	public void calibrateLight(int minValue, int maxValue) {
 		lightSensor.calibrate(minValue, maxValue);
 	}
