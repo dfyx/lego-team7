@@ -5,17 +5,13 @@ import robot.Platform;
 public class TestStrategy extends Strategy {
 
 	protected void doInit() {
-		Platform.HEAD.startSweeping(-1000, 1000, 20, 8);
+		Platform.HEAD.startCheckStalled(false);
 	}
 
 	protected void doRun() {
-		System.out.print("\r");
-		int[] values = Platform.HEAD.getLightSweepValues();
-		for (int i = 0; i < values.length; ++i)
-			if(values[i]==Integer.MAX_VALUE)
-				System.out.print("-  \t");
-			else
-				System.out.print("" + values[i] + "  \t");
-		System.out.flush();
+		if(Platform.HEAD.isStalled()) {
+			System.out.println("isStalled");
+			Platform.HEAD.stopMoving();
+		}
 	}
 }

@@ -33,21 +33,32 @@ public class Head {
 		return polledDistance;
 	}
 
+	/**
+	 * Returns the light value, normalized between 0 and 1000. Backlight effects
+	 * are suppressed.
+	 */
 	public int getLight() {
 		return polledLight;
 	}
-	
+
 	public boolean isSweeping() {
 		return sweepThread.isRunning();
 	}
-	
+
 	public void stopMoving() {
 		headMotor.stopMoving();
 	}
-	
+
 	public void terminate() {
 		sweepThread.terminate();
 		headMotor.terminate();
+	}
+
+	/**
+	 * Switch floodlight on or off
+	 */
+	public void setFloodlight(boolean value) {
+		lightSensor.setFloodlight(value);
 	}
 
 	/**
@@ -87,20 +98,22 @@ public class Head {
 	 * @param to
 	 *            The rightmost position to sweep. See getPosition() for range.
 	 * @param lightValuecount
-	 *            The number of light values to scan, distributed over the sweeping
-	 *            area
+	 *            The number of light values to scan, distributed over the
+	 *            sweeping area
 	 * @param ultrasonicValuecount
-	 *            The number of distance values to scan, distributed over the sweeping
-	 *            area
+	 *            The number of distance values to scan, distributed over the
+	 *            sweeping area
 	 */
-	public void startSweeping(int from, int to, int lightValuecount, int ultrasonicValuecount) {
-		sweepThread.startSweeping(from, to, lightValuecount, ultrasonicValuecount);
+	public void startSweeping(int from, int to, int lightValuecount,
+			int ultrasonicValuecount) {
+		sweepThread.startSweeping(from, to, lightValuecount,
+				ultrasonicValuecount);
 	}
 
 	/**
-	 * Move the head manually to a given position.
-	 * Don't use this function while sweeping!
-	 * (after stopSweeping() wait until isSweeping()==false, before you call this function)
+	 * Move the head manually to a given position. Don't use this function while
+	 * sweeping! (after stopSweeping() wait until isSweeping()==false, before
+	 * you call this function)
 	 * 
 	 * @param position
 	 *            The new position. Range as given in Javadoc for getPosition()
@@ -109,15 +122,32 @@ public class Head {
 	 *            moving.
 	 */
 	public void moveTo(int position, boolean async) {
-		if(isSweeping())
+		if (isSweeping())
 			throw new IllegalStateException("moveTo() call while sweeping");
 		headMotor.moveTo(position, async);
 	}
 
+	public void startCheckStalled(boolean moveRight) {
+		final int POWER = 50;
+		int power = POWER;
+		if (!moveRight)
+			power = -power;
+		headMotor.moveWithFixedPower(power);
+	}
+
 	/**
-	 * Move the head manually to a given position
-	 * Don't use this function while sweeping!
-	 * (after stopSweeping() wait until isSweeping()==false, before you call this function)
+	 * Call startCheckStalled first.
+	 * Call stopMoving as soon, as this yields true.
+	 * @return
+	 */
+	public boolean isStalled() {
+		return headMotor.isStalled();
+	}
+
+	/**
+	 * Move the head manually to a given position Don't use this function while
+	 * sweeping! (after stopSweeping() wait until isSweeping()==false, before
+	 * you call this function)
 	 * 
 	 * @param position
 	 *            The new position. Range as given in Javadoc for getPosition()
@@ -128,7 +158,7 @@ public class Head {
 	 *            The speed to move with (0<=speed<=1000)
 	 */
 	public void moveTo(int position, boolean async, int speed) {
-		if(isSweeping())
+		if (isSweeping())
 			throw new IllegalStateException("moveTo() call while sweeping");
 		headMotor.moveTo(position, async, speed);
 	}
@@ -154,7 +184,12 @@ public class Head {
 	}
 
 	/**
+<<<<<<< Updated upstream
 	 * Calibrate the light sensor
+=======
+	 * Calibrate the light sensor. The passed values must have been obtained by
+	 * {@link #getLight()} because of the backlight-subtraction applied there.
+>>>>>>> Stashed changes
 	 * 
 	 * @param minValue
 	 *            The value mapped to 0
@@ -173,27 +208,27 @@ public class Head {
 		sweepThread.setSpeed(speed);
 	}
 
-    /**
-     * Converts an angle in degress to a positional value compliant with
-     * {@link #getPosition()}.
-     * 
-     * @param degrees
-     *            an angle, {@code -90 <= angle <= 90}
-     * @return a position value, {@code -1000 <= result <= 1000}
-     */
-    public static int degreeToPosition(final int degrees) {
-        return (degrees * 1000) / 90;
-    }
-    
-    /**
-     * Converts a positional value as provided by {@link #getPosition()} to an
-     * angular value.
-     * 
-     * @param position
-     *            a position value, {@code -1000 <= position <= 1000}
-     * @return an angle, {@code -90 <= result <= 90}
-     */
-    public static int positionToDegrees(final int position) {
-        return (position * 90) / 1000;
-    }
+	/**
+	 * Converts an angle in degress to a positional value compliant with
+	 * {@link #getPosition()}.
+	 * 
+	 * @param degrees
+	 *            an angle, {@code -90 <= angle <= 90}
+	 * @return a position value, {@code -1000 <= result <= 1000}
+	 */
+	public static int degreeToPosition(final int degrees) {
+		return (degrees * 1000) / 90;
+	}
+
+	/**
+	 * Converts a positional value as provided by {@link #getPosition()} to an
+	 * angular value.
+	 * 
+	 * @param position
+	 *            a position value, {@code -1000 <= position <= 1000}
+	 * @return an angle, {@code -90 <= result <= 90}
+	 */
+	public static int positionToDegrees(final int position) {
+		return (position * 90) / 1000;
+	}
 }
