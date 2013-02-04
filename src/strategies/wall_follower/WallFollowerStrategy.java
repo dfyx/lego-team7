@@ -12,7 +12,7 @@ public class WallFollowerStrategy extends Strategy {
 	private Side headSide;
 
 	private FollowCollisionStrategy wallCollisionStrategy;
-	private EdgeCollisionStrategy edgeCollisionStrategy;
+	private FollowCollisionStrategy edgeCollisionStrategy;
 	private EdgeStrategy edgeStrategy;
 	private WallRegulatorStrategy wallStrategy;
 
@@ -43,11 +43,23 @@ public class WallFollowerStrategy extends Strategy {
 				200, // wall speed
 				1000 // wall direction
 		);
-		edgeCollisionStrategy = new EdgeCollisionStrategy(headSide, //head
-				5, 90, // detection
-				500, // backward speed
-				1000 // backward time
-				);
+		edgeCollisionStrategy = new FollowCollisionStrategy(headSide, // head
+				5, 90,// detection
+				500,// backward speed
+				1000, // backward time
+				30, // max obstacle distance
+				400, // obstacle speed
+				1000, // obstacle direction
+				300, // extra turn time
+				50, // max wall distance
+				200, // wall speed
+				1000 // wall direction
+		);
+//		edgeCollisionStrategy = new EdgeCollisionStrategy(headSide, //head
+//				5, 90, // detection
+//				500, // backward speed
+//				1000 // backward time
+//				);
 		edgeStrategy = new EdgeStrategy(this.headSide, 50 // wall distance
 				, 1000, 1000 // Rotation speed, direction
 				, rotationTime // Time
