@@ -1,3 +1,4 @@
+package strategies.main;
 import static robot.Platform.ENGINE;
 import lejos.nxt.Button;
 import robot.Platform;
@@ -8,7 +9,7 @@ import strategies.Strategy;
 import strategies.sections.RaceStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 
-public class MainStrategy extends Strategy {
+public class DefaultMainStrategy extends MainStrategy {
 	
 	private boolean detectBarcode;
 	
@@ -21,7 +22,7 @@ public class MainStrategy extends Strategy {
 	}
 
 	private enum State {
-		WAITING, CALIBRATING, WAITING_FOR_STARTSIGNAL, RUNNING
+		WAITING, WAITING_WILL_CALIBRATE, CALIBRATING, WAITING_FOR_STARTSIGNAL, RUNNING
 	}
 
 	private enum ButtonState {
@@ -31,7 +32,7 @@ public class MainStrategy extends Strategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(1), LABYRINTH(5);
+		RACE(13), LABYRINTH(5);
 
 		private final int value;
 
@@ -58,7 +59,7 @@ public class MainStrategy extends Strategy {
 
 	private Strategy currentStrategy;
 
-	public MainStrategy() {
+	public DefaultMainStrategy() {
 	}
 
 	private void switchToCalibrating() {
@@ -92,7 +93,7 @@ public class MainStrategy extends Strategy {
 	public void doInit() {
 		barcodeReader = new CountLinesStrategy();
 		barcodeReader.init();
-		state = State.WAITING;
+		state = State.WAITING_WILL_CALIBRATE;
 		buttonState = ButtonState.DOWN;
 		detectBarcode = true;
 		switchToCalibrating();
@@ -116,6 +117,11 @@ public class MainStrategy extends Strategy {
 			buttonState = ButtonState.UP;
 			switch (state) {
 			case WAITING:
+				state = State.RUNNING;
+				System.out.println("->BARCODE");
+				switchToBarcodeReading();
+				break;
+			case WAITING_WILL_CALIBRATE:
 			case CALIBRATING:
 				state = State.CALIBRATING;
 				System.out.println("->CALIBRATING");
@@ -123,6 +129,7 @@ public class MainStrategy extends Strategy {
 				break;
 			case RUNNING:
 				state = State.WAITING;
+				ENGINE.stop();
 				System.out.println("->WAITING");
 				break;
 			case WAITING_FOR_STARTSIGNAL:
