@@ -1,9 +1,10 @@
 package robot;
 
-import utils.Utils;
-import lejos.nxt.Motor;
+import lejos.nxt.MotorPort;
 import lejos.nxt.NXTRegulatedMotor;
+import lejos.nxt.TachoMotorPort;
 import lejos.util.Delay;
+import utils.Utils;
 
 /**
  * This class encapsulates the whole underbody of the robot which consists of
@@ -25,8 +26,10 @@ import lejos.util.Delay;
 public class Engine {
     private static final double DISTANCE_SCALE_FACTOR = 40.5 * Math.PI / 360;
     
-	private static final NXTRegulatedMotor LEFT_MOTOR = Motor.A;
-	private static final NXTRegulatedMotor RIGHT_MOTOR = Motor.B;
+    private static final MotorPortProxy LEFT_MOTOR_PORT = new MotorPortProxy(MotorPort.A);
+    private static final MotorPortProxy RIGHT_MOTOR_PORT = new MotorPortProxy(MotorPort.B);
+	private static final NXTRegulatedMotor LEFT_MOTOR = new NXTRegulatedMotor(LEFT_MOTOR_PORT);
+	private static final NXTRegulatedMotor RIGHT_MOTOR = new NXTRegulatedMotor(RIGHT_MOTOR_PORT);
 
 	protected int newLeftSpeed = 0;
 	protected int newRightSpeed = 0;
@@ -144,7 +147,6 @@ public class Engine {
 	 *            Should not be below ~100 mm (in mm)
 	 */
 	public void moveCircle(int speed, int innerRadius) {
-		int oldInner = innerRadius;
 		if (innerRadius < 50)
 			throw new IllegalArgumentException(
 					"inner radius of circle to small: " + innerRadius + " < "
@@ -272,5 +274,70 @@ public class Engine {
         return (int) ((LEFT_MOTOR.getTachoCount() - lastTachoLeft
                 + RIGHT_MOTOR.getTachoCount() - lastTachoRight) 
                 / 2 * DISTANCE_SCALE_FACTOR);
+	}
+	
+	public void poll() {
+	    final int l_dm = LEFT_MOTOR_PORT.getDriveMode();
+	    final int l_p = LEFT_MOTOR_PORT.getPower();
+	    final int l_pwm = LEFT_MOTOR_PORT.getPWMode();
+
+        final int r_dm = RIGHT_MOTOR_PORT.getDriveMode();
+        final int r_p = RIGHT_MOTOR_PORT.getPower();
+        final int r_pwm = RIGHT_MOTOR_PORT.getPWMode();
+	    
+        /*
+        System.out.println("L dm: " + l_dm + " p: " + l_p + " pwm: " + l_pwm
+                + "  R dm: " + r_dm + " p: " + r_p + " pwm: " + r_pwm);
+        */
+	}
+	
+	private static class MotorPortProxy implements TachoMotorPort {
+
+	    private final TachoMotorPort instance;
+	    
+	    private int lastPower;
+	    private int lastDriveMode;
+	    private int lastPWMMode;
+	    
+	    public MotorPortProxy(final TachoMotorPort realInstance) {
+            this.instance = realInstance;
+        }
+	    
+        @Override
+        public void controlMotor(final int power, final int mode) {
+            lastPower = power;
+            lastDriveMode = mode;
+            
+            instance.controlMotor(power, mode);
+        }
+
+        @Override
+        public void setPWMMode(final int mode) {
+            lastPWMMode = mode;
+            
+            instance.setPWMMode(mode);
+        }
+
+        @Override
+        public int getTachoCount() {
+            return instance.getTachoCount();
+        }
+
+        @Override
+        public void resetTachoCount() {
+            instance.resetTachoCount();
+        }
+        
+        public int getPower() {
+            return lastPower;
+        }
+	    
+        public int getDriveMode() {
+            return lastDriveMode;
+        }
+        
+        public int getPWMode() {
+            return lastPWMMode;
+        }
 	}
 }

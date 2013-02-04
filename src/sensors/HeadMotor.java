@@ -39,38 +39,56 @@ class HeadMotor extends Thread {
 	private int mostRightPos;
 
 	// Current state
+	private volatile boolean fixedPowerMoving = false;
 	private volatile boolean isMoving = false;
 	private volatile boolean isCalibrating = false;
 	private volatile int target;
-	private volatile boolean reMove = false; // Abort current movement and continue with next move command
-	private volatile boolean stopMoving = false; //Abort current movement
+	private volatile boolean reMove = false; // Abort current movement and
+												// continue with next move
+												// command
+	private volatile boolean stopMoving = false; // Abort current movement
 	private volatile int speed = 1000;
-	
+
 	private boolean terminate = false;
-	
+
 	public void terminate() {
 		terminate = true;
 	}
-	
+
 	public HeadMotor() {
 		start();
 	}
-	
+
 	private void doRotateTo(int target, boolean async) {
-		int motorPos=(mostLeftPos+mostRightPos)/2+target*(mostRightPos-mostLeftPos)/2000;
+		int motorPos = (mostLeftPos + mostRightPos) / 2 + target
+				* (mostRightPos - mostLeftPos) / 2000;
+		fixedPowerMoving = false;
 		MOTOR.stop();
 		MOTOR.setSpeed(speed);
 		if (motorPos > mostRightPos || motorPos < mostLeftPos)
 			throw new IllegalArgumentException("Move out of range: " + motorPos);
-		MOTOR.rotateTo(motorPos,async);
+		MOTOR.rotateTo(motorPos, async);
+	}
+
+	private boolean isStalled = false;
+	
+	public void moveWithFixedPower(int power) {
+		isStalled=false;
+		fixedPowerMoving = true;
+		MOTOR.suspendRegulation();
+		RAW_MOTOR.setPower(power);
+	}
+
+	public boolean isStalled() {
+		return isStalled;
 	}
 
 	public synchronized boolean isMoving() {
-		return isMoving;
+		return isMoving || fixedPowerMoving;
 	}
-	
+
 	public synchronized void stopMoving() {
-		stopMoving=true;
+		stopMoving = true;
 	}
 
 	public synchronized boolean isCalibrating() {
@@ -78,12 +96,12 @@ class HeadMotor extends Thread {
 	}
 
 	public int getPosition() {
-		return -1000+2000 * (MOTOR.getTachoCount() - mostLeftPos)
+		return -1000 + 2000 * (MOTOR.getTachoCount() - mostLeftPos)
 				/ (mostRightPos - mostLeftPos);
 	}
-	
+
 	public void moveTo(int position, boolean async, int speed) {
-		this.speed=speed;
+		this.speed = speed;
 		moveTo(position, async);
 	}
 
@@ -116,7 +134,8 @@ class HeadMotor extends Thread {
 			Delay.msDelay(200);
 			lastPosition = position;
 			position = RAW_MOTOR.getTachoCount();
-		};
+		}
+		;
 
 		MOTOR.stop();
 		return position;
@@ -154,25 +173,36 @@ class HeadMotor extends Thread {
 
 	public void run() {
 		try {
-			//Delay necessary, because motor commands are ignored when in debug mode and issued too early
+			// Delay necessary, because motor commands are ignored when in debug
+			// mode and issued too early
 			Delay.msDelay(500);
 			calibrate();
 			while (!interrupted()) {
+				int position = RAW_MOTOR.getTachoCount();
+				int lastPosition = position;
 				// State is NOT_MOVING
 				while (!isMoving && !terminate) {
+					while(!isMoving && !terminate && !fixedPowerMoving)
+						Delay.msDelay(10);
+					isStalled =  Math.abs(position - lastPosition) < MIN_MOVEMENT;
+					lastPosition=position;
+					position=RAW_MOTOR.getTachoCount();
 					Delay.msDelay(10);
+					if(stopMoving) {
+						break;
+					}
 				}
-				if(terminate)
+				if (terminate)
 					break;
 				// State just switched to MOVING
 				doRotateTo(target, true);
-				while (MOTOR.isMoving() && !reMove && !stopMoving && !terminate) {
+				while (MOTOR.isMoving() && !reMove && !stopMoving && !terminate && !fixedPowerMoving) {
 					Delay.msDelay(10);
 				}
-				if(stopMoving) {
+				if (stopMoving) {
 					MOTOR.stop();
 				}
-				if(terminate) {
+				if (terminate) {
 					break;
 				}
 				// If state switched to reMove, remain MOVING state.
@@ -187,7 +217,7 @@ class HeadMotor extends Thread {
 							isMoving = false;
 						}
 						calibrateLeft();
-						synchronized(this) {
+						synchronized (this) {
 							isCalibrating = false;
 						}
 					} else if (target == 1000
@@ -199,12 +229,12 @@ class HeadMotor extends Thread {
 							isMoving = false;
 						}
 						calibrateRight();
-						synchronized(this) {
+						synchronized (this) {
 							isCalibrating = false;
 						}
 					} else {
-						synchronized(this) {
-							isMoving=false;
+						synchronized (this) {
+							isMoving = false;
 						}
 					}
 				}

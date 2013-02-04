@@ -15,36 +15,26 @@ class LightSensor implements Sensor {
         realSensor = new lejos.nxt.LightSensor(port);
         
         resetCalibration();
+        setFloodlight(true);
     }
 
     /**
-     * Returns the light value, normalized between 0 and 1000. Backlight effects
-     * are suppressed.
+     * Returns the light value, normalized between 0 and 1000.
      */
     public int getValue() {
-        realSensor.setFloodlight(true);
-        final int onValue = realSensor.getNormalizedLightValue();
-        
-        realSensor.setFloodlight(false);
-        final int offValue = realSensor.getNormalizedLightValue();
-
-        final int result =
-                Utils.clamp(1000 * (onValue - offValue - minLight)
-                        / (maxLight - minLight), 0, 1000);
-        
-        // FIXME: Disable Debug Output
-//        System.out.println("On: " + onValue + " Off: " + offValue + " result: " + result);
-        
-        return result;
+        return Utils.clamp(1000 * (realSensor.getNormalizedLightValue() - minLight) / (maxLight - minLight),0,1000);
     }
     
     public int getRawValue() {
         return realSensor.getNormalizedLightValue();
     }
     
+    public void setFloodlight(boolean value) {
+        realSensor.setFloodlight(value);
+    }
+    
     /**
-     * Calibrate the light sensor. The passed values must have been obtained by
-     * {@link #getValue()} because of the backlight-subtraction applied there.
+     * Calibrate the light sensor
      * 
      * @param minValue The value mapped to 0
      * @param maxValue The value mapped to 1000
