@@ -65,6 +65,7 @@ class HeadMotor extends Thread {
 		fixedPowerMoving = false;
 		MOTOR.stop();
 		MOTOR.setSpeed(speed);
+		System.out.println("Move with speed "+speed);
 		if (motorPos > mostRightPos || motorPos < mostLeftPos)
 			throw new IllegalArgumentException("Move out of range: " + motorPos);
 		MOTOR.rotateTo(motorPos, async);

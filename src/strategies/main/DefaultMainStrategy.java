@@ -7,6 +7,7 @@ import strategies.DriveForwardStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
 import strategies.sections.RaceStrategy;
+import strategies.sections.SeesawStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 
 public class DefaultMainStrategy extends MainStrategy {
@@ -32,7 +33,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(5);
+		RACE(13), LABYRINTH(5), SEESAW(10);
 
 		private final int value;
 
@@ -79,6 +80,9 @@ public class DefaultMainStrategy extends MainStrategy {
 		switch (barcode) {
 		case RACE:
 			state = State.WAITING_FOR_STARTSIGNAL;
+			break;
+		case SEESAW:
+			currentStrategy = new SeesawStrategy();
 			break;
 		case LABYRINTH:
 			currentStrategy = new WallFollowerStrategy();
@@ -137,9 +141,11 @@ public class DefaultMainStrategy extends MainStrategy {
 		//Run child strategy
 		if (state == State.RUNNING || state == State.CALIBRATING) {
 			// run strategy and commit changes
+			barcodeReader.clearStatus();
 			if (!Platform.HEAD.isMoving())
 				barcodeReader.run();
 			if (detectBarcode && barcodeReader.hasNewCode()) {
+				System.out.println("New barcode :)");
 				int code = barcodeReader.getLineCount();
 				if(code>1)
 					switchLevel(Barcode.get(code));
