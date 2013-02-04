@@ -22,7 +22,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	}
 
 	private enum State {
-		WAITING, CALIBRATING, WAITING_FOR_STARTSIGNAL, RUNNING
+		WAITING, WAITING_WILL_CALIBRATE, CALIBRATING, WAITING_FOR_STARTSIGNAL, RUNNING
 	}
 
 	private enum ButtonState {
@@ -32,7 +32,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(1), LABYRINTH(5);
+		RACE(13), LABYRINTH(5);
 
 		private final int value;
 
@@ -93,7 +93,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	public void doInit() {
 		barcodeReader = new CountLinesStrategy();
 		barcodeReader.init();
-		state = State.WAITING;
+		state = State.WAITING_WILL_CALIBRATE;
 		buttonState = ButtonState.DOWN;
 		detectBarcode = true;
 		switchToCalibrating();
@@ -117,6 +117,11 @@ public class DefaultMainStrategy extends MainStrategy {
 			buttonState = ButtonState.UP;
 			switch (state) {
 			case WAITING:
+				state = State.RUNNING;
+				System.out.println("->BARCODE");
+				switchToBarcodeReading();
+				break;
+			case WAITING_WILL_CALIBRATE:
 			case CALIBRATING:
 				state = State.CALIBRATING;
 				System.out.println("->CALIBRATING");
@@ -124,6 +129,7 @@ public class DefaultMainStrategy extends MainStrategy {
 				break;
 			case RUNNING:
 				state = State.WAITING;
+				ENGINE.stop();
 				System.out.println("->WAITING");
 				break;
 			case WAITING_FOR_STARTSIGNAL:
