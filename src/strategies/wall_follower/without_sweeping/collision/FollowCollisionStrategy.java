@@ -1,6 +1,7 @@
 package strategies.wall_follower.without_sweeping.collision;
 
 import static robot.Platform.HEAD;
+import static robot.Platform.ENGINE;
 import strategies.util.ChildStrategy;
 import strategies.wall_follower.without_sweeping.DetectCollisionStrategy;
 import utils.Utils.Side;
@@ -16,8 +17,12 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	private final int FRONT_POSITION = 0;
 	private final int SIDE_POSITION;
 
+	private final int SEARCH_OBSTACLE_SPEED;
+	private final int SEARCH_OBSTACLE_DIRECTION;
 	private final int OBSTACLE_DISTANCE;
 
+	private final int SEARCH_WALL_SPEED;
+	private final int SEARCH_WALL_DIRECTION;
 	private final int WALL_DISTANCE;
 
 	// TODO SM (SB) check if collision was false positive through turning head
@@ -82,15 +87,22 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	public FollowCollisionStrategy(Side headSide, int valueCount,
 			int sensitivity, int backwardSpeed, int backwardTime,
-			int obstaclePosition, int wallDistance) {
+			int obstacleDistance, int searchObstacleSpeed,
+			int searchObstacleDirection, int wallDistance, int searchWallSpeed,
+			int searchWallDirection) {
 		SIDE_POSITION = 1000 * headSide.getValue();
 
 		collisionStrategy = new DetectCollisionStrategy(valueCount, sensitivity);
-		BACKWARD_SPEED = backwardSpeed;
+		BACKWARD_SPEED = -backwardSpeed;
 		BACKWARD_TIME = backwardTime;
 
-		OBSTACLE_DISTANCE = obstaclePosition;
+		OBSTACLE_DISTANCE = obstacleDistance;
+		SEARCH_OBSTACLE_SPEED = searchObstacleSpeed;
+		SEARCH_OBSTACLE_DIRECTION = searchObstacleDirection * headSide.getValue(); // TODO SB correct?
+
 		WALL_DISTANCE = wallDistance;
+		SEARCH_WALL_SPEED = searchWallSpeed;
+		SEARCH_WALL_DIRECTION = searchWallDirection * headSide.getValue();// TODO SB correct?
 	}
 
 	@Override
@@ -100,7 +112,8 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	@Override
 	public boolean isStopped() {
-		return currentState == State.WALL_FOUND;
+		// TODO SB return currentState == State.WALL_FOUND;
+		return false;
 	}
 
 	@Override
@@ -121,25 +134,34 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		case START:
 			break;
 		case COLLIDE:
+			collisionStrategy.work();
 			break;
 		case STAND:
+			ENGINE.move(BACKWARD_SPEED, 0);
 			break;
 		case DRIVE_BACK:
+			// intentionally left blank
+			// TODO SB use touch sensors?
 			break;
 		case TURN_HEAD_FORWARD:
+			HEAD.moveTo(FRONT_POSITION, true);
 			break;
 		case SEARCH_OBSTACLE:
+			ENGINE.move(SEARCH_OBSTACLE_SPEED, SEARCH_OBSTACLE_DIRECTION);
 			break;
 		case AVOID_OBSTACE:
+			// intentionally left blank
 			break;
 		case TURN_HEAD_SIDEWAYS:
+			HEAD.moveTo(SIDE_POSITION, true);
 			break;
 		case SEARCH_WALL:
+			ENGINE.move(SEARCH_WALL_SPEED, SEARCH_WALL_DIRECTION);
 			break;
 		case WALL_FOUND:
+			// TODO SB necessary?
+			ENGINE.stop();
 			break;
 		}
-		// TODO SB collisionStrategy.work();
 	}
-
 }
