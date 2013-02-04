@@ -45,6 +45,7 @@ public class LightCalibrationStrategy extends Strategy {
 	private int samples[] = new int[SAMPLE_SIZE];
 
 	protected void doInit() {
+	    HEAD.setFloodlight(true);
 		// Switch off calibration
 		HEAD.resetLightCalibration();
 		
