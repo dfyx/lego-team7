@@ -105,6 +105,7 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 			if (collisionStrategy.justStarted()) {
 				wallStrategy.init();
 			}
+			System.out.println("collide!");
 			collisionStrategy.run();
 		}
 	}

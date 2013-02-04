@@ -81,6 +81,9 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		case WALL_FOUND:
 			break;
 		}
+		
+		if(currentState != newState)
+			System.out.println(currentState.name() + " -> " + newState.name());
 
 		return newState;
 	}
@@ -134,7 +137,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		case START:
 			break;
 		case COLLIDE:
-			collisionStrategy.work();
+			collisionStrategy.run();
 			break;
 		case STAND:
 			ENGINE.move(BACKWARD_SPEED, 0);

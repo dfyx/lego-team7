@@ -90,9 +90,9 @@ public class DetectCollisionStrategy extends ChildStrategy {
 
 	private State checkState() {
 		// Syso
-		for (int side = 0; side < 2; ++side)
-			System.out.print(tachoDiff[side] + " < " + averageSpeed(Side.valueOf(side)) + ", ");
-		System.out.println();
+//		for (int side = 0; side < 2; ++side)
+//			System.out.print(tachoDiff[side] + " < " + averageSpeed(Side.valueOf(side)) + ", ");
+//		System.out.println();
 		State newState = currentState;
 		switch (currentState) {
 		case START:
@@ -112,7 +112,7 @@ public class DetectCollisionStrategy extends ChildStrategy {
 		case STOPPING:
 			break;
 		}
-		System.out.println("State: " + newState);
+//		System.out.println("State: " + newState);
 		return newState;
 	}
 
@@ -132,13 +132,13 @@ public class DetectCollisionStrategy extends ChildStrategy {
 		case START:
 			break;
 		case DRIVING:
-			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
-					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
-			break;
+//			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
+//					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
+//			break;
 		case WALL_FOUND:
-			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
-					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
-			foundWall = true;
+//			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
+//					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
+//			foundWall = true;
 			break;
 		case STOPPING:
 			break;
@@ -165,6 +165,7 @@ public class DetectCollisionStrategy extends ChildStrategy {
 
 	@Override
 	public void work() {
+		System.out.println("stopping engine");
 		ENGINE.stop();
 	}
 
