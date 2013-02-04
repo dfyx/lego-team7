@@ -4,6 +4,7 @@ import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
 import sensors.Head;
 import utils.Utils;
+import utils.Utils.Side;
 
 /**
  * Tries to find a line, can be used while driving or standing. If a line has
@@ -14,9 +15,11 @@ import utils.Utils;
 public class LineFinderStrategy extends Strategy {
     
     /** Brightness treshold used for line detection. */
-    private static final int DETECTION_THRESHOLD = 750;
+    private static final int DETECTION_THRESHOLD = LineFollowerStrategy.LIGHT_SETPOINT + 50;
     /** Sweep angle used during initial line search. */
-    private static final int DETECTION_ANGLE = 45;
+    private static final int DETECTION_ANGLE = 75;
+    /** Maximum turn angle during alignment. */
+    private static final int MAX_ANGLE = 120;
     
     private static final int DRIVE_SPEED = 500;
     private static final int ALIGN_SPEED = 200;
@@ -28,13 +31,20 @@ public class LineFinderStrategy extends Strategy {
     
     private int driveSpeed = DRIVE_SPEED;
     private int sweepSpeed = SEARCH_SWEEP_SPEED;
+
+    private Side trackingSide = Side.LEFT;
     
     private int sweepTo = Head.degreeToPosition(DETECTION_ANGLE);
     private int turnDir = -1;
+    private int turnSpeed = ALIGN_SPEED;
+    
+    private float angle = 0;
             
     @Override
     protected void doInit() {
         state = State.NOT_LOCKED;
+        
+        turnDir = trackingSide.getValue();
     }
 
     @Override
@@ -66,6 +76,12 @@ public class LineFinderStrategy extends Strategy {
                 break;
             case MOVE_TO_LINE:
                 if (value < DETECTION_THRESHOLD) {
+                    angle += ENGINE.estimateAngle();
+                    
+                    if (Math.abs(angle) > MAX_ANGLE) {
+                        turnDir *= -1;
+                        turnSpeed = ALIGN_SPEED / 2;
+                    }
                     alignmentControlLoop(value);
                 } else {
                     ENGINE.stop();
@@ -82,7 +98,7 @@ public class LineFinderStrategy extends Strategy {
         final int linear = (int) (error * P);
         
         int out = turnDir * linear;
-        out = Utils.clamp(out, -ALIGN_SPEED, ALIGN_SPEED); // limit to drive speed
+        out = Utils.clamp(out, -turnSpeed, turnSpeed); // limit to drive speed
         
         // System.out.println("err: " + error + " lin: " + linear + " out: " + out);
         
@@ -136,6 +152,14 @@ public class LineFinderStrategy extends Strategy {
      */
     public void setSweepSpeed(int sweepSpeed) {
         this.sweepSpeed = sweepSpeed;
+    }
+    
+    public Side getTrackingSide() {
+        return trackingSide;
+    }
+    
+    public void setTrackingSide(final Side side) {
+        trackingSide = side;
     }
     
     private enum State {
