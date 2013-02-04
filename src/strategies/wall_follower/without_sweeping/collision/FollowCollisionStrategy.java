@@ -105,7 +105,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			int searchWallDirection) {
 		SIDE_POSITION = 1000 * headSide.getValue();
 
-		collisionStrategy = new DetectCollisionStrategy(valueCount, sensitivity);
+		collisionStrategy = new DetectCollisionStrategy(valueCount, sensitivity, 150);
 		BACKWARD_SPEED = -backwardSpeed;
 		BACKWARD_TIME = backwardTime;
 

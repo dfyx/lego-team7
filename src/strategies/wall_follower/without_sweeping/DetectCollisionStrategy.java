@@ -10,6 +10,9 @@ public class DetectCollisionStrategy extends ChildStrategy {
 	private final int COLLISION_PERCENTAGE;
 	private int[][] lastValues;
 
+	private long endAccelerationTime;
+	private final long ACCELERATION_TIME;
+
 	private boolean foundWall;
 
 	private enum Side {
@@ -48,15 +51,20 @@ public class DetectCollisionStrategy extends ChildStrategy {
 	 * @param sensitivity
 	 *            The percentage of the tacho count, which will trigger as a
 	 *            collision. Should be around 95.
+	 * @param accelerationTime
+	 *            Time in which no collision is detected (while accelerating)
+	 *            (in ms)
 	 */
-	public DetectCollisionStrategy(int valueCount, int sensitivity) {
+	public DetectCollisionStrategy(int valueCount, int sensitivity,
+			int accelerationTime) {
 		LAST_VALUES_COUNT = valueCount;
 		COLLISION_PERCENTAGE = sensitivity;
+		ACCELERATION_TIME = accelerationTime;
 		lastValues = new int[2][LAST_VALUES_COUNT];
 	}
 
 	private enum State {
-		START, DRIVING, WALL_FOUND, STOPPING
+		START, ACCELERATING, DRIVING, WALL_FOUND, STOPPING
 	}
 
 	private static State currentState;
@@ -96,7 +104,11 @@ public class DetectCollisionStrategy extends ChildStrategy {
 		State newState = currentState;
 		switch (currentState) {
 		case START:
-			newState = State.DRIVING;
+			newState = State.ACCELERATING;
+			break;
+		case ACCELERATING:
+			if(System.currentTimeMillis() > endAccelerationTime)
+				newState = State.DRIVING;
 			break;
 		case DRIVING:
 			for (int side = 0; side < 2; ++side)
@@ -130,13 +142,19 @@ public class DetectCollisionStrategy extends ChildStrategy {
 
 		switch (currentState) {
 		case START:
+			endAccelerationTime = System.currentTimeMillis() + ACCELERATION_TIME;
+			break;
+		case ACCELERATING:
+			// don't detect collisions
+			System.out.println("Accelerating  : " + tachoDiff[Side.LEFT.getValue()]
+					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
 			break;
 		case DRIVING:
-			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
+			System.out.println("Moving :        " + tachoDiff[Side.LEFT.getValue()]
 					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
 			break;
 		case WALL_FOUND:
-			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
+			System.out.println("Stopping:       " + tachoDiff[Side.LEFT.getValue()]
 					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
 			foundWall = true;
 			break;
