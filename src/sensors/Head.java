@@ -117,6 +117,18 @@ public class Head {
 			throw new IllegalStateException("moveTo() call while sweeping");
 		headMotor.moveTo(position, async);
 	}
+	
+	public void startCheckStalled(int moveTarget) {
+		final int ERROR = 20;
+		final int TIME = 20;
+		headMotor.stopMoving();
+		headMotor.setStallThreshold(ERROR,TIME);
+		headMotor.moveTo(moveTarget);
+	}
+	
+	public boolean isStalled() {
+		return headMotor.isStalled();
+	}
 
 	/**
 	 * Move the head manually to a given position

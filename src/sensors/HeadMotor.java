@@ -64,6 +64,14 @@ class HeadMotor extends Thread {
 			throw new IllegalArgumentException("Move out of range: " + motorPos);
 		MOTOR.rotateTo(motorPos,async);
 	}
+	
+	public void setStallThreshold(int error, int time) {
+		MOTOR.setStallThreshold(error,time);
+	}
+	
+	public boolean isStalled() {
+		return MOTOR.isStalled();
+	}
 
 	public synchronized boolean isMoving() {
 		return isMoving;
