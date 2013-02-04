@@ -1,7 +1,7 @@
 package strategies.wall_follower.without_sweeping.collision;
 
-import static robot.Platform.HEAD;
 import static robot.Platform.ENGINE;
+import static robot.Platform.HEAD;
 import strategies.util.ChildStrategy;
 import strategies.wall_follower.without_sweeping.DetectCollisionStrategy;
 import utils.Utils.Side;
@@ -11,7 +11,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	DetectCollisionStrategy collisionStrategy;
 
 	private final int EPSILON = 5;
-	
+
 	private final int BACKWARD_SPEED;
 	private final long BACKWARD_TIME;
 	private long endBackwardTime;
@@ -22,6 +22,8 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	private final int SEARCH_OBSTACLE_SPEED;
 	private final int SEARCH_OBSTACLE_DIRECTION;
 	private final int OBSTACLE_DISTANCE;
+	private final long EXTRA_TURN_TIME;
+	private long endTurnTime;
 
 	private final int SEARCH_WALL_SPEED;
 	private final int SEARCH_WALL_DIRECTION;
@@ -35,6 +37,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		TURN_HEAD_FORWARD, // turn head to front
 		SEARCH_OBSTACLE, // look forward, if obstacle is there
 		AVOID_OBSTACE, // turn left until obstacle goes out of side
+		TURN_EXTRA, // turn further away from wall
 		// obstacle out of sight -> turn head to wall
 		START_TURN_HEAD_SIDEWAYS, // start turning head
 		TURN_HEAD_SIDEWAYS, // head turning to wall (on right side)
@@ -67,18 +70,26 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			newState = State.SEARCH_OBSTACLE;
 			break;
 		case SEARCH_OBSTACLE:
-			if (!HEAD.isMoving() && HEAD.getPosition() <= FRONT_POSITION + EPSILON && HEAD.getPosition() >= FRONT_POSITION - EPSILON)
+			if (!HEAD.isMoving()
+					&& HEAD.getPosition() <= FRONT_POSITION + EPSILON
+					&& HEAD.getPosition() >= FRONT_POSITION - EPSILON)
 				newState = State.AVOID_OBSTACE;
 			break;
 		case AVOID_OBSTACE:
 			if (HEAD.getDistance() > OBSTACLE_DISTANCE)
+				newState = State.TURN_EXTRA;
+			break;
+		case TURN_EXTRA:
+			if (System.currentTimeMillis() > endTurnTime)
 				newState = State.START_TURN_HEAD_SIDEWAYS;
 			break;
 		case START_TURN_HEAD_SIDEWAYS:
 			newState = State.TURN_HEAD_SIDEWAYS;
 			break;
 		case TURN_HEAD_SIDEWAYS:
-			if (!HEAD.isMoving() && HEAD.getPosition() <= SIDE_POSITION + EPSILON && HEAD.getPosition() >= SIDE_POSITION - EPSILON)
+			if (!HEAD.isMoving()
+					&& HEAD.getPosition() <= SIDE_POSITION + EPSILON
+					&& HEAD.getPosition() >= SIDE_POSITION - EPSILON)
 				newState = State.START_SEARCH_WALL;
 			break;
 		case START_SEARCH_WALL:
@@ -101,8 +112,8 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	public FollowCollisionStrategy(Side headSide, int valueCount,
 			int sensitivity, int backwardSpeed, int backwardTime,
 			int obstacleDistance, int searchObstacleSpeed,
-			int searchObstacleDirection, int wallDistance, int searchWallSpeed,
-			int searchWallDirection) {
+			int searchObstacleDirection, int extraTurnTime, int wallDistance,
+			int searchWallSpeed, int searchWallDirection) {
 		SIDE_POSITION = 1000 * headSide.getValue();
 
 		collisionStrategy = new DetectCollisionStrategy(headSide);
@@ -113,6 +124,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		SEARCH_OBSTACLE_SPEED = searchObstacleSpeed;
 		SEARCH_OBSTACLE_DIRECTION = searchObstacleDirection
 				* -headSide.getValue();
+		EXTRA_TURN_TIME = extraTurnTime;
 
 		WALL_DISTANCE = wallDistance;
 		SEARCH_WALL_SPEED = searchWallSpeed;
@@ -174,6 +186,10 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		case AVOID_OBSTACE:
 			// head turned forward. start turning
 			ENGINE.move(SEARCH_OBSTACLE_SPEED, SEARCH_OBSTACLE_DIRECTION);
+			endTurnTime = System.currentTimeMillis() + EXTRA_TURN_TIME;
+			break;
+		case TURN_EXTRA:
+			System.out.println("turning extra");
 			break;
 		case START_TURN_HEAD_SIDEWAYS:
 			// Start turning head sideways

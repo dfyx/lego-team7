@@ -20,6 +20,7 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 
 	private State currentState;
 
+	// TODO SB collision detection, while in edge
 	public WallFollowerWithoutCollisionController(Side headSide) {
 		this.headSide = headSide;
 		collisionStrategy = new FollowCollisionStrategy(headSide, // head
@@ -27,8 +28,9 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 				500,// backward speed
 				1000, // backward time
 				30, // max obstacle distance
-				200, // obstacle speed
+				400, // obstacle speed
 				1000, // obstacle direction
+				300, // extra turn time
 				50, // max wall distance
 				200, // wall speed
 				1000 // wall direction

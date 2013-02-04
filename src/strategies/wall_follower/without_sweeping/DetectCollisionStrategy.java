@@ -16,7 +16,7 @@ public class DetectCollisionStrategy extends ChildStrategy {
 
 	Side headSide;
 	
-	private static final int HEAD_POSITION = 800;
+	private static final int HEAD_POSITION = 850;
 
 	/**
 	 * Detect collisions.

@@ -73,7 +73,7 @@ class HeadMotor extends Thread {
 	
 	public boolean isColliding() {
 		int currentTachoCount = MOTOR.getTachoCount();
-		System.out.println("Target: " + collisionTachoCount + " Position: " + currentTachoCount);
+//		System.out.println("Target: " + collisionTachoCount + " Position: " + currentTachoCount);
 		int diff = collisionTachoCount - currentTachoCount;
 		if(diff < 0)
 			diff *= -1;
