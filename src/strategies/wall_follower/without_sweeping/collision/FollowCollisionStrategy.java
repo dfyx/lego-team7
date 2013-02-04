@@ -72,14 +72,14 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			break;
 		case AVOID_OBSTACE:
 			if (HEAD.getDistance() > OBSTACLE_DISTANCE)
-				newState = State.TURN_HEAD_SIDEWAYS;
+				newState = State.START_TURN_HEAD_SIDEWAYS;
 			break;
 		case START_TURN_HEAD_SIDEWAYS:
 			newState = State.TURN_HEAD_SIDEWAYS;
 			break;
 		case TURN_HEAD_SIDEWAYS:
 			if (!HEAD.isMoving() && HEAD.getPosition() <= SIDE_POSITION + EPSILON && HEAD.getPosition() >= SIDE_POSITION - EPSILON)
-				newState = State.SEARCH_WALL;
+				newState = State.START_SEARCH_WALL;
 			break;
 		case START_SEARCH_WALL:
 			newState = State.SEARCH_WALL;
