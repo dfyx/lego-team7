@@ -9,6 +9,9 @@ public class EdgeStrategy extends ChildStrategy {
 	private Side headSide;
 
 	private final int wallDistance;
+	
+	private int currentDistance = 0;
+	private int lastDistance = 0;
 
 	/**
 	 * Time to turn
@@ -51,12 +54,19 @@ public class EdgeStrategy extends ChildStrategy {
 		case CURVING:
 			break;
 		}
+		if (newState != currentState)
+			System.out.println(currentState.name() + " -> " + newState.name());
 		return newState;
 	}
 
 	@Override
 	public void work() {
+
+		State oldState = currentState;
 		currentState = checkState();
+		if(oldState != currentState)
+			System.out.println("running: " + currentState.name());
+		
 		switch (currentState) {
 		case START:
 			break;
@@ -108,7 +118,7 @@ public class EdgeStrategy extends ChildStrategy {
 
 	@Override
 	public boolean willStart() {
-		return HEAD.getDistance() >= wallDistance;
+		return currentDistance >= wallDistance && lastDistance >= wallDistance;
 	}
 
 	@Override
@@ -124,6 +134,8 @@ public class EdgeStrategy extends ChildStrategy {
 
 	@Override
 	public void check() {
+		lastDistance = currentDistance;
+		currentDistance = HEAD.getDistance();
 		return;
 	}
 

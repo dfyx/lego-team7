@@ -33,7 +33,7 @@ class LightSensor implements Sensor {
                         / (maxLight - minLight), 0, 1000);
         
         // FIXME: Disable Debug Output
-        System.out.println("On: " + onValue + " Off: " + offValue + " result: " + result);
+//        System.out.println("On: " + onValue + " Off: " + offValue + " result: " + result);
         
         return result;
     }

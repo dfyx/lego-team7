@@ -132,13 +132,13 @@ public class DetectCollisionStrategy extends ChildStrategy {
 		case START:
 			break;
 		case DRIVING:
-//			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
-//					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
-//			break;
+			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
+					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
+			break;
 		case WALL_FOUND:
-//			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
-//					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
-//			foundWall = true;
+			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
+					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
+			foundWall = true;
 			break;
 		case STOPPING:
 			break;

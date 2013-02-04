@@ -121,6 +121,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	@Override
 	protected void childInit() {
+		System.out.println("init collision");
 		currentState = State.START;
 		collisionStrategy.init();
 	}
@@ -132,7 +133,12 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	@Override
 	public void work() {
-		State currentState = checkState();
+
+		State oldState = currentState;
+		currentState = checkState();
+		if(oldState != currentState)
+			System.out.println("running: " + currentState.name());
+		
 		switch (currentState) {
 		case START:
 			break;

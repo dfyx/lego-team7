@@ -67,8 +67,8 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 			break;
 		}
 
-		// System.out.println("(" + HEAD.getDistance() + ")" + oldState.name()
-		// + " -> " + currentState.name());
+//		if (oldState != currentState)
+//			System.out.println(oldState.name() + " -> " + currentState.name());
 		return currentState;
 	}
 
@@ -83,7 +83,10 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 
 	@Override
 	protected void doRun() {
+		State oldState = currentState;
 		currentState = checkState();
+		if(oldState != currentState)
+			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
 		case STARTED:
@@ -101,12 +104,13 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 				wallStrategy.init();
 			}
 			edgeStrategy.run();
+			break;
 		case WALL_COLLISION:
 			if (collisionStrategy.justStarted()) {
 				wallStrategy.init();
 			}
-			System.out.println("collide!");
 			collisionStrategy.run();
+			break;
 		}
 	}
 
