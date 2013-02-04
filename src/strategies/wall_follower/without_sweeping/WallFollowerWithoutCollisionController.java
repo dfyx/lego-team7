@@ -20,28 +20,31 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 
 	private State currentState;
 
+	// TODO SB collision detection, while in edge
 	public WallFollowerWithoutCollisionController(Side headSide) {
 		this.headSide = headSide;
 		collisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
-				1000,// backward speed
-				100, // backward time
+				500,// backward speed
+				1000, // backward time
 				30, // max obstacle distance
-				200, // obstacle speed
+				400, // obstacle speed
 				1000, // obstacle direction
+				300, // extra turn time
 				50, // max wall distance
 				200, // wall speed
 				1000 // wall direction
 		);
 		edgeStrategy = new EdgeStrategy(this.headSide, 50 // wall distance
-				, 0, 1000 // Rotation speed, direction
-				, 0 // Time
-				, 1000, 400);
+				, 1000, 1000 // Rotation speed, direction
+				, 300 // Time
+				, 1000, 300);
 		wallStrategy = new WallFollowerStrategy(this.headSide);
 	}
 
 	private State checkState() {
 		collisionStrategy.check();
+		edgeStrategy.check();
 
 		State oldState = currentState;
 		switch (currentState) {
@@ -67,8 +70,8 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 			break;
 		}
 
-//		if (oldState != currentState)
-//			System.out.println(oldState.name() + " -> " + currentState.name());
+		if (oldState != currentState)
+			System.out.println(oldState.name() + " -> " + currentState.name());
 		return currentState;
 	}
 

@@ -6,10 +6,8 @@ import static robot.Platform.HEAD;
 import static robot.Platform.ENGINE;
 
 public class EdgeStrategy extends ChildStrategy {
-	private Side headSide;
-
 	private final int wallDistance;
-	
+
 	private int currentDistance = 0;
 	private int lastDistance = 0;
 
@@ -64,9 +62,9 @@ public class EdgeStrategy extends ChildStrategy {
 
 		State oldState = currentState;
 		currentState = checkState();
-		if(oldState != currentState)
+		if (oldState != currentState)
 			System.out.println("running: " + currentState.name());
-		
+
 		switch (currentState) {
 		case START:
 			break;
@@ -99,21 +97,13 @@ public class EdgeStrategy extends ChildStrategy {
 	public EdgeStrategy(Side headSide, int wallDistance, int rotationSpeed,
 			int rotationDirection, int rotationTime, int curveSpeed,
 			int curveDirection) {
-		this.headSide = headSide;
-
 		this.wallDistance = wallDistance;
 		this.ROTATION_SPEED = rotationSpeed;
-		if (this.headSide == Side.RIGHT)
-			this.ROTATION_DIRECTION = -rotationDirection;
-		else
-			this.ROTATION_DIRECTION = rotationDirection;
+		this.ROTATION_DIRECTION = -headSide.getValue() * rotationDirection;
 		this.ROTATION_TIME = rotationTime;
 
 		this.CURVE_SPEED = curveSpeed;
-		if (this.headSide == Side.RIGHT)
-			this.CURVE_DIRECTION = curveDirection;
-		else
-			this.CURVE_DIRECTION = -curveDirection;
+		this.CURVE_DIRECTION = headSide.getValue() * curveDirection;
 	}
 
 	@Override

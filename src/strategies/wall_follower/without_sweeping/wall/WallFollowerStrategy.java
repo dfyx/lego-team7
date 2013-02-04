@@ -21,6 +21,11 @@ public class WallFollowerStrategy extends ChildStrategy {
 
 	private static final int LINEAR_FACTOR_MOVE_AWAY = 55;
 	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 37;
+	
+	/**
+	 * used to turn collision detection off, if we are regulating too much.
+	 */
+	private static final int BAD_VALUE = 200;
 
 	/**
 	 * distance to wall (in cm)
@@ -43,8 +48,9 @@ public class WallFollowerStrategy extends ChildStrategy {
 		if (headSide == Side.LEFT)
 			direction = -direction;
 
-//		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
-//				+ " -> " + direction);
+		// System.out.println("IST/SOLL: " + actualValue + " / " +
+		// referenceValue
+		// + " -> " + direction);
 
 		ENGINE.move(speed, direction);
 	}
@@ -64,6 +70,16 @@ public class WallFollowerStrategy extends ChildStrategy {
 			linearValue = diff * LINEAR_FACTOR_MOVE_AWAY;
 
 		return Utils.clamp(linearValue, -1000, 1000);
+	}
+
+	/**
+	 * @return true, iff we do not drive on a straight line.
+	 */
+	public boolean badValues() {
+		int abs = getMotorDirection();
+		if (abs < 0)
+			abs *= -1;
+		return abs > BAD_VALUE;
 	}
 
 	@Override
