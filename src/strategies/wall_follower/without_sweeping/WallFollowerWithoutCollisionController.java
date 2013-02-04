@@ -6,7 +6,6 @@ import strategies.wall_follower.without_sweeping.edge.EdgeStrategy;
 import strategies.wall_follower.without_sweeping.wall.WallFollowerStrategy;
 import utils.Utils.Side;
 import static robot.Platform.ENGINE;
-import static robot.Platform.HEAD;
 
 public class WallFollowerWithoutCollisionController extends Strategy {
 	private Side headSide;
@@ -23,9 +22,12 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 
 	public WallFollowerWithoutCollisionController(Side headSide) {
 		this.headSide = headSide;
-		collisionStrategy = new FollowCollisionStrategy(5, 90,// detection
-				0,// backward speed
-				0 // backward time
+		collisionStrategy = new FollowCollisionStrategy(headSide, // head,
+				5, 90,// detection
+				1000,// backward speed
+				100, // backward time
+				30, // max obstacle distance
+				50 // max wall distance
 		);
 		edgeStrategy = new EdgeStrategy(this.headSide, 50 // wall distance
 				, 0, 1000 // Rotation speed, direction

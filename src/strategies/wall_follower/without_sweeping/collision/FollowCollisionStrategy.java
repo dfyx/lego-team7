@@ -1,7 +1,9 @@
 package strategies.wall_follower.without_sweeping.collision;
 
+import static robot.Platform.HEAD;
 import strategies.util.ChildStrategy;
 import strategies.wall_follower.without_sweeping.DetectCollisionStrategy;
+import utils.Utils.Side;
 
 public class FollowCollisionStrategy extends ChildStrategy {
 	// TODO SB make this work for both head positions
@@ -10,6 +12,13 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	private final int BACKWARD_SPEED;
 	private final long BACKWARD_TIME;
 	private long endBackwardTime;
+
+	private final int FRONT_POSITION = 0;
+	private final int SIDE_POSITION;
+
+	private final int OBSTACLE_DISTANCE;
+
+	private final int WALL_DISTANCE;
 
 	// TODO SM (SB) check if collision was false positive through turning head
 	// to front and measuring resistance
@@ -46,22 +55,22 @@ public class FollowCollisionStrategy extends ChildStrategy {
 				newState = State.TURN_HEAD_FORWARD;
 			break;
 		case TURN_HEAD_FORWARD:
-			if (headIsForward)
+			if (!HEAD.isMoving() && HEAD.getPosition() == FRONT_POSITION)
 				newState = State.SEARCH_OBSTACLE;
 			break;
 		case SEARCH_OBSTACLE:
 			newState = State.AVOID_OBSTACE;
 			break;
 		case AVOID_OBSTACE:
-			if (noObstacleInSight)
+			if (HEAD.getDistance() > OBSTACLE_DISTANCE)
 				newState = State.TURN_HEAD_SIDEWAYS;
 			break;
 		case TURN_HEAD_SIDEWAYS:
-			if (headIsSideways)
+			if (!HEAD.isMoving() && HEAD.getPosition() == SIDE_POSITION)
 				newState = State.SEARCH_WALL;
 			break;
 		case SEARCH_WALL:
-			if (wallFound)
+			if (HEAD.getDistance() < WALL_DISTANCE)
 				newState = State.WALL_FOUND;
 			break;
 		case WALL_FOUND:
@@ -71,10 +80,17 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		return newState;
 	}
 
-	public FollowCollisionStrategy(int valueCount, int sensitivity, int backwardSpeed, int backwardTime) {
+	public FollowCollisionStrategy(Side headSide, int valueCount,
+			int sensitivity, int backwardSpeed, int backwardTime,
+			int obstaclePosition, int wallDistance) {
+		SIDE_POSITION = 1000 * headSide.getValue();
+
 		collisionStrategy = new DetectCollisionStrategy(valueCount, sensitivity);
 		BACKWARD_SPEED = backwardSpeed;
 		BACKWARD_TIME = backwardTime;
+
+		OBSTACLE_DISTANCE = obstaclePosition;
+		WALL_DISTANCE = wallDistance;
 	}
 
 	@Override
@@ -84,8 +100,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	@Override
 	public boolean isStopped() {
-		// TODO SB only used to stay stopped
-		return false;
+		return currentState == State.WALL_FOUND;
 	}
 
 	@Override
@@ -101,7 +116,30 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	@Override
 	public void work() {
-		collisionStrategy.work();
+		State currentState = checkState();
+		switch (currentState) {
+		case START:
+			break;
+		case COLLIDE:
+			break;
+		case STAND:
+			break;
+		case DRIVE_BACK:
+			break;
+		case TURN_HEAD_FORWARD:
+			break;
+		case SEARCH_OBSTACLE:
+			break;
+		case AVOID_OBSTACE:
+			break;
+		case TURN_HEAD_SIDEWAYS:
+			break;
+		case SEARCH_WALL:
+			break;
+		case WALL_FOUND:
+			break;
+		}
+		// TODO SB collisionStrategy.work();
 	}
 
 }
