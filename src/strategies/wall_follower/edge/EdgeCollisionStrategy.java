@@ -1,8 +1,8 @@
-package strategies.wall_follower.without_sweeping.edge;
+package strategies.wall_follower.edge;
 
 import static robot.Platform.ENGINE;
 import strategies.util.ChildStrategy;
-import strategies.wall_follower.without_sweeping.DetectCollisionStrategy;
+import strategies.wall_follower.DetectCollisionStrategy;
 import utils.Utils.Side;
 
 public class EdgeCollisionStrategy extends ChildStrategy {

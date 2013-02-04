@@ -1,11 +1,11 @@
-package strategies.wall_follower.without_sweeping;
+package strategies.wall_follower;
 
 import static robot.Platform.ENGINE;
 import strategies.Strategy;
-import strategies.wall_follower.without_sweeping.collision.FollowCollisionStrategy;
-import strategies.wall_follower.without_sweeping.edge.EdgeCollisionStrategy;
-import strategies.wall_follower.without_sweeping.edge.EdgeStrategy;
-import strategies.wall_follower.without_sweeping.wall.WallFollowerStrategy;
+import strategies.wall_follower.collision.FollowCollisionStrategy;
+import strategies.wall_follower.edge.EdgeCollisionStrategy;
+import strategies.wall_follower.edge.EdgeStrategy;
+import strategies.wall_follower.wall.WallFollowerStrategy;
 import utils.Utils.Side;
 
 public class WallFollowerWithoutCollisionController extends Strategy {

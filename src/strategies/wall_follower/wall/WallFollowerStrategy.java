@@ -1,4 +1,4 @@
-package strategies.wall_follower.without_sweeping.wall;
+package strategies.wall_follower.wall;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
