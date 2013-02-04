@@ -31,5 +31,7 @@ public abstract class ChildStrategy extends Strategy{
 		super.init();
 	}
 	
-
+	public int getRunCount() {
+		return runCount;
+	}
 }
