@@ -147,7 +147,6 @@ public class Engine {
 	 *            Should not be below ~100 mm (in mm)
 	 */
 	public void moveCircle(int speed, int innerRadius) {
-		int oldInner = innerRadius;
 		if (innerRadius < 50)
 			throw new IllegalArgumentException(
 					"inner radius of circle to small: " + innerRadius + " < "
