@@ -98,10 +98,11 @@ public class LightCalibrationStrategy extends Strategy {
 	            
 	            HEAD.calibrateLight(blackPoint, whitePoint);
 	            
-	            // FIXME: Disable debugging code
+	            /*
                 System.out.println("Min: " + samples[0] + " Max: "
                         + samples[SAMPLE_SIZE - 1] + " bp: " + blackPoint
                         + " wp: " + whitePoint);
+                */
 	        }
 	    }
 	}
