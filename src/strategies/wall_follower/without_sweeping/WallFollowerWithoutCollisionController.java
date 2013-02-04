@@ -24,8 +24,8 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 		this.headSide = headSide;
 		collisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
-				1000,// backward speed
-				100, // backward time
+				500,// backward speed
+				1000, // backward time
 				30, // max obstacle distance
 				200, // obstacle speed
 				1000, // obstacle direction

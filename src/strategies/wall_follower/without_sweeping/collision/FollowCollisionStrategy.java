@@ -153,6 +153,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			// TODO SB use touch sensors?
 			break;
 		case TURN_HEAD_FORWARD:
+			ENGINE.stop();
 			HEAD.moveTo(FRONT_POSITION, true);
 			break;
 		case SEARCH_OBSTACLE:
@@ -162,6 +163,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			// intentionally left blank
 			break;
 		case TURN_HEAD_SIDEWAYS:
+			ENGINE.stop();
 			HEAD.moveTo(SIDE_POSITION, true);
 			break;
 		case SEARCH_WALL:
