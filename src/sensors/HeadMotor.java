@@ -23,7 +23,7 @@ class HeadMotor extends Thread {
 	private final static int MIN_MOVEMENT = 1;
 
 	// How much of space to spare on the left and on the right (in motor units)
-	private final static int CALIBRATION_OFFSET = 20;
+	private final static int CALIBRATION_OFFSET = 10;
 
 	/**
 	 * The voltage to use for calibration
@@ -63,6 +63,14 @@ class HeadMotor extends Thread {
 		if (motorPos > mostRightPos || motorPos < mostLeftPos)
 			throw new IllegalArgumentException("Move out of range: " + motorPos);
 		MOTOR.rotateTo(motorPos,async);
+	}
+	
+	public void setStallThreshold(int error, int time) {
+		MOTOR.setStallThreshold(error,time);
+	}
+	
+	public boolean isStalled() {
+		return MOTOR.isStalled();
 	}
 
 	public synchronized boolean isMoving() {

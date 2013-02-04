@@ -25,8 +25,10 @@ public class LightCalibrationStrategy extends Strategy {
 	private static final int BASE_SPEED = 50;
 	/** Number of samples to collect. */
 	private static final int SAMPLE_SIZE = 200;
-	/** Number of largest/smallest samples to ignore. */
-	private static final int DROPPED_SAMPLES = 5;
+	/** Number of smallest samples to ignore. */
+	private static final int DROPPED_DARK_SAMPLES = 10;
+	/** Number of largest samples to ignore. */
+	private static final int DROPPED_LIGHT_SAMPLES = 5;
     /**
      * Number of largest/smallest remaining samples to use for black-/whitePoint
      * calculation.
@@ -43,7 +45,6 @@ public class LightCalibrationStrategy extends Strategy {
 	private int samples[] = new int[SAMPLE_SIZE];
 
 	protected void doInit() {
-	    HEAD.setFloodlight(true);
 		// Switch off calibration
 		HEAD.resetLightCalibration();
 		
@@ -73,10 +74,12 @@ public class LightCalibrationStrategy extends Strategy {
                 int blackPoint = 0;
                 int whitePoint = 0;
                 
-	            for (int i = DROPPED_SAMPLES; i < DROPPED_SAMPLES + ACCEPTED_SAMPLES; i++) {
+	            for (int i = DROPPED_DARK_SAMPLES; i < DROPPED_DARK_SAMPLES + ACCEPTED_SAMPLES; i++) {
 	                blackPoint += samples[i];
-	                whitePoint += samples[SAMPLE_SIZE - i - 1];
 	            }
+	            for (int i = DROPPED_LIGHT_SAMPLES; i < DROPPED_LIGHT_SAMPLES + ACCEPTED_SAMPLES; i++) {
+                    whitePoint += samples[SAMPLE_SIZE - i - 1];
+                }
 	            
 	            blackPoint /= ACCEPTED_SAMPLES;
 	            whitePoint /= ACCEPTED_SAMPLES;

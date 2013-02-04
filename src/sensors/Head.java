@@ -33,6 +33,10 @@ public class Head {
 		return polledDistance;
 	}
 
+	/**
+     * Returns the light value, normalized between 0 and 1000. Backlight effects
+     * are suppressed.
+     */
 	public int getLight() {
 		return polledLight;
 	}
@@ -48,13 +52,6 @@ public class Head {
 	public void terminate() {
 		sweepThread.terminate();
 		headMotor.terminate();
-	}
-
-	/**
-	 * Switch floodlight on or off
-	 */
-	public void setFloodlight(boolean value) {
-		lightSensor.setFloodlight(value);
 	}
 
 	/**
@@ -120,6 +117,18 @@ public class Head {
 			throw new IllegalStateException("moveTo() call while sweeping");
 		headMotor.moveTo(position, async);
 	}
+	
+	public void startCheckStalled(int moveTarget) {
+		final int ERROR = 20;
+		final int TIME = 20;
+		headMotor.stopMoving();
+		headMotor.setStallThreshold(ERROR,TIME);
+		headMotor.moveTo(moveTarget);
+	}
+	
+	public boolean isStalled() {
+		return headMotor.isStalled();
+	}
 
 	/**
 	 * Move the head manually to a given position
@@ -161,13 +170,12 @@ public class Head {
 	}
 
 	/**
-	 * Calibrate the light sensor
-	 * 
-	 * @param minValue
-	 *            The value mapped to 0
-	 * @param maxValue
-	 *            The value mapped to 1000
-	 */
+     * Calibrate the light sensor. The passed values must have been obtained by
+     * {@link #getLight()} because of the backlight-subtraction applied there.
+     * 
+     * @param minValue The value mapped to 0
+     * @param maxValue The value mapped to 1000
+     */
 	public void calibrateLight(int minValue, int maxValue) {
 		lightSensor.calibrate(minValue, maxValue);
 	}
@@ -179,4 +187,28 @@ public class Head {
 	public void setSweepSpeed(int speed) {
 		sweepThread.setSpeed(speed);
 	}
+
+    /**
+     * Converts an angle in degress to a positional value compliant with
+     * {@link #getPosition()}.
+     * 
+     * @param degrees
+     *            an angle, {@code -90 <= angle <= 90}
+     * @return a position value, {@code -1000 <= result <= 1000}
+     */
+    public static int degreeToPosition(final int degrees) {
+        return (degrees * 1000) / 90;
+    }
+    
+    /**
+     * Converts a positional value as provided by {@link #getPosition()} to an
+     * angular value.
+     * 
+     * @param position
+     *            a position value, {@code -1000 <= position <= 1000}
+     * @return an angle, {@code -90 <= result <= 90}
+     */
+    public static int positionToDegrees(final int position) {
+        return (position * 90) / 1000;
+    }
 }

@@ -3,7 +3,32 @@ package utils;
 import lejos.util.Stopwatch;
 
 public class Utils {
-	private static Stopwatch watch = new Stopwatch();
+	
+    /**
+     * An enum representing left/right hand sides.
+     */
+    public static enum Side {
+    	RIGHT(1), 
+    	LEFT(-1);
+    	
+    	private final int value;
+    	
+    	private Side(final int value) {
+    	    this.value = value;
+        }
+    	
+        /**
+         * Returns a directional value conforming to {@code robot.Engine} and
+         * {@code sensors.Head}.
+         * 
+         * @return {@code -1} for {@code LEFT} and {@code 1} for {@code RIGHT}
+         */
+        public int getValue() {
+            return value;
+        }
+    }
+
+    private static Stopwatch watch = new Stopwatch();
 	
 	public static int clamp(int value, int min, int max) {
 		return Math.min(max,Math.max(min,value));

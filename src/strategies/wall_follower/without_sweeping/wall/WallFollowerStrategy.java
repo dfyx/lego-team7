@@ -1,12 +1,15 @@
-package strategies.wall_follower;
+package strategies.wall_follower.without_sweeping.wall;
 
 import static robot.Platform.ENGINE;
-import strategies.Strategy;
+import static robot.Platform.HEAD;
+import strategies.util.ChildStrategy;
 import utils.Utils;
 import utils.Utils.Side;
 
 // TODO SB should work for right and left looking sensor head
-public class WallFollowerStrategy extends Strategy {
+public class WallFollowerStrategy extends ChildStrategy {
+	private Side headSide;
+
 	// TODO SB calibrate?
 	/**
 	 * desired distance to wall (in cm)
@@ -15,17 +18,7 @@ public class WallFollowerStrategy extends Strategy {
 
 	private static final int MAX_SPEED = 1000;
 	private int speed = MAX_SPEED;
-	private int speedWhileScanning = MAX_SPEED/2;
 
-	private enum HeadOn {
-		RIGHT_SIDE, LEFT_SIDE
-	}
-
-	private static HeadOn headOn;
-
-	/**
-	 * Turn on max speed outside of +- 5cm corridor 5*_200_ = 1000
-	 */
 	private static final int LINEAR_FACTOR_MOVE_AWAY = 55;
 	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 37;
 
@@ -34,33 +27,26 @@ public class WallFollowerStrategy extends Strategy {
 	 */
 	private int actualValue;
 
-	public WallFollowerStrategy() {
-
+	public WallFollowerStrategy(Side headSide) {
+		this.headSide = headSide;
 	}
 
-	protected void doInit() {
+	protected void childInit() {
 	}
 
-	protected void doRun() {
-	    // doInit is moving the sensor head nonblocking -> skip control loop
-	    // until the sensor head arrived at its final position 
-	    
-		actualValue = WallFollowerController.getWallDistance();
-		
+	public void work() {
+		// TODO wait while sensor head is moving
+		actualValue = HEAD.getDistance();
 
 		int direction = getMotorDirection();
 
-		if (WallFollowerController.headOn == Side.LEFT)
+		if (headSide == Side.LEFT)
 			direction = -direction;
 
 //		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
 //				+ " -> " + direction);
 
-		if(actualValue != WallFollowerController.lastDistance) {
-			System.out.println("---- NEW VALUE ---"+actualValue + " ("+System.currentTimeMillis()+")");
-			ENGINE.move(speed/2, 0);
-		} else
-			ENGINE.move(speedWhileScanning, direction);
+		ENGINE.move(speed, direction);
 	}
 
 	// TODO SB doesn't work on big distances
@@ -78,5 +64,20 @@ public class WallFollowerStrategy extends Strategy {
 			linearValue = diff * LINEAR_FACTOR_MOVE_AWAY;
 
 		return Utils.clamp(linearValue, -1000, 1000);
+	}
+
+	@Override
+	public boolean willStart() {
+		return true;
+	}
+
+	@Override
+	public boolean isStopped() {
+		return false;
+	}
+
+	@Override
+	public void check() {
+		return;
 	}
 }
