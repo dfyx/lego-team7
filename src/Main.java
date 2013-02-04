@@ -2,6 +2,8 @@ import lejos.util.Delay;
 import robot.Platform;
 import strategies.Strategy;
 import strategies.TestStrategy;
+import strategies.wall_follower.without_sweeping.WallFollowerWithoutCollisionController;
+import utils.Utils.Side;
 
 /**
  * @author markus
@@ -18,7 +20,8 @@ public class Main {
 		while (Platform.HEAD.isCalibrating())
 			Delay.msDelay(500);
 
-		Strategy mainStrategy = new TestStrategy();
+		WallFollowerWithoutCollisionController mainStrategy = new WallFollowerWithoutCollisionController(
+				Side.RIGHT);
 		Loop loop = new Loop(mainStrategy);
 		loop.run();
 	}

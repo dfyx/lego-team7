@@ -96,6 +96,12 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 			if (wallStrategy.justStarted()) {
 				collisionStrategy.init();
 				edgeStrategy.init();
+			} else if(wallStrategy.badValues()) {
+				// pause collision detection, if we are not driving in a straight line
+				collisionStrategy.init();
+				System.out.println("pause collision");
+			} else {
+				System.out.println("use collision");
 			}
 			wallStrategy.run();
 			break;
