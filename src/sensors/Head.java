@@ -51,13 +51,6 @@ public class Head {
 	}
 
 	/**
-	 * Switch floodlight on or off
-	 */
-	public void setFloodlight(boolean value) {
-		lightSensor.setFloodlight(value);
-	}
-
-	/**
 	 * Returns true, iff the sensor head is currently moving
 	 */
 	public boolean isMoving() {
