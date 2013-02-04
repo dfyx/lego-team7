@@ -77,7 +77,7 @@ class HeadMotor extends Thread {
 		int diff = collisionTachoCount - currentTachoCount;
 		if(diff < 0)
 			diff *= -1;
-		return diff > 5;
+		return diff > 3;
 	}
 
 	private void doRotateTo(int target, boolean async) {
