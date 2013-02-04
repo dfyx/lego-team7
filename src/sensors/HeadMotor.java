@@ -58,6 +58,13 @@ class HeadMotor extends Thread {
 	public HeadMotor() {
 		start();
 	}
+	
+	public void setFloating(boolean floating) {
+		if(floating)
+			MOTOR.flt(true);
+		else
+			MOTOR.stop(true);
+	}
 
 	private void doRotateTo(int target, boolean async) {
 		int motorPos = (mostLeftPos + mostRightPos) / 2 + target

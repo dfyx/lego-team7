@@ -62,6 +62,18 @@ public class Head {
 	}
 
 	/**
+	 * Set the motor to floating. You need to explicitly stop the floating.
+	 * 
+	 * Used for collision detection.
+	 * 
+	 * @param floating
+	 *            True, iff the motor should float. False otherwise.
+	 */
+	public void setFloating(boolean floating) {
+		headMotor.setFloating(floating);
+	}
+
+	/**
 	 * Returns true, iff the sensor head is currently moving
 	 */
 	public boolean isMoving() {
@@ -136,8 +148,9 @@ public class Head {
 	}
 
 	/**
-	 * Call startCheckStalled first.
-	 * Call stopMoving as soon, as this yields true.
+	 * Call startCheckStalled first. Call stopMoving as soon, as this yields
+	 * true.
+	 * 
 	 * @return
 	 */
 	public boolean isStalled() {
@@ -184,12 +197,10 @@ public class Head {
 	}
 
 	/**
-<<<<<<< Updated upstream
-	 * Calibrate the light sensor
-=======
-	 * Calibrate the light sensor. The passed values must have been obtained by
+	 * <<<<<<< Updated upstream Calibrate the light sensor ======= Calibrate the
+	 * light sensor. The passed values must have been obtained by
 	 * {@link #getLight()} because of the backlight-subtraction applied there.
->>>>>>> Stashed changes
+	 * >>>>>>> Stashed changes
 	 * 
 	 * @param minValue
 	 *            The value mapped to 0
