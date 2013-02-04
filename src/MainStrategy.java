@@ -4,8 +4,8 @@ import robot.Platform;
 import strategies.CountLinesStrategy;
 import strategies.DriveForwardStrategy;
 import strategies.LightCalibrationStrategy;
-import strategies.RaceStrategy;
 import strategies.Strategy;
+import strategies.sections.RaceStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 
 public class MainStrategy extends Strategy {
