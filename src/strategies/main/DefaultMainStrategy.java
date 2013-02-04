@@ -87,7 +87,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			currentStrategy = new WallFollowerStrategy(Side.RIGHT, // side
 					0 , // rotation time
 					1000 , // curve speed
-					300); // curve direction
+					500); // curve direction
 			break;
 		}
 		currentStrategy.init();
