@@ -7,7 +7,7 @@ import utils.Utils;
 import utils.Utils.Side;
 
 // TODO SB should work for right and left looking sensor head
-public class WallFollowerStrategy extends ChildStrategy {
+public class WallRegulatorStrategy extends ChildStrategy {
 	private Side headSide;
 
 	// TODO SB calibrate?
@@ -32,7 +32,7 @@ public class WallFollowerStrategy extends ChildStrategy {
 	 */
 	private int actualValue;
 
-	public WallFollowerStrategy(Side headSide) {
+	public WallRegulatorStrategy(Side headSide) {
 		this.headSide = headSide;
 	}
 

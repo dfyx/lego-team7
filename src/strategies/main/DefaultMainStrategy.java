@@ -8,6 +8,7 @@ import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
 import strategies.sections.RaceStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
+import utils.Utils.Side;
 
 public class DefaultMainStrategy extends MainStrategy {
 	
@@ -83,7 +84,10 @@ public class DefaultMainStrategy extends MainStrategy {
 			break;
 		case LABYRINTH:
 			System.out.println("->LABYRINTH");
-			currentStrategy = new WallFollowerStrategy();
+			currentStrategy = new WallFollowerStrategy(Side.RIGHT, // side
+					0 , // rotation time
+					1000 , // curve speed
+					300); // curve direction
 			break;
 		}
 		currentStrategy.init();

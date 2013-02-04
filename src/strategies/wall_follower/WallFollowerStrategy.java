@@ -5,16 +5,16 @@ import strategies.Strategy;
 import strategies.wall_follower.collision.FollowCollisionStrategy;
 import strategies.wall_follower.edge.EdgeCollisionStrategy;
 import strategies.wall_follower.edge.EdgeStrategy;
-import strategies.wall_follower.wall.WallFollowerStrategy;
+import strategies.wall_follower.wall.WallRegulatorStrategy;
 import utils.Utils.Side;
 
-public class WallFollowerWithoutCollisionController extends Strategy {
+public class WallFollowerStrategy extends Strategy {
 	private Side headSide;
 
 	private FollowCollisionStrategy wallCollisionStrategy;
 	private EdgeCollisionStrategy edgeCollisionStrategy;
 	private EdgeStrategy edgeStrategy;
-	private WallFollowerStrategy wallStrategy;
+	private WallRegulatorStrategy wallStrategy;
 
 	private enum State {
 		START, STARTED, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE, EDGE_COLLISION
@@ -29,7 +29,7 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 	 * @param curveSpeed should be 1000
 	 * @param curveDirection should be 300 for race and less for labyrinth
 	 */
-	public WallFollowerWithoutCollisionController(Side headSide, int rotationTime, int curveSpeed, int curveDirection) {
+	public WallFollowerStrategy(Side headSide, int rotationTime, int curveSpeed, int curveDirection) {
 		this.headSide = headSide;
 		wallCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
@@ -52,7 +52,7 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 				, 1000, 1000 // Rotation speed, direction
 				, rotationTime // Time
 				, curveSpeed, curveDirection);
-		wallStrategy = new WallFollowerStrategy(this.headSide);
+		wallStrategy = new WallRegulatorStrategy(this.headSide);
 	}
 
 	private State checkState() {
