@@ -23,7 +23,7 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 
 	public WallFollowerWithoutCollisionController(Side headSide) {
 		this.headSide = headSide;
-		collisionStrategy = new FollowCollisionStrategy();
+		collisionStrategy = new FollowCollisionStrategy(5, 90);
 		edgeStrategy = new EdgeStrategy(this.headSide, 50 // wall distance
 				, 0, 1000 // Rotation speed, direction
 				, 0 // Time
@@ -32,6 +32,8 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 	}
 
 	private State checkState() {
+		collisionStrategy.check();
+		
 		State oldState = currentState;
 		switch (currentState) {
 		case START:
@@ -45,16 +47,19 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 				currentState = State.WALL_COLLISION;
 			else if (edgeStrategy.willStart())
 				currentState = State.FOLLOW_EDGE;
+			break;
 		case WALL_COLLISION:
 			if (collisionStrategy.isStopped())
 				currentState = State.FOLLOW_WALL;
+			break;
 		case FOLLOW_EDGE:
 			if (edgeStrategy.isStopped())
 				currentState = State.FOLLOW_WALL;
+			break;
 		}
 
-		// System.out.println("(" + HEAD.getDistance() + ")" + oldState.name()
-		// + " -> " + currentState.name());
+//		 System.out.println("(" + HEAD.getDistance() + ")" + oldState.name()
+//		 + " -> " + currentState.name());
 		return currentState;
 	}
 

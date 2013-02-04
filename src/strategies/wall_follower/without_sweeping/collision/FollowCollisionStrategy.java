@@ -1,37 +1,39 @@
 package strategies.wall_follower.without_sweeping.collision;
 
 import strategies.util.ChildStrategy;
+import strategies.wall_follower.without_sweeping.DetectCollisionStrategy;
 
-public class FollowCollisionStrategy extends ChildStrategy{
+public class FollowCollisionStrategy extends ChildStrategy {
+	DetectCollisionStrategy collisionStrategy;
+
+	public FollowCollisionStrategy(int valueCount, int sensitivity) {
+		collisionStrategy = new DetectCollisionStrategy(valueCount, sensitivity);
+	}
 
 	@Override
 	public boolean willStart() {
-		// TODO Auto-generated method stub
-		return false;
+		return collisionStrategy.willStart();
 	}
 
 	@Override
 	public boolean isStopped() {
-		// TODO Auto-generated method stub
+		// TODO SB only used to stay stopped
 		return false;
 	}
 
 	@Override
 	protected void childInit() {
-		// TODO Auto-generated method stub
-		
+		collisionStrategy.init();
 	}
 
 	@Override
 	public void check() {
-		// TODO Auto-generated method stub
-		
+		collisionStrategy.check();
 	}
 
 	@Override
 	public void work() {
-		// TODO Auto-generated method stub
-		
+		collisionStrategy.work();
 	}
 
 }

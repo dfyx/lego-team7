@@ -43,8 +43,8 @@ public class WallFollowerStrategy extends ChildStrategy {
 		if (headSide == Side.LEFT)
 			direction = -direction;
 
-		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
-				+ " -> " + direction);
+//		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
+//				+ " -> " + direction);
 
 		ENGINE.move(speed, direction);
 	}

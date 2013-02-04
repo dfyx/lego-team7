@@ -3,12 +3,14 @@ package strategies.wall_follower.without_sweeping;
 import static robot.Platform.ENGINE;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
-import strategies.Strategy;
+import strategies.util.ChildStrategy;
 
-public class DetectCollisionStrategy extends Strategy {
+public class DetectCollisionStrategy extends ChildStrategy {
 	private final int LAST_VALUES_COUNT;
 	private final int COLLISION_PERCENTAGE;
 	private int[][] lastValues;
+
+	private boolean foundWall;
 
 	private enum Side {
 		LEFT(0), RIGHT(1);
@@ -71,21 +73,26 @@ public class DetectCollisionStrategy extends Strategy {
 		return average / LAST_VALUES_COUNT;
 	}
 
-	private int[] tachoDiff;
+	private int[] tachoDiff = new int[2];
 
 	private static final int INITIAL_VALUE = 0;
 
 	@Override
-	protected void doInit() {
+	protected void childInit() {
 		currentState = State.START;
 		for (int i = 0; i < LAST_VALUES_COUNT; ++i) {
 			for (int j = 0; j < 2; ++j) {
 				lastValues[j][i] = INITIAL_VALUE;
 			}
 		}
+		foundWall = false;
 	}
 
 	private State checkState() {
+		// Syso
+		for (int side = 0; side < 2; ++side)
+			System.out.print(tachoDiff[side] + " < " + averageSpeed(Side.valueOf(side)) + ", ");
+		System.out.println();
 		State newState = currentState;
 		switch (currentState) {
 		case START:
@@ -94,8 +101,8 @@ public class DetectCollisionStrategy extends Strategy {
 		case DRIVING:
 			for (int side = 0; side < 2; ++side)
 				if (tachoDiff[side] < (averageSpeed(Side.valueOf(side)) * COLLISION_PERCENTAGE) / 100) {
-//					System.out.println("Wall found: " + averageSpeed(Side.LEFT)
-//							+ " / " + averageSpeed(Side.RIGHT));
+					System.out.println("Wall found: " + averageSpeed(Side.LEFT)
+							+ " / " + averageSpeed(Side.RIGHT));
 					newState = State.WALL_FOUND;
 				}
 			break;
@@ -105,12 +112,12 @@ public class DetectCollisionStrategy extends Strategy {
 		case STOPPING:
 			break;
 		}
-//		System.out.println("State: " + newState);
+		System.out.println("State: " + newState);
 		return newState;
 	}
 
 	@Override
-	protected void doRun() {
+	public void check() {
 		int[] newTachoCount = new int[2];
 		newTachoCount[0] = LEFT_MOTOR.getTachoCount();
 		newTachoCount[1] = RIGHT_MOTOR.getTachoCount();
@@ -125,13 +132,13 @@ public class DetectCollisionStrategy extends Strategy {
 		case START:
 			break;
 		case DRIVING:
-//			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
-//					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
+			System.out.println("Moving  : " + tachoDiff[Side.LEFT.getValue()]
+					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
 			break;
 		case WALL_FOUND:
-//			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
-//					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
-			ENGINE.stop();
+			System.out.println("Stopping: " + tachoDiff[Side.LEFT.getValue()]
+					+ " , " + tachoDiff[Side.RIGHT.getValue()]);
+			foundWall = true;
 			break;
 		case STOPPING:
 			break;
@@ -145,4 +152,20 @@ public class DetectCollisionStrategy extends Strategy {
 			oldTachoCount[j] = newTachoCount[j];
 		}
 	}
+
+	@Override
+	public boolean willStart() {
+		return foundWall;
+	}
+
+	@Override
+	public boolean isStopped() {
+		return true;
+	}
+
+	@Override
+	public void work() {
+		ENGINE.stop();
+	}
+
 }
