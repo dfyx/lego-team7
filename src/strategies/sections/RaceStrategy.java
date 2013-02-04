@@ -1,6 +1,7 @@
-package strategies;
+package strategies.sections;
 
 import robot.Platform;
+import strategies.Strategy;
 
 //TODO IMPLEMENT!!!
 
