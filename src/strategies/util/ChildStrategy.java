@@ -19,17 +19,17 @@ public abstract class ChildStrategy extends Strategy{
 	/**
 	 * Call only, if the strategy can control motors, etc.
 	 */
-	public final void doRun() {
-		work();
+	@Override
+	public void run() {
+		super.run();
 		runCount++;
 	}
-	protected abstract void work();
 	
-	public final void doInit() {
+	@Override
+	public void init() {
 		runCount = 0;
-		childInit();
+		super.init();
 	}
-	protected abstract void childInit();
 	
 
 }

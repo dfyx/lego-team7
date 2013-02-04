@@ -55,7 +55,7 @@ public class EdgeStrategy extends ChildStrategy {
 	}
 
 	@Override
-	public void work() {
+	public void doRun() {
 		currentState = checkState();
 		switch (currentState) {
 		case START:
@@ -118,7 +118,7 @@ public class EdgeStrategy extends ChildStrategy {
 	}
 
 	@Override
-	protected void childInit() {
+	protected void doInit() {
 		currentState = State.START;
 	}
 

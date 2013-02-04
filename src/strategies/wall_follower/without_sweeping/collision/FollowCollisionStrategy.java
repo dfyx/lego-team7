@@ -120,7 +120,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	}
 
 	@Override
-	protected void childInit() {
+	protected void doInit() {
 		currentState = State.START;
 		collisionStrategy.init();
 	}
@@ -131,7 +131,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	}
 
 	@Override
-	public void work() {
+	public void doRun() {
 		State currentState = checkState();
 		switch (currentState) {
 		case START:

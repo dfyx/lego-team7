@@ -31,10 +31,12 @@ public class WallFollowerStrategy extends ChildStrategy {
 		this.headSide = headSide;
 	}
 
-	protected void childInit() {
+	@Override
+	protected void doInit() {
 	}
 
-	public void work() {
+	@Override
+	public void doRun() {
 		// TODO wait while sensor head is moving
 		actualValue = HEAD.getDistance();
 

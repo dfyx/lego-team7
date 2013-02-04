@@ -78,7 +78,7 @@ public class DetectCollisionStrategy extends ChildStrategy {
 	private static final int INITIAL_VALUE = 0;
 
 	@Override
-	protected void childInit() {
+	protected void doInit() {
 		currentState = State.START;
 		for (int i = 0; i < LAST_VALUES_COUNT; ++i) {
 			for (int j = 0; j < 2; ++j) {
@@ -164,7 +164,7 @@ public class DetectCollisionStrategy extends ChildStrategy {
 	}
 
 	@Override
-	public void work() {
+	public void doRun() {
 		System.out.println("stopping engine");
 		ENGINE.stop();
 	}
