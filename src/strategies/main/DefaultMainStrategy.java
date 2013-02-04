@@ -79,10 +79,8 @@ public class DefaultMainStrategy extends MainStrategy {
 		switch (barcode) {
 		case RACE:
 			state = State.WAITING_FOR_STARTSIGNAL;
-			System.out.println("->WAIT FOR RACE");
 			break;
 		case LABYRINTH:
-			System.out.println("->LABYRINTH");
 			currentStrategy = new WallFollowerStrategy();
 			break;
 		}
@@ -118,23 +116,19 @@ public class DefaultMainStrategy extends MainStrategy {
 			switch (state) {
 			case WAITING:
 				state = State.RUNNING;
-				System.out.println("->BARCODE");
 				switchToBarcodeReading();
 				break;
 			case WAITING_WILL_CALIBRATE:
 			case CALIBRATING:
 				state = State.CALIBRATING;
-				System.out.println("->CALIBRATING");
 				switchToCalibrating();
 				break;
 			case RUNNING:
 				state = State.WAITING;
 				ENGINE.stop();
-				System.out.println("->WAITING");
 				break;
 			case WAITING_FOR_STARTSIGNAL:
 				currentStrategy = new RaceStrategy();
-				System.out.println("->START RACE");
 				state = State.RUNNING;
 				break;
 			}
@@ -146,7 +140,11 @@ public class DefaultMainStrategy extends MainStrategy {
 			if (!Platform.HEAD.isMoving())
 				barcodeReader.run();
 			if (detectBarcode && barcodeReader.hasNewCode()) {
-				switchLevel(Barcode.get(barcodeReader.getLineCount()));
+				int code = barcodeReader.getLineCount();
+				if(code>1)
+					switchLevel(Barcode.get(code));
+				else
+					currentStrategy.run();
 			} else {
 				currentStrategy.run();
 			}
@@ -156,7 +154,6 @@ public class DefaultMainStrategy extends MainStrategy {
 		//React, if calibration is finished
 		if (state == State.CALIBRATING && currentStrategy.isFinished()) {
 			state = State.RUNNING;
-			System.out.println("->RUNNING (barcode)");
 			switchToBarcodeReading();
 		}
 	}
