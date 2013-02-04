@@ -136,6 +136,12 @@ public class WallFollowerStrategy extends Strategy {
 			}
 			wallCollisionStrategy.run();
 			break;
+		case EDGE_COLLISION:
+			if (edgeCollisionStrategy.justStarted()) {
+				edgeStrategy.init();
+			}
+			edgeCollisionStrategy.run();
+			break;
 		}
 	}
 
