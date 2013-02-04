@@ -52,7 +52,7 @@ public class WallFollowerStrategy extends Strategy {
 				, 1000, 1000 // Rotation speed, direction
 				, rotationTime // Time
 				, curveSpeed, curveDirection);
-		wallStrategy = new WallRegulatorStrategy(this.headSide);
+		wallStrategy = new WallRegulatorStrategy(this.headSide, 500);
 	}
 
 	private State checkState() {

@@ -22,6 +22,8 @@ public class WallRegulatorStrategy extends ChildStrategy {
 	private static final int LINEAR_FACTOR_MOVE_AWAY = 55;
 	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 37;
 	
+	private final int MAX_MOTOR_DIRECTION;
+	
 	/**
 	 * used to turn collision detection off, if we are regulating too much.
 	 */
@@ -32,8 +34,14 @@ public class WallRegulatorStrategy extends ChildStrategy {
 	 */
 	private int actualValue;
 
-	public WallRegulatorStrategy(Side headSide) {
+	/**
+	 * 
+	 * @param headSide
+	 * @param maxMotorDirection Should be around 500
+	 */
+	public WallRegulatorStrategy(Side headSide, int maxMotorDirection) {
 		this.headSide = headSide;
+		MAX_MOTOR_DIRECTION = maxMotorDirection;
 	}
 
 	protected void childInit() {
@@ -69,7 +77,7 @@ public class WallRegulatorStrategy extends ChildStrategy {
 		else
 			linearValue = diff * LINEAR_FACTOR_MOVE_AWAY;
 
-		return Utils.clamp(linearValue, -1000, 1000);
+		return Utils.clamp(linearValue, -MAX_MOTOR_DIRECTION, MAX_MOTOR_DIRECTION);
 	}
 
 	/**
