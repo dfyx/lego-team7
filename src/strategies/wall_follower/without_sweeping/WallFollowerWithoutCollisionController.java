@@ -1,29 +1,37 @@
 package strategies.wall_follower.without_sweeping;
 
+import static robot.Platform.ENGINE;
 import strategies.Strategy;
 import strategies.wall_follower.without_sweeping.collision.FollowCollisionStrategy;
+import strategies.wall_follower.without_sweeping.edge.EdgeCollisionStrategy;
 import strategies.wall_follower.without_sweeping.edge.EdgeStrategy;
 import strategies.wall_follower.without_sweeping.wall.WallFollowerStrategy;
 import utils.Utils.Side;
-import static robot.Platform.ENGINE;
 
 public class WallFollowerWithoutCollisionController extends Strategy {
 	private Side headSide;
 
-	private FollowCollisionStrategy collisionStrategy;
+	private FollowCollisionStrategy wallCollisionStrategy;
+	private EdgeCollisionStrategy edgeCollisionStrategy;
 	private EdgeStrategy edgeStrategy;
 	private WallFollowerStrategy wallStrategy;
 
 	private enum State {
-		START, STARTED, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE
+		START, STARTED, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE, EDGE_COLLISION
 	}
 
 	private State currentState;
 
-	// TODO SB collision detection, while in edge
-	public WallFollowerWithoutCollisionController(Side headSide) {
+	/**
+	 * 
+	 * @param headSide
+	 * @param rotationTime should be around 300
+	 * @param curveSpeed should be 1000
+	 * @param curveDirection should be 300 for race and less for labyrinth
+	 */
+	public WallFollowerWithoutCollisionController(Side headSide, int rotationTime, int curveSpeed, int curveDirection) {
 		this.headSide = headSide;
-		collisionStrategy = new FollowCollisionStrategy(headSide, // head
+		wallCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
 				500,// backward speed
 				1000, // backward time
@@ -35,15 +43,21 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 				200, // wall speed
 				1000 // wall direction
 		);
+		edgeCollisionStrategy = new EdgeCollisionStrategy(headSide, //head
+				5, 90, // detection
+				500, // backward speed
+				1000 // backward time
+				);
 		edgeStrategy = new EdgeStrategy(this.headSide, 50 // wall distance
 				, 1000, 1000 // Rotation speed, direction
-				, 300 // Time
-				, 1000, 300);
+				, rotationTime // Time
+				, curveSpeed, curveDirection);
 		wallStrategy = new WallFollowerStrategy(this.headSide);
 	}
 
 	private State checkState() {
-		collisionStrategy.check();
+		wallCollisionStrategy.check();
+		edgeCollisionStrategy.check();
 		edgeStrategy.check();
 
 		State oldState = currentState;
@@ -55,18 +69,25 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 			currentState = State.FOLLOW_WALL;
 			break;
 		case FOLLOW_WALL:
-			if (collisionStrategy.willStart())
+			if (wallCollisionStrategy.willStart())
 				currentState = State.WALL_COLLISION;
 			else if (edgeStrategy.willStart())
 				currentState = State.FOLLOW_EDGE;
 			break;
 		case WALL_COLLISION:
-			if (collisionStrategy.isStopped())
+			if (wallCollisionStrategy.isStopped())
 				currentState = State.FOLLOW_WALL;
 			break;
 		case FOLLOW_EDGE:
-			if (edgeStrategy.isStopped())
+			// TODO SB correct order?
+			if (edgeCollisionStrategy.willStart())
+				currentState = State.EDGE_COLLISION;
+			else if (edgeStrategy.isStopped())
 				currentState = State.FOLLOW_WALL;
+			break;
+		case EDGE_COLLISION:
+			if (edgeCollisionStrategy.isStopped())
+				currentState = State.FOLLOW_EDGE;
 			break;
 		}
 
@@ -79,7 +100,7 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 	protected void doInit() {
 		currentState = State.START;
 
-		collisionStrategy.init();
+		wallCollisionStrategy.init();
 		edgeStrategy.init();
 		wallStrategy.init();
 	}
@@ -97,7 +118,7 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 			break;
 		case FOLLOW_WALL:
 			if (wallStrategy.justStarted()) {
-				collisionStrategy.init();
+				wallCollisionStrategy.init();
 				edgeStrategy.init();
 			}
 			wallStrategy.run();
@@ -105,14 +126,15 @@ public class WallFollowerWithoutCollisionController extends Strategy {
 		case FOLLOW_EDGE:
 			if (edgeStrategy.justStarted()) {
 				wallStrategy.init();
+				edgeCollisionStrategy.init();
 			}
 			edgeStrategy.run();
 			break;
 		case WALL_COLLISION:
-			if (collisionStrategy.justStarted()) {
+			if (wallCollisionStrategy.justStarted()) {
 				wallStrategy.init();
 			}
-			collisionStrategy.run();
+			wallCollisionStrategy.run();
 			break;
 		}
 	}
