@@ -135,6 +135,11 @@ public class Head {
 		headMotor.moveWithFixedPower(power);
 	}
 
+	/**
+	 * Call startCheckStalled first.
+	 * Call stopMoving as soon, as this yields true.
+	 * @return
+	 */
 	public boolean isStalled() {
 		return headMotor.isStalled();
 	}
