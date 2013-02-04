@@ -11,6 +11,10 @@ public abstract class Strategy {
     public boolean isRunning() {
         return running;
     }
+    
+    public boolean isFinished() {
+    	return !running;
+    }
 
     public void init() {
         running = true;

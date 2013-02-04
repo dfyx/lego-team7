@@ -21,7 +21,7 @@ public class CountLinesStrategy extends Strategy {
     private static final int DELTA_THRESHOLD = 600;
     
     /** Free area before a barcode, in mm. */
-    private static final int CLEARANCE_BEFORE = 200;
+    private static final int CLEARANCE_BEFORE = 150;
     /** Free area after a barcode, in mm. */
     private static final int CLEARANCE_AFTER = 75; // 3x 2,5mm
     
