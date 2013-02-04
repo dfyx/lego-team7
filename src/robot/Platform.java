@@ -2,6 +2,8 @@ package robot;
 import lejos.nxt.SensorPort;
 import sensors.Bumper;
 import sensors.Head;
+import strategies.main.DefaultMainStrategy;
+import strategies.main.MainStrategy;
 
 
 public class Platform {
@@ -21,5 +23,9 @@ public class Platform {
     	LEFT_BUMPER.poll();
     	RIGHT_BUMPER.poll();
     }
+    
+	public static MainStrategy getMainStrategy() {
+		return new DefaultMainStrategy();
+	}
     
 }

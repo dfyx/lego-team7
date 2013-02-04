@@ -1,3 +1,4 @@
+package strategies.main;
 import static robot.Platform.ENGINE;
 import lejos.nxt.Button;
 import robot.Platform;
@@ -8,7 +9,7 @@ import strategies.Strategy;
 import strategies.sections.RaceStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 
-public class MainStrategy extends Strategy {
+public class DefaultMainStrategy extends MainStrategy {
 	
 	private boolean detectBarcode;
 	
@@ -58,7 +59,7 @@ public class MainStrategy extends Strategy {
 
 	private Strategy currentStrategy;
 
-	public MainStrategy() {
+	public DefaultMainStrategy() {
 	}
 
 	private void switchToCalibrating() {

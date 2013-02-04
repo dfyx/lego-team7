@@ -2,31 +2,31 @@ package strategies;
 
 public abstract class Strategy {
 
-    private boolean running = false;
+	private boolean running = false;
 
-    public void run() {
-        doRun();
-    }
+	public void run() {
+		doRun();
+	}
 
-    public boolean isRunning() {
-        return running;
-    }
-    
-    public boolean isFinished() {
-    	return !running;
-    }
+	public boolean isRunning() {
+		return running;
+	}
 
-    public void init() {
-        running = true;
+	public boolean isFinished() {
+		return !running;
+	}
 
-        doInit();
-    }
+	public void init() {
+		running = true;
 
-    abstract protected void doInit();
+		doInit();
+	}
 
-    abstract protected void doRun();
+	abstract protected void doInit();
 
-    protected void setFinished() {
-        running = false;
-    }
+	abstract protected void doRun();
+
+	protected void setFinished() {
+		running = false;
+	}
 }
