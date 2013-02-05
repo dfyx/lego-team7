@@ -2,8 +2,8 @@ package strategies.wall_follower;
 
 import static robot.Platform.ENGINE;
 import strategies.Strategy;
+import strategies.util.MoveDistanceStrategy;
 import strategies.wall_follower.collision.FollowCollisionStrategy;
-import strategies.wall_follower.edge.EdgeCollisionStrategy;
 import strategies.wall_follower.edge.EdgeStrategy;
 import strategies.wall_follower.wall.WallRegulatorStrategy;
 import utils.Utils.Side;
@@ -15,9 +15,10 @@ public class WallFollowerStrategy extends Strategy {
 	private FollowCollisionStrategy edgeCollisionStrategy;
 	private EdgeStrategy edgeStrategy;
 	private WallRegulatorStrategy wallStrategy;
+	private MoveDistanceStrategy moveBack;
 
 	private enum State {
-		START, STARTED, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE, EDGE_COLLISION
+		START, STARTED, DRIVE_BACK, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE, EDGE_COLLISION
 	}
 
 	private State currentState;
@@ -67,6 +68,10 @@ public class WallFollowerStrategy extends Strategy {
 				, rotationTime // Time
 				, curveSpeed, curveDirection);
 		wallStrategy = new WallRegulatorStrategy(this.headSide, 500, desiredWallDistance);
+		moveBack = new MoveDistanceStrategy();
+		moveBack.init();
+		moveBack.setSpeed(1000);
+		moveBack.setTargetPosition(-200);
 	}
 
 	private State checkState() {
@@ -77,7 +82,11 @@ public class WallFollowerStrategy extends Strategy {
 		State oldState = currentState;
 		switch (currentState) {
 		case START:
-			currentState = State.STARTED;
+			currentState = State.DRIVE_BACK;
+			break;
+		case DRIVE_BACK:
+			if(moveBack.isFinished())
+				currentState = State.STARTED;
 			break;
 		case STARTED:
 			currentState = State.FOLLOW_WALL;
@@ -127,6 +136,9 @@ public class WallFollowerStrategy extends Strategy {
 			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
+		case DRIVE_BACK:
+			moveBack.run();
+			break;
 		case STARTED:
 			ENGINE.move(1000, 0);
 			break;
