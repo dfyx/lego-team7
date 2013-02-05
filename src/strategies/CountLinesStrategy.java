@@ -43,12 +43,14 @@ public class CountLinesStrategy extends Strategy {
         lineCount = 0;
         drivenDistance = 0;
     }
+    
+    public void clearStatus() {
+    	changed = false;
+    }
 
     @Override
     protected void doRun() {
         final int value = HEAD.getLight();
-        
-        changed = false;
         
         drivenDistance += ENGINE.estimateDistance();
         
@@ -63,6 +65,7 @@ public class CountLinesStrategy extends Strategy {
             lineCount = edgeCount / 2;
             edgeCount = 0;
             
+            System.out.println("Found new code");
             changed = true;
         } else if (drivenDistance > CLEARANCE_BEFORE) {
             clearance = true;

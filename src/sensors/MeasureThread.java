@@ -1,8 +1,7 @@
 package sensors;
 
-import lejos.util.Delay;
 
-public class MeasureThread extends Thread {
+/*public class MeasureThread extends Thread {
 
 	private volatile boolean isRunning = false;
 	private volatile boolean shouldStop = false;
@@ -79,4 +78,4 @@ public class MeasureThread extends Thread {
 		}
 	}
 
-}
+}*/
