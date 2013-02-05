@@ -52,7 +52,10 @@ public class FindWallStrategy extends ChildStrategy {
 
 		switch (newState) {
 		case START:
-			newState = State.START_MOVE_BACK;
+			if (HEAD.getDistance() < WALL_DISTANCE)
+				newState = State.WALL_FOUND;
+			else
+				newState = State.START_MOVE_BACK;
 			break;
 		case START_MOVE_BACK:
 			newState = State.MOVE_BACK;
@@ -114,9 +117,8 @@ public class FindWallStrategy extends ChildStrategy {
 	}
 
 	public FindWallStrategy(Side headSide, int backwardSpeed,
-			int backwardPosition, int nearWallDistance,
-			int wallDistance, int searchWallSpeed,
-			int searchWallDirection, int driveToWallSpeed) {
+			int backwardPosition, int nearWallDistance, int wallDistance,
+			int searchWallSpeed, int searchWallDirection, int driveToWallSpeed) {
 		SIDE_POSITION = 1000 * headSide.getValue();
 
 		moveBack = new MoveDistanceStrategy();
