@@ -28,8 +28,10 @@ public class WallFollowerStrategy extends Strategy {
 	 * @param rotationTime should be around 300
 	 * @param curveSpeed should be 1000
 	 * @param curveDirection should be 300 for race and less for labyrinth
+	 * @param maxWallDistance used to prevent overregulating after a curve. Should be around 35.
+	 * @param desiredWallDistance the desired distance to the wall. Should be around 14.
 	 */
-	public WallFollowerStrategy(Side headSide, int rotationTime, int curveSpeed, int curveDirection) {
+	public WallFollowerStrategy(Side headSide, int rotationTime, int curveSpeed, int curveDirection, int maxWallDistance, int desiredWallDistance) {
 		this.headSide = headSide;
 		wallCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
@@ -39,7 +41,7 @@ public class WallFollowerStrategy extends Strategy {
 				400, // obstacle speed
 				1000, // obstacle direction
 				300, // extra turn time
-				50, // max wall distance
+				maxWallDistance, // max wall distance
 				200, // wall speed
 				1000 // wall direction
 		);
@@ -60,11 +62,11 @@ public class WallFollowerStrategy extends Strategy {
 //				500, // backward speed
 //				1000 // backward time
 //				);
-		edgeStrategy = new EdgeStrategy(this.headSide, 50 // wall distance
+		edgeStrategy = new EdgeStrategy(this.headSide, maxWallDistance // wall distance
 				, 1000, 1000 // Rotation speed, direction
 				, rotationTime // Time
 				, curveSpeed, curveDirection);
-		wallStrategy = new WallRegulatorStrategy(this.headSide, 500);
+		wallStrategy = new WallRegulatorStrategy(this.headSide, 500, desiredWallDistance);
 	}
 
 	private State checkState() {
