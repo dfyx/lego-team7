@@ -8,9 +8,15 @@ import robot.Platform;
 public class Main {
 
 	public static void main(String[] args) {
-		new Platform();
+		try {
+			new Platform();
 
-		Loop loop = new Loop(Platform.getMainStrategy());
-		loop.run();
+			Loop loop = new Loop(Platform.getMainStrategy());
+			loop.run();
+		} finally {
+			Platform.ENGINE.stop();
+			Platform.ENGINE.commit();
+			Platform.HEAD.terminate();
+		}
 	}
 }
