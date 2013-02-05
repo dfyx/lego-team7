@@ -2,9 +2,9 @@ package strategies.wall_follower;
 
 import static robot.Platform.ENGINE;
 import strategies.Strategy;
-import strategies.util.MoveDistanceStrategy;
 import strategies.wall_follower.collision.FollowCollisionStrategy;
 import strategies.wall_follower.edge.EdgeStrategy;
+import strategies.wall_follower.find_wall.FindWallStrategy;
 import strategies.wall_follower.wall.WallRegulatorStrategy;
 import utils.Utils.Side;
 
@@ -15,10 +15,10 @@ public class WallFollowerStrategy extends Strategy {
 	private FollowCollisionStrategy edgeCollisionStrategy;
 	private EdgeStrategy edgeStrategy;
 	private WallRegulatorStrategy wallStrategy;
-	private MoveDistanceStrategy moveBack;
+	private FindWallStrategy startStrategy;
 
 	private enum State {
-		START, STARTED, DRIVE_BACK, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE, EDGE_COLLISION
+		START, STARTED, FIND_WALL, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE, EDGE_COLLISION
 	}
 
 	private State currentState;
@@ -68,10 +68,7 @@ public class WallFollowerStrategy extends Strategy {
 				, rotationTime // Time
 				, curveSpeed, curveDirection);
 		wallStrategy = new WallRegulatorStrategy(this.headSide, 500, desiredWallDistance);
-		moveBack = new MoveDistanceStrategy();
-		moveBack.init();
-		moveBack.setSpeed(1000);
-		moveBack.setTargetPosition(-200);
+		startStrategy = new FindWallStrategy(headSide, 1000, -200, 15, 50, 1000, 1000, 1000);
 	}
 
 	private State checkState() {
@@ -82,10 +79,10 @@ public class WallFollowerStrategy extends Strategy {
 		State oldState = currentState;
 		switch (currentState) {
 		case START:
-			currentState = State.DRIVE_BACK;
+			currentState = State.FIND_WALL;
 			break;
-		case DRIVE_BACK:
-			if(moveBack.isFinished())
+		case FIND_WALL:
+			if(startStrategy.isStopped())
 				currentState = State.STARTED;
 			break;
 		case STARTED:
@@ -126,6 +123,7 @@ public class WallFollowerStrategy extends Strategy {
 		wallCollisionStrategy.init();
 		edgeStrategy.init();
 		wallStrategy.init();
+		startStrategy.init();
 	}
 
 	@Override
@@ -136,8 +134,8 @@ public class WallFollowerStrategy extends Strategy {
 			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
-		case DRIVE_BACK:
-			moveBack.run();
+		case FIND_WALL:
+			startStrategy.run();
 			break;
 		case STARTED:
 			ENGINE.move(1000, 0);
