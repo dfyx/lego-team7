@@ -1,4 +1,4 @@
-package strategies.wall_follower.without_sweeping.edge;
+package strategies.wall_follower.edge;
 
 import strategies.util.ChildStrategy;
 import utils.Utils.Side;

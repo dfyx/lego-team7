@@ -47,6 +47,7 @@ public class Head implements Action {
 	}
 
 	public void stopMoving() {
+		sweepAction.stopSweeping();
 		headMotor.stopMoving();
 	}
 

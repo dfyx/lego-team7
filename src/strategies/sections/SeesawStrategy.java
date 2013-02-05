@@ -34,11 +34,12 @@ public class SeesawStrategy extends Strategy {
 				System.out.println("distance="+Platform.HEAD.getDistance());
 				state = State.MOVING;
 				Platform.ENGINE.move(1000);
-				Platform.HEAD.startSweeping(-1000, 1000, 20, 0);
+				Platform.HEAD.startSweeping(-1000, 1000, 1000);
 			}
 			break;
 		case MOVING:
 			if(Platform.HEAD.getLight()>500) {
+				Platform.HEAD.stopSweeping();
 				setFinished();
 			}
 		}

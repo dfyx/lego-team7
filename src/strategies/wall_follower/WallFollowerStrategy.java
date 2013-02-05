@@ -2,81 +2,159 @@ package strategies.wall_follower;
 
 import static robot.Platform.ENGINE;
 import strategies.Strategy;
-import utils.Utils;
+import strategies.wall_follower.collision.FollowCollisionStrategy;
+import strategies.wall_follower.edge.EdgeCollisionStrategy;
+import strategies.wall_follower.edge.EdgeStrategy;
+import strategies.wall_follower.wall.WallRegulatorStrategy;
 import utils.Utils.Side;
 
-// TODO SB should work for right and left looking sensor head
 public class WallFollowerStrategy extends Strategy {
-	// TODO SB calibrate?
-	/**
-	 * desired distance to wall (in cm)
-	 */
-	private int referenceValue = 14;
+	private Side headSide;
 
-	private static final int MAX_SPEED = 1000;
-	private int speed = MAX_SPEED;
-	private int speedWhileScanning = MAX_SPEED/2;
+	private FollowCollisionStrategy wallCollisionStrategy;
+	private FollowCollisionStrategy edgeCollisionStrategy;
+	private EdgeStrategy edgeStrategy;
+	private WallRegulatorStrategy wallStrategy;
 
-	private enum HeadOn {
-		RIGHT_SIDE, LEFT_SIDE
+	private enum State {
+		START, STARTED, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE, EDGE_COLLISION
 	}
 
-	private static HeadOn headOn;
+	private State currentState;
 
-	/**
-	 * Turn on max speed outside of +- 5cm corridor 5*_200_ = 1000
-	 */
-	private static final int LINEAR_FACTOR_MOVE_AWAY = 55;
-	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 37;
-
-	/**
-	 * distance to wall (in cm)
-	 */
-	private int actualValue;
-
-	public WallFollowerStrategy() {
-
-	}
-
-	protected void doInit() {
-	}
-
-	protected void doRun() {
-	    // doInit is moving the sensor head nonblocking -> skip control loop
-	    // until the sensor head arrived at its final position 
-	    
-		actualValue = WallFollowerController.getWallDistance();
-		
-
-		int direction = getMotorDirection();
-
-		if (WallFollowerController.headOn == Side.LEFT)
-			direction = -direction;
-
-//		System.out.println("IST/SOLL: " + actualValue + " / " + referenceValue
-//				+ " -> " + direction);
-
-		if(actualValue != WallFollowerController.lastDistance) {
-			System.out.println("---- NEW VALUE ---"+actualValue + " ("+System.currentTimeMillis()+")");
-			ENGINE.move(speed/2, 0);
-		} else
-			ENGINE.move(speedWhileScanning, direction);
-	}
-
-	// TODO SB doesn't work on big distances
 	/**
 	 * 
-	 * @return positive = move to wall; negative = move away from wall
+	 * @param headSide
+	 * @param rotationTime should be around 300
+	 * @param curveSpeed should be 1000
+	 * @param curveDirection should be 300 for race and less for labyrinth
 	 */
-	private int getMotorDirection() {
-		int diff = (actualValue - referenceValue);
-		int linearValue = 0;
-		// move to wall
-		if (diff > 0)
-			linearValue = diff * LINEAR_FACTOR_MOVE_TOWARDS;
-		else
-			linearValue = diff * LINEAR_FACTOR_MOVE_AWAY;
-
-		return Utils.clamp(linearValue, -1000, 1000);
+	public WallFollowerStrategy(Side headSide, int rotationTime, int curveSpeed, int curveDirection) {
+		this.headSide = headSide;
+		wallCollisionStrategy = new FollowCollisionStrategy(headSide, // head
+				5, 90,// detection
+				500,// backward speed
+				1000, // backward time
+				30, // max obstacle distance
+				400, // obstacle speed
+				1000, // obstacle direction
+				300, // extra turn time
+				50, // max wall distance
+				200, // wall speed
+				1000 // wall direction
+		);
+		edgeCollisionStrategy = new FollowCollisionStrategy(headSide, // head
+				5, 90,// detection
+				500,// backward speed
+				1000, // backward time
+				30, // max obstacle distance
+				400, // obstacle speed
+				1000, // obstacle direction
+				300, // extra turn time
+				50, // max wall distance
+				200, // wall speed
+				1000 // wall direction
+		);
+//		edgeCollisionStrategy = new EdgeCollisionStrategy(headSide, //head
+//				5, 90, // detection
+//				500, // backward speed
+//				1000 // backward time
+//				);
+		edgeStrategy = new EdgeStrategy(this.headSide, 50 // wall distance
+				, 1000, 1000 // Rotation speed, direction
+				, rotationTime // Time
+				, curveSpeed, curveDirection);
+		wallStrategy = new WallRegulatorStrategy(this.headSide, 500);
 	}
+
+	private State checkState() {
+		wallCollisionStrategy.check();
+		edgeCollisionStrategy.check();
+		edgeStrategy.check();
+
+		State oldState = currentState;
+		switch (currentState) {
+		case START:
+			currentState = State.STARTED;
+			break;
+		case STARTED:
+			currentState = State.FOLLOW_WALL;
+			break;
+		case FOLLOW_WALL:
+			if (wallCollisionStrategy.willStart())
+				currentState = State.WALL_COLLISION;
+			else if (edgeStrategy.willStart())
+				currentState = State.FOLLOW_EDGE;
+			break;
+		case WALL_COLLISION:
+			if (wallCollisionStrategy.isStopped())
+				currentState = State.FOLLOW_WALL;
+			break;
+		case FOLLOW_EDGE:
+			// TODO SB correct order?
+			if (edgeCollisionStrategy.willStart())
+				currentState = State.EDGE_COLLISION;
+			else if (edgeStrategy.isStopped())
+				currentState = State.FOLLOW_WALL;
+			break;
+		case EDGE_COLLISION:
+			if (edgeCollisionStrategy.isStopped())
+				currentState = State.FOLLOW_EDGE;
+			break;
+		}
+
+		if (oldState != currentState)
+			System.out.println(oldState.name() + " -> " + currentState.name());
+		return currentState;
+	}
+
+	@Override
+	protected void doInit() {
+		currentState = State.START;
+
+		wallCollisionStrategy.init();
+		edgeStrategy.init();
+		wallStrategy.init();
+	}
+
+	@Override
+	protected void doRun() {
+		State oldState = currentState;
+		currentState = checkState();
+		if(oldState != currentState)
+			System.out.println("running: " + currentState.name());
+
+		switch (currentState) {
+		case STARTED:
+			ENGINE.move(1000, 0);
+			break;
+		case FOLLOW_WALL:
+			if (wallStrategy.justStarted()) {
+				wallCollisionStrategy.init();
+				edgeStrategy.init();
+			}
+			wallStrategy.run();
+			break;
+		case FOLLOW_EDGE:
+			if (edgeStrategy.justStarted()) {
+				wallStrategy.init();
+				edgeCollisionStrategy.init();
+			}
+			edgeStrategy.run();
+			break;
+		case WALL_COLLISION:
+			if (wallCollisionStrategy.justStarted()) {
+				wallStrategy.init();
+			}
+			wallCollisionStrategy.run();
+			break;
+		case EDGE_COLLISION:
+			if (edgeCollisionStrategy.justStarted()) {
+				edgeStrategy.init();
+			}
+			edgeCollisionStrategy.run();
+			break;
+		}
+	}
+
 }

@@ -82,7 +82,7 @@ class HeadMotor implements Action {
 		int diff = collisionTachoCount - currentTachoCount;
 		if (diff < 0)
 			diff *= -1;
-		return diff > 10;
+		return diff > 3;
 	}
 
 	private void doRotateTo(int target, boolean async) {

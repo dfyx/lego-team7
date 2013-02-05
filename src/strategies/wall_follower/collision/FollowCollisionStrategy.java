@@ -1,9 +1,9 @@
-package strategies.wall_follower.without_sweeping.collision;
+package strategies.wall_follower.collision;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
 import strategies.util.ChildStrategy;
-import strategies.wall_follower.without_sweeping.DetectCollisionStrategy;
+import strategies.wall_follower.DetectCollisionStrategy;
 import utils.Utils.Side;
 
 public class FollowCollisionStrategy extends ChildStrategy {

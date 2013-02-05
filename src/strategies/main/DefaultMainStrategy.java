@@ -9,6 +9,7 @@ import strategies.Strategy;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
+import utils.Utils.Side;
 
 public class DefaultMainStrategy extends MainStrategy {
 	
@@ -85,7 +86,10 @@ public class DefaultMainStrategy extends MainStrategy {
 			currentStrategy = new SeesawStrategy();
 			break;
 		case LABYRINTH:
-			currentStrategy = new WallFollowerStrategy();
+			currentStrategy = new WallFollowerStrategy(Side.LEFT, // side
+					0 , // rotation time
+					1000 , // curve speed
+					350); // curve direction
 			break;
 		}
 		currentStrategy.init();
