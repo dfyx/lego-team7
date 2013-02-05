@@ -1,7 +1,5 @@
 package sensors;
 
-import java.util.LinkedList;
-
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
