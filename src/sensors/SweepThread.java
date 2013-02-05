@@ -8,8 +8,8 @@ public class SweepThread extends Thread {
 	//private UltrasonicSensor ultrasonicSensor;
 	//private LightSensor lightSensor;
 	
-	private SyncArray ultrasonicValues = new SyncArray();
-	private SyncArray lightValues = new SyncArray();
+	//private SyncArray ultrasonicValues = new SyncArray();
+	//private SyncArray lightValues = new SyncArray();
 	private volatile int sweepFrom;
 	private volatile int sweepTo;
 	//private volatile int lightValueCount;
@@ -28,13 +28,13 @@ public class SweepThread extends Thread {
 		start();
 	}
 	
-	public int[] getUltrasonicValues() {
+	/*public int[] getUltrasonicValues() {
 		return ultrasonicValues.getCopy();
 	}
 	
 	public int[] getLightValues() {
 		return lightValues.getCopy();
-	}
+	}*/
 	
 	public void setSpeed(int speed) {
 		this.speed=speed;

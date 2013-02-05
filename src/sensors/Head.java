@@ -14,8 +14,8 @@ public class Head implements Action {
 	private int polledDistance;
 	private int polledLight;
 	private int polledPosition;
-	private int[] polledUltrasonicValues;
-	private int[] polledLightValues;
+	//private int[] polledUltrasonicValues;
+	//private int[] polledLightValues;
 
 	// private MotorThread motorThread = new MotorThread();
 	private HeadMotor headMotor = new HeadMotor();
@@ -26,8 +26,8 @@ public class Head implements Action {
 		polledPosition = headMotor.getPosition();
 		polledDistance = ultrasonicSensor.getValue();
 		polledLight = lightSensor.getValue();
-		polledUltrasonicValues = sweepThread.getUltrasonicValues();
-		polledLightValues = sweepThread.getLightValues();
+		//polledUltrasonicValues = sweepThread.getUltrasonicValues();
+		//polledLightValues = sweepThread.getLightValues();
 	}
 
 	public int getDistance() {
@@ -195,17 +195,17 @@ public class Head implements Action {
 	 * Return the measured sweep values Lower indices in the array are values
 	 * more to the left
 	 */
-	public int[] getUltrasonicSweepValues() {
+	/*public int[] getUltrasonicSweepValues() {
 		return polledUltrasonicValues;
-	}
+	}*/
 
 	/**
 	 * Return the measured sweep values Lower indices in the array are values
 	 * more to the left
 	 */
-	public int[] getLightSweepValues() {
+	/*public int[] getLightSweepValues() {
 		return polledLightValues;
-	}
+	}*/
 
 	public int getRawLightValue() {
 		return lightSensor.getRawValue();
