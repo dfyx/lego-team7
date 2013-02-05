@@ -23,6 +23,8 @@ public class LightCalibrationStrategy extends Strategy {
 	private static final int SEARCH_TIME = 2 * 1000;
 	/** Driving speed while sampling light sensor. */
 	private static final int BASE_SPEED = 50;
+	/** Driving speed while moving back after sampling. */
+	private static final int DRIVE_BACK_SPEED = 75;
 	/** Number of samples to collect. */
 	private static final int SAMPLE_SIZE = 200;
 	/** Number of smallest samples to ignore. */
@@ -37,6 +39,7 @@ public class LightCalibrationStrategy extends Strategy {
 	/** Time per sample. */
 	private static final int SAMPLE_TIME = SEARCH_TIME / SAMPLE_SIZE;
 
+	private State state = State.SAMPLE;
 	/** Interval start timestamp */
 	private int startTime = 0;
 	/** The number of currently collected samples */
@@ -50,6 +53,9 @@ public class LightCalibrationStrategy extends Strategy {
 		HEAD.resetLightCalibration();
 		
 		startTime = Utils.getSystemTime();
+		sampleCount = 0;
+		
+		state = State.SAMPLE;
 		
 		ENGINE.move(BASE_SPEED);
 	}
@@ -60,51 +66,63 @@ public class LightCalibrationStrategy extends Strategy {
 	        
 	        final int sampleValue = HEAD.getRawLightValue();
 	        
-	        if (sampleCount < SAMPLE_SIZE) {
-	            samples[sampleCount] = sampleValue;
-	        }
-            
-	        sampleCount++;
+	        switch (state) {
+	            case SAMPLE:
+	                if (sampleCount < SAMPLE_SIZE) {
+	                    samples[sampleCount++] = sampleValue;
+	                }
+	                
+	                if (sampleCount == SAMPLE_SIZE) {	                    
+	                    processData();
+	                    
+	                    // Start driving back
+	                    sampleCount = 0;
+	                    state = State.DRIVE_BACK;
+	                    ENGINE.move(-DRIVE_BACK_SPEED);
+	                }
+	                break;
+	            case DRIVE_BACK:
+	                sampleCount++;
 
-            if (sampleCount == 3 * SAMPLE_SIZE) {
-                ENGINE.stop();
-                
-                setFinished();
-            }
-	        
-	        if (sampleCount == SAMPLE_SIZE) {
-	            ENGINE.move(-BASE_SPEED);
-	            
-	            Arrays.sort(samples);
-	            
-	            /*
-	            for (int sample : samples) {
-	                System.out.println(sample);
-	            }
-	            */
-
-                int blackPoint = 0;
-                int whitePoint = 0;
-                
-	            for (int i = DROPPED_DARK_SAMPLES; i < DROPPED_DARK_SAMPLES + ACCEPTED_SAMPLES; i++) {
-	                blackPoint += samples[i];
-	            }
-	            for (int i = DROPPED_LIGHT_SAMPLES; i < DROPPED_LIGHT_SAMPLES + ACCEPTED_SAMPLES; i++) {
-                    whitePoint += samples[SAMPLE_SIZE - i - 1];
-                }
-	            
-	            blackPoint /= ACCEPTED_SAMPLES;
-	            whitePoint /= ACCEPTED_SAMPLES;
-	            
-	            HEAD.calibrateLight(blackPoint, whitePoint);
-	            
-	            /*
-                System.out.println("Min: " + samples[0] + " Max: "
-                        + samples[SAMPLE_SIZE - 1] + " bp: " + blackPoint
-                        + " wp: " + whitePoint);
-                */
+	                if (sampleCount == SAMPLE_SIZE) {
+	                    ENGINE.stop();
+	                    
+	                    setFinished();
+	                }
+	                break;
 	        }
 	    }
+	}
+	
+	private void processData() {
+	    Arrays.sort(samples);
+        
+        /*
+        for (int sample : samples) {
+            System.out.println(sample);
+        }
+        */
+
+        int blackPoint = 0;
+        int whitePoint = 0;
+        
+        for (int i = DROPPED_DARK_SAMPLES; i < DROPPED_DARK_SAMPLES + ACCEPTED_SAMPLES; i++) {
+            blackPoint += samples[i];
+        }
+        for (int i = DROPPED_LIGHT_SAMPLES; i < DROPPED_LIGHT_SAMPLES + ACCEPTED_SAMPLES; i++) {
+            whitePoint += samples[SAMPLE_SIZE - i - 1];
+        }
+        
+        blackPoint /= ACCEPTED_SAMPLES;
+        whitePoint /= ACCEPTED_SAMPLES;
+        
+        HEAD.calibrateLight(blackPoint, whitePoint);
+        
+        /*
+        System.out.println("Min: " + samples[0] + " Max: "
+                + samples[SAMPLE_SIZE - 1] + " bp: " + blackPoint
+                + " wp: " + whitePoint);
+        */
 	}
 	
 	/**
@@ -121,5 +139,10 @@ public class LightCalibrationStrategy extends Strategy {
 	 */
 	private int elapsedTime() {
 	    return Utils.getSystemTime() - startTime;
+	}
+	
+	private enum State {
+	    SAMPLE,
+	    DRIVE_BACK
 	}
 }
