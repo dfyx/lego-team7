@@ -2,7 +2,7 @@ package sensors;
 
 import strategies.Action;
 
-public class SweepThread implements Action {
+public class SweepAction implements Action {
 
 	private enum State {
 		INACTIVE, SHOULD_START, SWEEP_LEFT, SWEEP_RIGHT
@@ -16,7 +16,7 @@ public class SweepThread implements Action {
 	private volatile int sweepTo;
 	private volatile int sweepSpeed;
 
-	public SweepThread(HeadMotor motor) {
+	public SweepAction(HeadMotor motor) {
 		this.motor = motor;
 		state = State.INACTIVE;
 	}

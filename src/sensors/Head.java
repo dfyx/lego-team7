@@ -16,7 +16,7 @@ public class Head implements Action {
 	private int polledPosition;
 
 	private HeadMotor headMotor = new HeadMotor();
-	private SweepThread sweepAction = new SweepThread(headMotor);
+	private SweepAction sweepAction = new SweepAction(headMotor);
 
 	public void poll() {
 		polledPosition = headMotor.getPosition();
