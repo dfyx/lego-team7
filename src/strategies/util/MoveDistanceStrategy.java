@@ -11,6 +11,14 @@ public class MoveDistanceStrategy extends Strategy {
     private float targetDistance = 0;
     private float currentDistance = 0;
     
+    public MoveDistanceStrategy() {
+    }
+    
+    public MoveDistanceStrategy(int speed, float targetDistance) {
+    	this.speed = speed;
+    	this.targetDistance = targetDistance;
+    }
+    
     @Override
     protected void doInit() {
         state = State.START;
