@@ -34,7 +34,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(5), SEESAW(10);
+		RACE(13), LABYRINTH(7), SEESAW(10);
 
 		private final int value;
 
