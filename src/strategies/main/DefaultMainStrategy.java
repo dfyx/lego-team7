@@ -97,12 +97,14 @@ public class DefaultMainStrategy extends MainStrategy {
 
 	@Override
 	public void doInit() {
+		System.out.println("Start init");
 		barcodeReader = new CountLinesStrategy();
 		barcodeReader.init();
 		state = State.WAITING_WILL_CALIBRATE;
 		buttonState = ButtonState.DOWN;
 		detectBarcode = true;
 		switchToCalibrating();
+		System.out.println("End init");
 	}
 
 	/**
@@ -134,6 +136,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			case RUNNING:
 				state = State.WAITING;
 				ENGINE.stop();
+				Platform.HEAD.stopMoving();
 				break;
 			case WAITING_FOR_STARTSIGNAL:
 				currentStrategy = new RaceStrategy();

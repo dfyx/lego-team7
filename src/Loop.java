@@ -40,6 +40,8 @@ public class Loop extends Thread {
 	 * 
 	 */
 	public void run() {
+		System.out.println("START");
+		System.out.flush();
 		try {
 			isRunning = true;
 
@@ -47,6 +49,11 @@ public class Loop extends Thread {
 			numCycles = 0;
 
 			strategy.init();
+			
+			while(Platform.HEAD.isCalibrating()) {
+				Platform.HEAD.run();
+				Delay.msDelay(10);
+			}
 
 			int lastEndTime = Utils.getSystemTime();
 

@@ -89,7 +89,7 @@ public class Head implements Action {
 	 * Returns true, iff the sensor head is currently moving
 	 */
 	public boolean isMoving() {
-		return headMotor.isMoving();
+		return isSweeping() || headMotor.isMoving();
 	}
 
 	public boolean isCalibrating() {
@@ -154,6 +154,7 @@ public class Head implements Action {
 	 * Calibrate the light sensor.
 	 * The passed values must have been obtained by
 	 * {@link #getLight()} because of the backlight-subtraction applied there.
+
 	 * 
 	 * @param minValue
 	 *            The value mapped to 0

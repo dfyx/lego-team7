@@ -1,7 +1,6 @@
 package sensors;
 
 import java.util.LinkedList;
-import java.util.Queue;
 
 import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
@@ -9,6 +8,7 @@ import lejos.nxt.NXTMotor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.util.Delay;
 import strategies.Action;
+import utils.Queue;
 import utils.Utils;
 
 // This thread handles asynchronous motor movements
@@ -63,8 +63,8 @@ class HeadMotor implements Action {
 	}
 
 	public HeadMotor() {
-		stateQueue = new LinkedList<State>();
-		stateQueue.add(State.CALIBRATING_RIGHT);
+		stateQueue = new Queue<State>();
+		stateQueue.push(State.CALIBRATING_RIGHT);
 		enterState(State.CALIBRATING_LEFT);
 	}
 
@@ -115,30 +115,32 @@ class HeadMotor implements Action {
 					lastCalibrationLeft = currentTime;
 					mostLeftPos = RAW_MOTOR.getTachoCount()
 							+ CALIBRATION_OFFSET;
-					enterState(stateQueue.poll());
+					enterState(stateQueue.pop());
 				} else
 					calibratingLastTime = currentTime;
+				lastMotorPos = motorPos;
 			}
 			break;
 		case CALIBRATING_RIGHT:
 			if (currentTime >= calibratingLastTime + CALIBRATION_MEASUREDELAY) {
 				int motorPos = RAW_MOTOR.getTachoCount();
-				if (lastMotorPos - motorPos < MIN_MOVEMENT) {
+				if (motorPos - lastMotorPos < MIN_MOVEMENT) {
 					lastCalibrationRight = currentTime;
 					mostRightPos = RAW_MOTOR.getTachoCount()
 							- CALIBRATION_OFFSET;
-					enterState(stateQueue.poll());
+					enterState(stateQueue.pop());
 				} else
 					calibratingLastTime = currentTime;
+				lastMotorPos = motorPos;
 			}
 			break;
 		case MOVING:
 			if (!MOTOR.isMoving()) {
 				if(getPosition()>900 && lastCalibrationRight+RECALIBRATION_MIN_INTERVAL<currentTime) {
-					stateQueue.add(State.MOVING);
+					stateQueue.push(State.MOVING);
 					enterState(State.CALIBRATING_RIGHT);
 				} else if(getPosition()<-900  && lastCalibrationLeft+RECALIBRATION_MIN_INTERVAL<currentTime) {
-					stateQueue.add(State.MOVING);
+					stateQueue.push(State.MOVING);
 					enterState(State.CALIBRATING_LEFT);
 				} else {
 					enterState(State.INACTIVE);
@@ -217,7 +219,7 @@ class HeadMotor implements Action {
 			break;
 		case CALIBRATING_LEFT:
 		case CALIBRATING_RIGHT:
-			stateQueue.add(State.MOVING);
+			stateQueue.push(State.MOVING);
 		}
 	}
 
