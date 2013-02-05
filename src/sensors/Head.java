@@ -54,6 +54,7 @@ public class Head implements Action {
 	public void terminate() {
 		sweepAction.terminate();
 		headMotor.terminate();
+		ultrasonicSensor.terminate();
 	}
 
 	/**
