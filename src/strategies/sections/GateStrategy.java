@@ -29,6 +29,7 @@ public class GateStrategy extends Strategy {
 				Platform.ENGINE.stop();
 				if (Gate.getInstance().isConnected()) {
 					Gate.getInstance().open();
+					Platform.ENGINE.move(1000);
 					return State.PASS;
 				} else {
 					return State.WAIT_FOR_CONNECTION;
@@ -38,6 +39,7 @@ public class GateStrategy extends Strategy {
 		case WAIT_FOR_CONNECTION:
 			if (Gate.getInstance().isConnected()) {
 				Gate.getInstance().open();
+				Platform.ENGINE.move(1000);
 				return State.PASS;
 			}
 			break;
