@@ -1,7 +1,8 @@
-package strategies;
+package strategies.line_follower;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
+import strategies.Strategy;
 import utils.RunningAverage;
 import utils.Utils;
 import utils.Utils.Side;

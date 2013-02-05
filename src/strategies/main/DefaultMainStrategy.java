@@ -3,11 +3,11 @@ import static robot.Platform.ENGINE;
 import lejos.nxt.Button;
 import robot.Platform;
 import strategies.CountLinesStrategy;
-import strategies.DriveForwardStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
+import strategies.util.DriveForwardStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils.Side;
 

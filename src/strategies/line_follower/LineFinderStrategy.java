@@ -1,8 +1,9 @@
-package strategies;
+package strategies.line_follower;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
 import sensors.Head;
+import strategies.Strategy;
 import utils.Utils;
 import utils.Utils.Side;
 

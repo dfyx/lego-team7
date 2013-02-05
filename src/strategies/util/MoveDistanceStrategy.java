@@ -1,6 +1,7 @@
-package strategies;
+package strategies.util;
 
 import static robot.Platform.ENGINE;
+import strategies.Strategy;
 
 public class MoveDistanceStrategy extends Strategy {
    
