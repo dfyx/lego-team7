@@ -21,10 +21,6 @@ public class LightCalibrationStrategy extends Strategy {
 
     /** Time to sample light sensor. */
 	private static final int SEARCH_TIME = 2 * 1000;
-	/** Driving speed while sampling light sensor. */
-	private static final int BASE_SPEED = 50;
-	/** Driving speed while moving back after sampling. */
-	private static final int DRIVE_BACK_SPEED = 75;
 	/** Number of samples to collect. */
 	private static final int SAMPLE_SIZE = 200;
 	/** Number of smallest samples to ignore. */
@@ -38,7 +34,10 @@ public class LightCalibrationStrategy extends Strategy {
 	private static final int ACCEPTED_SAMPLES = 20;
 	/** Time per sample. */
 	private static final int SAMPLE_TIME = SEARCH_TIME / SAMPLE_SIZE;
-
+	
+	/** Calibration mode */
+	private Mode mode = new ModeDrive();
+	/** Current calibration state */
 	private State state = State.SAMPLE;
 	/** Interval start timestamp */
 	private int startTime = 0;
@@ -56,8 +55,7 @@ public class LightCalibrationStrategy extends Strategy {
 		sampleCount = 0;
 		
 		state = State.SAMPLE;
-		
-		ENGINE.move(BASE_SPEED);
+		mode.update(State.INIT, State.SAMPLE);
 	}
 
 	protected void doRun() {	    
@@ -65,6 +63,7 @@ public class LightCalibrationStrategy extends Strategy {
 	        resetTime();
 	        
 	        final int sampleValue = HEAD.getRawLightValue();
+	        final State oldState = state;
 	        
 	        switch (state) {
 	            case SAMPLE:
@@ -78,19 +77,20 @@ public class LightCalibrationStrategy extends Strategy {
 	                    // Start driving back
 	                    sampleCount = 0;
 	                    state = State.DRIVE_BACK;
-	                    ENGINE.move(-DRIVE_BACK_SPEED);
 	                }
 	                break;
 	            case DRIVE_BACK:
 	                sampleCount++;
 
 	                if (sampleCount == SAMPLE_SIZE) {
-	                    ENGINE.stop();
-	                    
 	                    setFinished();
+	                    
+	                    state = State.DONE;
 	                }
 	                break;
 	        }
+	        
+	        mode.update(oldState, state);
 	    }
 	}
 	
@@ -141,8 +141,79 @@ public class LightCalibrationStrategy extends Strategy {
 	    return Utils.getSystemTime() - startTime;
 	}
 	
-	private enum State {
+	/**
+	 * Returns the currently used calibration mode.
+	 * 
+	 * @return the calibration mode in use
+	 */
+	public Mode getMode() {
+        return mode;
+    }
+	
+	/**
+	 * Sets the calibration mode. {@link #init()} must be called after this
+	 * method.
+	 * 
+	 * @param mode the new calibration mode to use
+	 */
+	public void setMode(final Mode mode) {
+        this.mode = mode;
+    }
+	
+	static abstract class Mode {
+	    abstract void update(final State oldState, final State newState);
+	}
+	
+    public static final class ModeDrive extends Mode {
+        /** Driving speed while sampling light sensor. */
+        private static final int BASE_SPEED = 50;
+        /** Driving speed while moving back after sampling. */
+        private static final int DRIVE_BACK_SPEED = 75;
+        
+        @Override
+        void update(final State oldState, final State newState) {
+            if (oldState == State.INIT && newState == State.SAMPLE) {
+                ENGINE.move(BASE_SPEED);
+            } else if (oldState == State.SAMPLE && newState == State.DRIVE_BACK) {
+                ENGINE.move(-DRIVE_BACK_SPEED);
+            } else if (oldState == State.DRIVE_BACK && newState == State.DONE) {
+                ENGINE.stop();
+            }
+        }
+    }
+	
+	
+	public static final class ModeSweep extends Mode {
+	    /** Angle used during sweeping calibration. */
+	    private static final int SWEEP_ANGLE = 30;
+	    /** Sweep speed used for sweeping calibration. */
+	    private static final int SWEEP_SPEED = 100;
+	    
+	    private int sweepDir = -1;
+	    
+        @Override
+        void update(final State oldState, final State newState) {
+            switch (newState) {
+                case INIT:
+                    HEAD.moveTo(SWEEP_ANGLE * sweepDir, true, SWEEP_SPEED);
+                    sweepDir *= -1;
+                    break;
+                case SAMPLE:
+                    if (!HEAD.isMoving()) {
+                        HEAD.moveTo(SWEEP_ANGLE * sweepDir, true, SWEEP_SPEED);
+                    }
+                    break;
+                case DRIVE_BACK:
+                    HEAD.moveTo(0, true);
+                    break;
+            }
+        }
+	}
+	
+	private static enum State {
+	    INIT,
 	    SAMPLE,
-	    DRIVE_BACK
+	    DRIVE_BACK,
+	    DONE
 	}
 }
