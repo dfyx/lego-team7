@@ -5,6 +5,7 @@ import static robot.Platform.HEAD;
 
 import java.util.Arrays;
 
+import sensors.Head;
 import utils.Utils;
 
 /**
@@ -55,6 +56,7 @@ public class LightCalibrationStrategy extends Strategy {
 		sampleCount = 0;
 		
 		state = State.SAMPLE;
+		mode.reset();
 		mode.update(State.INIT, State.SAMPLE);
 	}
 
@@ -75,17 +77,14 @@ public class LightCalibrationStrategy extends Strategy {
 	                    processData();
 	                    
 	                    // Start driving back
-	                    sampleCount = 0;
 	                    state = State.DRIVE_BACK;
 	                }
 	                break;
 	            case DRIVE_BACK:
-	                sampleCount++;
-
-	                if (sampleCount == SAMPLE_SIZE) {
-	                    setFinished();
-	                    
+	                if (mode.finished()) {
 	                    state = State.DONE;
+	                    
+	                    setFinished();
 	                }
 	                break;
 	        }
@@ -161,7 +160,9 @@ public class LightCalibrationStrategy extends Strategy {
     }
 	
 	static abstract class Mode {
+	    abstract void reset();
 	    abstract void update(final State oldState, final State newState);
+	    abstract boolean finished();
 	}
 	
     public static final class ModeDrive extends Mode {
@@ -169,9 +170,20 @@ public class LightCalibrationStrategy extends Strategy {
         private static final int BASE_SPEED = 50;
         /** Driving speed while moving back after sampling. */
         private static final int DRIVE_BACK_SPEED = 75;
+        /** Desired distance/position after the calibration. */
+        private static final float TARGET_DISTANCE = (float) -30.0;
+        
+        private float distance = (float) 0.0;
+        
+        @Override
+        void reset() {
+            distance = (float) 0.0;
+        }
         
         @Override
         void update(final State oldState, final State newState) {
+            distance += ENGINE.estimateDistance();
+            
             if (oldState == State.INIT && newState == State.SAMPLE) {
                 ENGINE.move(BASE_SPEED);
             } else if (oldState == State.SAMPLE && newState == State.DRIVE_BACK) {
@@ -179,6 +191,11 @@ public class LightCalibrationStrategy extends Strategy {
             } else if (oldState == State.DRIVE_BACK && newState == State.DONE) {
                 ENGINE.stop();
             }
+        }
+        
+        @Override
+        boolean finished() {
+            return distance < TARGET_DISTANCE;
         }
     }
 	
@@ -189,24 +206,37 @@ public class LightCalibrationStrategy extends Strategy {
 	    /** Sweep speed used for sweeping calibration. */
 	    private static final int SWEEP_SPEED = 100;
 	    
-	    private int sweepDir = -1;
+	    private int sweepTo = -Head.degreeToPosition(SWEEP_ANGLE);
+	    
+	    @Override
+	    void reset() {
+	        sweepTo = -Head.degreeToPosition(SWEEP_ANGLE);
+	    }
 	    
         @Override
         void update(final State oldState, final State newState) {
             switch (newState) {
                 case INIT:
-                    HEAD.moveTo(SWEEP_ANGLE * sweepDir, true, SWEEP_SPEED);
-                    sweepDir *= -1;
+                    HEAD.moveTo(sweepTo, true, SWEEP_SPEED);
+                    sweepTo *= -1;
                     break;
                 case SAMPLE:
                     if (!HEAD.isMoving()) {
-                        HEAD.moveTo(SWEEP_ANGLE * sweepDir, true, SWEEP_SPEED);
+                        HEAD.moveTo(sweepTo, true, SWEEP_SPEED);
+                        sweepTo *= -1;
                     }
                     break;
                 case DRIVE_BACK:
-                    HEAD.moveTo(0, true);
+                    if (oldState == State.SAMPLE) {
+                        HEAD.moveTo(0, true);
+                    }
                     break;
             }
+        }
+        
+        @Override
+        boolean finished() {
+            return !HEAD.isMoving();
         }
 	}
 	
