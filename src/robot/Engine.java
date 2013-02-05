@@ -35,7 +35,31 @@ public class Engine {
 	protected int newLeftSpeed = 0;
 	protected int newRightSpeed = 0;
 	
+	private int calibrationMaxSpeed;
+	
 	private Engine() {
+		//Move full speed forward (3000 shouldn't be reached)
+		LEFT_MOTOR.setSpeed(3000);
+		RIGHT_MOTOR.setSpeed(3000);
+		LEFT_MOTOR.forward();
+		RIGHT_MOTOR.forward();
+		//Wait until full speed reached
+		Delay.msDelay(500);
+		//Measure speed
+		calibrationMaxSpeed=Math.min(LEFT_MOTOR.getRotationSpeed(),RIGHT_MOTOR.getRotationSpeed());
+		//Drive back to original position
+		LEFT_MOTOR.stop(true);
+		RIGHT_MOTOR.stop();
+		while(LEFT_MOTOR.isMoving())
+			Delay.msDelay(10);
+		LEFT_MOTOR.backward();
+		RIGHT_MOTOR.backward();
+		Delay.msDelay(500);
+		LEFT_MOTOR.stop(true);
+		RIGHT_MOTOR.stop();
+		//Wait until all engines are stopped again
+		while(LEFT_MOTOR.isMoving())
+			Delay.msDelay(10);
 	}
 	
 	private static final Engine INSTANCE = new Engine();
@@ -138,59 +162,7 @@ public class Engine {
 	public void move(int speed) {
 		move(speed, 0);
 	}
-
-	/**
-	 * Move in a circle See also #move
-	 * 
-	 * @param speed
-	 *            Should not be above 500
-	 * @param innerRadius
-	 *            Should not be below ~100 mm (in mm)
-	 */
-	public void moveCircle(int speed, int innerRadius) {
-		if (innerRadius < 50)
-			throw new IllegalArgumentException(
-					"inner radius of circle to small: " + innerRadius + " < "
-							+ 50);
-		
-		// TODO SB this factor varies with distance.
-		// diameter not radius!
-		// desired   3   4   6  <- real with radius/x
-		//      10  15  12  10
-		//      20  22  18  13
-		//      30  30  25  18
-		//      60  49  40  30
-		innerRadius /= 3;
-
-		int wheelWidth = 92; // in mm
-
-		int outerRadius = innerRadius + wheelWidth;
-
-//		System.out.println("Driving (inner/outer): " + innerRadius + "mm / "
-//				+ outerRadius + "mm with real inner: " + oldInner + "mm");
-
-		int outerSpeed = speed;
-
-		// innerSpeed = speedCoefficient*outerSpeed
-		//
-		int speedCoefficientUp = innerRadius;
-		int speedCoefficientDown = outerRadius;
-
-		int innerSpeed = (speedCoefficientUp * outerSpeed)
-				/ speedCoefficientDown;
-
-		newRightSpeed = innerSpeed;
-		newLeftSpeed = outerSpeed;
-
-		commit();
-
-		Delay.msDelay(100);
-
-//		System.out.println("desL / realL  ||  desR / realR: " + newLeftSpeed
-//				+ " / " + LEFT_MOTOR.getRotationSpeed() + "  ||  "
-//				+ newRightSpeed + " / " + RIGHT_MOTOR.getRotationSpeed());
-	}
-
+	
 	/**
 	 * Move forward or backward in a curved path. See also #moveCircle
 	 * 
@@ -260,8 +232,9 @@ public class Engine {
 		left = left * speed / MAX;
 		right = right * speed / MAX;
 
-		newLeftSpeed = left;
-		newRightSpeed = right;
+		//Normalize speed
+		newLeftSpeed = left*calibrationMaxSpeed/1000;
+		newRightSpeed = right*calibrationMaxSpeed/1000;
 	}
 	
 	/**
