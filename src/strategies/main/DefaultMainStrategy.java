@@ -84,10 +84,10 @@ public class DefaultMainStrategy extends MainStrategy {
 			break;
 		case LABYRINTH:
 			System.out.println("->LABYRINTH");
-			currentStrategy = new WallFollowerStrategy(Side.RIGHT, // side
+			currentStrategy = new WallFollowerStrategy(Side.LEFT, // side
 					0 , // rotation time
 					1000 , // curve speed
-					500); // curve direction
+					350); // curve direction
 			break;
 		}
 		currentStrategy.init();
