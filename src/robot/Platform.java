@@ -24,8 +24,9 @@ public class Platform {
     	RIGHT_BUMPER.poll();
     }
     
-	public static MainStrategy getMainStrategy() {
-		return new DefaultMainStrategy();
+	private final static MainStrategy mainStrategy = new DefaultMainStrategy();
+	public static MainStrategy getMainStrategy() { 
+		return mainStrategy;
 	}
     
 }
