@@ -40,6 +40,7 @@ public class GateStrategy extends Strategy {
 			if (Gate.getInstance().isConnected()) {
 				Gate.getInstance().open();
 				Platform.ENGINE.move(1000);
+				Gate.getInstance().disconnect();
 				return State.PASS;
 			}
 			break;
