@@ -1,8 +1,10 @@
 package strategies.sections;
 
-import bluetooth.Gate;
-import robot.Platform;
+import static robot.Platform.ENGINE;
 import strategies.Strategy;
+import strategies.wall_follower.WallFollowerStrategy;
+import utils.Utils.Side;
+import bluetooth.Gate;
 
 /**
  * A very simple gate strategy. Right now the robot just stops a few
@@ -14,37 +16,43 @@ import strategies.Strategy;
  * by far fast enough to just drive through.
  */
 public class GateStrategy extends Strategy {
+	WallFollowerStrategy wallFollower;
+	
 	public enum State {
-		APPROACH,
 		WAIT_FOR_CONNECTION,
-		PASS
+		PASS, // pass door parallel to wall
+		MOVE // move forward
+	}
+	
+	public GateStrategy() {
+		wallFollower = new WallFollowerStrategy(Side.LEFT, // side
+				0, // rotation time
+				1000, // curve speed
+				350, // curve direction
+				35, // max wall distance
+				14 // desired wall distance
+		);
 	}
 
 	private State currentState;
 	
 	public State checkStateTransition() {
 		switch(currentState) {
-		case APPROACH:
-			if (Platform.HEAD.getDistance() < 20) {
-				Platform.ENGINE.stop();
-				if (Gate.getInstance().isConnected()) {
-					Gate.getInstance().open();
-					Platform.ENGINE.move(1000);
-					return State.PASS;
-				} else {
-					return State.WAIT_FOR_CONNECTION;
-				}
-			}
-			break;
 		case WAIT_FOR_CONNECTION:
 			if (Gate.getInstance().isConnected()) {
 				Gate.getInstance().open();
-				Platform.ENGINE.move(1000);
 				Gate.getInstance().disconnect();
 				return State.PASS;
 			}
 			break;
 		case PASS:
+			if(wallFollower.getLostEdgeCount() > 0) {
+				ENGINE.move(1000,0);
+				return State.MOVE;
+			}
+			break;
+		case MOVE:
+			// do nothing and wait for barcode
 			break;
 		default:
 			break;
@@ -55,10 +63,10 @@ public class GateStrategy extends Strategy {
 
 	@Override
 	protected void doInit() {
-		currentState = State.APPROACH;
+		currentState = State.WAIT_FOR_CONNECTION;
 		Gate.getInstance().connect();
-		Platform.ENGINE.move(1000);
-		Platform.HEAD.moveTo(0, 1000);
+		wallFollower.init();
+		ENGINE.stop();
 	}
 
 	@Override
@@ -67,6 +75,10 @@ public class GateStrategy extends Strategy {
 		currentState = checkStateTransition();
 		if (oldState != currentState) {
 			System.out.println(currentState.toString() + " -> " + currentState.toString());
+		}
+		
+		if(currentState == State.PASS) {
+			wallFollower.run();
 		}
 	}
 
