@@ -10,6 +10,27 @@ import utils.Utils.Side;
 
 public class WallFollowerStrategy extends Strategy {
 	private Side headSide;
+	
+	private int wallCollisionCount = 0;
+	private int lostEdgeCount = 0;
+	
+	/**
+	 * May be used to detect turns. (unsafe)
+	 * Use #init to reset.
+	 * @return 
+	 */
+	public int getWallCollisionCount() {
+		return wallCollisionCount;
+	}
+	
+	/**
+	 * May be used to detect turns. (unsafe)
+	 * Use # init to reset.
+	 * @return
+	 */
+	public int getLostEdgeCount() {
+		return lostEdgeCount;
+	}
 
 	private FollowCollisionStrategy wallCollisionStrategy;
 	private FollowCollisionStrategy edgeCollisionStrategy;
@@ -89,10 +110,13 @@ public class WallFollowerStrategy extends Strategy {
 			currentState = State.FOLLOW_WALL;
 			break;
 		case FOLLOW_WALL:
-			if (wallCollisionStrategy.willStart())
+			if (wallCollisionStrategy.willStart()) {
 				currentState = State.WALL_COLLISION;
-			else if (edgeStrategy.willStart())
+				wallCollisionCount++;
+			} else if (edgeStrategy.willStart()) {
 				currentState = State.FOLLOW_EDGE;
+				lostEdgeCount++;
+			}
 			break;
 		case WALL_COLLISION:
 			if (wallCollisionStrategy.isStopped())
@@ -124,6 +148,9 @@ public class WallFollowerStrategy extends Strategy {
 		edgeStrategy.init();
 		wallStrategy.init();
 		startStrategy.init();
+		
+		wallCollisionCount = 0;
+		lostEdgeCount = 0;
 	}
 
 	@Override
