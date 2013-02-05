@@ -1,8 +1,9 @@
 package sensors;
 
 import robot.Platform;
+import strategies.Action;
 
-public class Head {
+public class Head implements Action {
 
 	private static final UltrasonicSensor ultrasonicSensor = new UltrasonicSensor(
 			Platform.ULTRASONIC_PORT);
@@ -31,6 +32,11 @@ public class Head {
 
 	public int getDistance() {
 		return polledDistance;
+	}
+	
+	@Override
+	public void run() {
+		headMotor.run();
 	}
 
 	/**

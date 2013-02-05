@@ -1,9 +1,10 @@
 package strategies;
 
-public abstract class Strategy {
+public abstract class Strategy implements Action {
 
 	private boolean running = false;
 
+	@Override
 	public void run() {
 		doRun();
 	}

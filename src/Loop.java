@@ -51,6 +51,8 @@ public class Loop extends Thread {
 			int lastEndTime = Utils.getSystemTime();
 
 			while (strategy.isRunning() && !abort) {
+				//Give some computation time to the head
+				Platform.HEAD.run();
 				// poll sensors
 				Platform.poll();
 
