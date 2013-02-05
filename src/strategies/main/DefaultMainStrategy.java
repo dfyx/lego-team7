@@ -89,6 +89,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			break;
 		case SWAMP:
 		case LABYRINTH:
+			// TODO SB switch side
 			currentStrategy = new WallFollowerStrategy(Side.LEFT, // side
 					0, // rotation time
 					1000, // curve speed
