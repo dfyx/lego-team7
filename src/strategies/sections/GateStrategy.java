@@ -58,7 +58,7 @@ public class GateStrategy extends Strategy {
 		currentState = State.APPROACH;
 		Gate.getInstance().connect();
 		Platform.ENGINE.move(1000);
-		Platform.HEAD.moveTo(0, true);
+		Platform.HEAD.moveTo(0, 1000);
 	}
 
 	@Override
