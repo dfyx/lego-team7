@@ -18,8 +18,8 @@ public class Head {
 
 	// private MotorThread motorThread = new MotorThread();
 	private HeadMotor headMotor = new HeadMotor();
-	private SweepThread sweepThread = new SweepThread(headMotor,
-			ultrasonicSensor, lightSensor);
+	private SweepThread sweepThread = new SweepThread(headMotor/*,
+			ultrasonicSensor, lightSensor*/);
 
 	public void poll() {
 		polledPosition = headMotor.getPosition();
@@ -127,8 +127,8 @@ public class Head {
 	 */
 	public void startSweeping(int from, int to, int lightValuecount,
 			int ultrasonicValuecount) {
-		sweepThread.startSweeping(from, to, lightValuecount,
-				ultrasonicValuecount);
+		sweepThread.startSweeping(from, to/*, lightValuecount,
+				ultrasonicValuecount*/);
 	}
 
 	/**
