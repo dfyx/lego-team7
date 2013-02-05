@@ -177,7 +177,7 @@ public class FindWallStrategy extends ChildStrategy {
 		case START_TURN_HEAD_FORWARD:
 			// finished moving -> start to turn head to front
 			ENGINE.stop();
-			HEAD.moveTo(FRONT_POSITION, true);
+			HEAD.moveTo(FRONT_POSITION, 1000);
 			break;
 		case TURN_HEAD_FORWARD:
 			// head turning...
@@ -202,7 +202,7 @@ public class FindWallStrategy extends ChildStrategy {
 			break;
 		case START_TURN_HEAD_SIDEWAYS: // start turning head to wall
 			ENGINE.stop();
-			HEAD.moveTo(SIDE_POSITION, true);
+			HEAD.moveTo(SIDE_POSITION, 1000);
 			break;
 		case TURN_HEAD_SIDEWAYS:
 			// head turning...
