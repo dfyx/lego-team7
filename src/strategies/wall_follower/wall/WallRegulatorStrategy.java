@@ -1,4 +1,4 @@
-package strategies.wall_follower.without_sweeping.wall;
+package strategies.wall_follower.wall;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
@@ -7,7 +7,7 @@ import utils.Utils;
 import utils.Utils.Side;
 
 // TODO SB should work for right and left looking sensor head
-public class WallFollowerStrategy extends ChildStrategy {
+public class WallRegulatorStrategy extends ChildStrategy {
 	private Side headSide;
 
 	// TODO SB calibrate?
@@ -22,6 +22,8 @@ public class WallFollowerStrategy extends ChildStrategy {
 	private static final int LINEAR_FACTOR_MOVE_AWAY = 55;
 	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 37;
 	
+	private final int MAX_MOTOR_DIRECTION;
+	
 	/**
 	 * used to turn collision detection off, if we are regulating too much.
 	 */
@@ -32,8 +34,14 @@ public class WallFollowerStrategy extends ChildStrategy {
 	 */
 	private int actualValue;
 
-	public WallFollowerStrategy(Side headSide) {
+	/**
+	 * 
+	 * @param headSide
+	 * @param maxMotorDirection Should be around 500
+	 */
+	public WallRegulatorStrategy(Side headSide, int maxMotorDirection) {
 		this.headSide = headSide;
+		MAX_MOTOR_DIRECTION = maxMotorDirection;
 	}
 
 	protected void childInit() {
@@ -69,7 +77,7 @@ public class WallFollowerStrategy extends ChildStrategy {
 		else
 			linearValue = diff * LINEAR_FACTOR_MOVE_AWAY;
 
-		return Utils.clamp(linearValue, -1000, 1000);
+		return Utils.clamp(linearValue, -MAX_MOTOR_DIRECTION, MAX_MOTOR_DIRECTION);
 	}
 
 	/**
