@@ -5,6 +5,7 @@ import robot.Platform;
 import strategies.CountLinesStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
+import strategies.sections.GateStrategy;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
 import strategies.util.DriveForwardStrategy;
@@ -34,7 +35,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(7), SEESAW(10);
+		RACE(13), LABYRINTH(7), GATE(3), SEESAW(10);
 
 		private final int value;
 
@@ -90,6 +91,9 @@ public class DefaultMainStrategy extends MainStrategy {
 					0 , // rotation time
 					1000 , // curve speed
 					350); // curve direction
+			break;
+		case GATE:
+			currentStrategy = new GateStrategy();
 			break;
 		}
 		currentStrategy.init();
