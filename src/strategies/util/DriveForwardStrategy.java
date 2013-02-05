@@ -1,6 +1,7 @@
-package strategies;
+package strategies.util;
 
 import robot.Platform;
+import strategies.Strategy;
 
 /**
  * Just drive forward - for example for reading a barcode

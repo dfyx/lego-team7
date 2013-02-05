@@ -1,17 +1,19 @@
-package strategies;
+package strategies.line_follower;
 
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
+import strategies.Strategy;
 import utils.RunningAverage;
 import utils.Utils;
 import utils.Utils.Side;
 
 public class LineFollowerStrategy extends Strategy {
 
-    private static final int LIGHT_SETPOINT = 550; // FIXME: Adjust at monday
+    protected static final int LIGHT_SETPOINT = 600;
     
     private static final int LINE_LOSS_LIMIT = 5;
-    private static final int LINE_LOSS_THRESHOLD = 100; // FIXME: Adjust at monday
+    private static final int LINE_LOSS_UNDO_CYCLES = 10;
+    private static final int LINE_LOSS_THRESHOLD = 250;
     
     private static final double P = 0.8;
     private static final double D = 2.0;
@@ -49,6 +51,10 @@ public class LineFollowerStrategy extends Strategy {
         
         if (onLine && value < LINE_LOSS_THRESHOLD) {
             onLine = ++lineLossCounter <= LINE_LOSS_LIMIT;
+            
+            if (!onLine) {
+                lineLossCounter = LINE_LOSS_UNDO_CYCLES;
+            }
         } else if (value > LINE_LOSS_THRESHOLD) {
             lineLossCounter = 0;
         }
