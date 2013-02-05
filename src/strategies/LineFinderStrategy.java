@@ -9,6 +9,7 @@ import utils.Utils.Side;
 /**
  * Tries to find a line, can be used while driving or standing. If a line has
  * been found, the robot will be moved for a hand-over to the LineFinderStrategy.
+ * This class itself does NOT move the robot until a line has been found!
  * 
  * @author markus
  */
@@ -35,7 +36,7 @@ public class LineFinderStrategy extends Strategy {
     private Side trackingSide = Side.LEFT;
     
     private int sweepTo = Head.degreeToPosition(DETECTION_ANGLE);
-    private int turnDir = -1;
+    private int turnDir = -1 * trackingSide.getValue();
     private int turnSpeed = ALIGN_SPEED;
     
     private float angle = 0;
@@ -44,7 +45,12 @@ public class LineFinderStrategy extends Strategy {
     protected void doInit() {
         state = State.NOT_LOCKED;
         
-        turnDir = trackingSide.getValue();
+        driveSpeed = DRIVE_SPEED;
+        sweepSpeed = SEARCH_SWEEP_SPEED;
+        
+        sweepTo = Head.degreeToPosition(DETECTION_ANGLE);
+        turnDir = -1 * trackingSide.getValue();
+        turnSpeed = ALIGN_SPEED;
     }
 
     @Override
