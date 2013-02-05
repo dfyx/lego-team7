@@ -31,7 +31,7 @@ public class CountLinesStrategy extends Strategy {
     int peak = 1000;
     int edgeCount = 0;
     int lineCount = 0;
-    int drivenDistance = 0;
+    float drivenDistance = 0;
     
     @Override
     protected void doInit() {
@@ -84,6 +84,20 @@ public class CountLinesStrategy extends Strategy {
             
             if (clearance) { // count edges only after passing clearance
                 edgeCount++;
+            }
+        }
+    }
+
+    /**
+     * Overwrites the automatic clearance detection with the passed state.
+     * 
+     * @param clearance
+     *            the new clearance state
+     */
+    void setClearance(final boolean clearance) {
+        if (this.clearance != clearance) {
+            if (!clearance) {
+               edgeCount = 0;
             }
         }
     }
