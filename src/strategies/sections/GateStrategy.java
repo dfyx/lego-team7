@@ -60,9 +60,11 @@ public class GateStrategy extends Strategy {
 
 	@Override
 	protected void doRun() {
-		System.out.print(currentState.toString());
+		State oldState = currentState;
 		currentState = checkStateTransition();
-		System.out.println(" -> " + currentState.toString());
+		if (oldState != currentState) {
+			System.out.println(currentState.toString() + " -> " + currentState.toString());
+		}
 	}
 
 }
