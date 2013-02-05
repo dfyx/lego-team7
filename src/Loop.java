@@ -40,8 +40,6 @@ public class Loop extends Thread {
 	 * 
 	 */
 	public void run() {
-		System.out.println("START");
-		System.out.flush();
 		try {
 			isRunning = true;
 
@@ -55,9 +53,17 @@ public class Loop extends Thread {
 				Delay.msDelay(10);
 			}
 
-			int lastEndTime = Utils.getSystemTime();
+			int nextIterationTime = Utils.getSystemTime();
 
 			while (strategy.isRunning() && !abort) {
+				int currentTime=Utils.getSystemTime();
+				if(nextIterationTime>currentTime) {
+					Delay.msDelay(nextIterationTime-currentTime);
+					nextIterationTime+=LOOP_TIME;
+				} else {
+					nextIterationTime = currentTime + LOOP_TIME;
+				}
+				
 				//Give some computation time to the head
 				Platform.HEAD.run();
 				// poll sensors
@@ -66,11 +72,6 @@ public class Loop extends Thread {
 				// run strategy and commit changes
 				strategy.run();
 				ENGINE.commit();
-
-				// check when to perform the next cycle
-				lastEndTime += LOOP_TIME;
-				if (lastEndTime > Utils.getSystemTime())
-					Delay.msDelay(lastEndTime - Utils.getSystemTime());
 
 				numCycles++;
 			}
