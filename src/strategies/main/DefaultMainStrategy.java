@@ -1,4 +1,5 @@
 package strategies.main;
+
 import static robot.Platform.ENGINE;
 import lejos.nxt.Button;
 import robot.Platform;
@@ -13,13 +14,13 @@ import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils.Side;
 
 public class DefaultMainStrategy extends MainStrategy {
-	
+
 	private boolean detectBarcode;
-	
+
 	public void disableBarcodeDetection() {
-		detectBarcode=false;
+		detectBarcode = false;
 	}
-	
+
 	public void enableBarcodeDetection() {
 		detectBarcode = true;
 	}
@@ -89,9 +90,12 @@ public class DefaultMainStrategy extends MainStrategy {
 		case SWAMP:
 		case LABYRINTH:
 			currentStrategy = new WallFollowerStrategy(Side.LEFT, // side
-					0 , // rotation time
-					1000 , // curve speed
-					350); // curve direction
+					0, // rotation time
+					1000, // curve speed
+					350, // curve direction
+					35, // max wall distance
+					14 // desired wall distance
+			);
 			break;
 		case GATE:
 			currentStrategy = new GateStrategy();
@@ -148,7 +152,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			}
 		}
 
-		//Run child strategy
+		// Run child strategy
 		if (state == State.RUNNING || state == State.CALIBRATING) {
 			// run strategy and commit changes
 			barcodeReader.clearStatus();
@@ -157,7 +161,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			if (detectBarcode && barcodeReader.hasNewCode()) {
 				System.out.println("New barcode: "+barcodeReader.getLineCount());
 				int code = barcodeReader.getLineCount();
-				if(code>1)
+				if (code > 1)
 					switchLevel(Barcode.get(code));
 				else
 					currentStrategy.run();
@@ -167,7 +171,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			ENGINE.commit();
 		}
 
-		//React, if calibration is finished
+		// React, if calibration is finished
 		if (state == State.CALIBRATING && currentStrategy.isFinished()) {
 			state = State.RUNNING;
 			switchToBarcodeReading();

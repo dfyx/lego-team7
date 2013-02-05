@@ -3,8 +3,8 @@ package strategies.wall_follower;
 import static robot.Platform.ENGINE;
 import strategies.Strategy;
 import strategies.wall_follower.collision.FollowCollisionStrategy;
-import strategies.wall_follower.edge.EdgeCollisionStrategy;
 import strategies.wall_follower.edge.EdgeStrategy;
+import strategies.wall_follower.find_wall.FindWallStrategy;
 import strategies.wall_follower.wall.WallRegulatorStrategy;
 import utils.Utils.Side;
 
@@ -15,9 +15,10 @@ public class WallFollowerStrategy extends Strategy {
 	private FollowCollisionStrategy edgeCollisionStrategy;
 	private EdgeStrategy edgeStrategy;
 	private WallRegulatorStrategy wallStrategy;
+	private FindWallStrategy startStrategy;
 
 	private enum State {
-		START, STARTED, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE, EDGE_COLLISION
+		START, STARTED, FIND_WALL, FOLLOW_WALL, WALL_COLLISION, FOLLOW_EDGE, EDGE_COLLISION
 	}
 
 	private State currentState;
@@ -28,8 +29,10 @@ public class WallFollowerStrategy extends Strategy {
 	 * @param rotationTime should be around 300
 	 * @param curveSpeed should be 1000
 	 * @param curveDirection should be 300 for race and less for labyrinth
+	 * @param maxWallDistance used to prevent overregulating after a curve. Should be around 35.
+	 * @param desiredWallDistance the desired distance to the wall. Should be around 14.
 	 */
-	public WallFollowerStrategy(Side headSide, int rotationTime, int curveSpeed, int curveDirection) {
+	public WallFollowerStrategy(Side headSide, int rotationTime, int curveSpeed, int curveDirection, int maxWallDistance, int desiredWallDistance) {
 		this.headSide = headSide;
 		wallCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
@@ -39,7 +42,7 @@ public class WallFollowerStrategy extends Strategy {
 				400, // obstacle speed
 				1000, // obstacle direction
 				300, // extra turn time
-				50, // max wall distance
+				maxWallDistance, // max wall distance
 				200, // wall speed
 				1000 // wall direction
 		);
@@ -60,11 +63,12 @@ public class WallFollowerStrategy extends Strategy {
 //				500, // backward speed
 //				1000 // backward time
 //				);
-		edgeStrategy = new EdgeStrategy(this.headSide, 50 // wall distance
+		edgeStrategy = new EdgeStrategy(this.headSide, maxWallDistance // wall distance
 				, 1000, 1000 // Rotation speed, direction
 				, rotationTime // Time
 				, curveSpeed, curveDirection);
-		wallStrategy = new WallRegulatorStrategy(this.headSide, 500);
+		wallStrategy = new WallRegulatorStrategy(this.headSide, 500, desiredWallDistance);
+		startStrategy = new FindWallStrategy(headSide, 1000, -200, 15, 50, 1000, 1000, 1000);
 	}
 
 	private State checkState() {
@@ -75,7 +79,11 @@ public class WallFollowerStrategy extends Strategy {
 		State oldState = currentState;
 		switch (currentState) {
 		case START:
-			currentState = State.STARTED;
+			currentState = State.FIND_WALL;
+			break;
+		case FIND_WALL:
+			if(startStrategy.isStopped())
+				currentState = State.STARTED;
 			break;
 		case STARTED:
 			currentState = State.FOLLOW_WALL;
@@ -115,6 +123,7 @@ public class WallFollowerStrategy extends Strategy {
 		wallCollisionStrategy.init();
 		edgeStrategy.init();
 		wallStrategy.init();
+		startStrategy.init();
 	}
 
 	@Override
@@ -125,6 +134,9 @@ public class WallFollowerStrategy extends Strategy {
 			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
+		case FIND_WALL:
+			startStrategy.run();
+			break;
 		case STARTED:
 			ENGINE.move(1000, 0);
 			break;
