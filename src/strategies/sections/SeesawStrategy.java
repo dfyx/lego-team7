@@ -15,7 +15,7 @@ public class SeesawStrategy extends Strategy {
 		state = State.POSITIONING_HEAD;
 		Platform.ENGINE.move(-1000);
 		System.out.println("Init Seesaw");
-		Platform.HEAD.moveTo(0, true, 200);
+		Platform.HEAD.moveTo(0, 200);
 	}
 
 	protected void doRun() {

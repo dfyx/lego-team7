@@ -138,76 +138,22 @@ public class Head implements Action {
 	 * @param async
 	 *            If true, the call immediately returns while the head is still
 	 *            moving.
+	 * @param speed The speed to move with (0<=speed<=1000)
 	 */
-	public void moveTo(int position, boolean async) {
+	public void moveTo(int position, int speed) {
 		if (isSweeping())
 			throw new IllegalStateException("moveTo() call while sweeping");
-		headMotor.moveTo(position, async);
+		headMotor.moveTo(position, speed);
 	}
-
-	public void startCheckStalled(boolean moveRight) {
-		final int POWER = 50;
-		int power = POWER;
-		if (!moveRight)
-			power = -power;
-		headMotor.moveWithFixedPower(power);
-	}
-
-	/**
-	 * Call startCheckStalled first. Call stopMoving as soon, as this yields
-	 * true.
-	 * 
-	 * @return
-	 */
-	public boolean isStalled() {
-		return headMotor.isStalled();
-	}
-
-	/**
-	 * Move the head manually to a given position Don't use this function while
-	 * sweeping! (after stopSweeping() wait until isSweeping()==false, before
-	 * you call this function)
-	 * 
-	 * @param position
-	 *            The new position. Range as given in Javadoc for getPosition()
-	 * @param async
-	 *            If true, the call immediately returns while the head is still
-	 *            moving.
-	 * @param speed
-	 *            The speed to move with (0<=speed<=1000)
-	 */
-	public void moveTo(int position, boolean async, int speed) {
-		if (isSweeping())
-			throw new IllegalStateException("moveTo() call while sweeping");
-		headMotor.moveTo(position, async, speed);
-	}
-
-	/**
-	 * Return the measured sweep values Lower indices in the array are values
-	 * more to the left
-	 */
-	/*
-	 * public int[] getUltrasonicSweepValues() { return polledUltrasonicValues;
-	 * }
-	 */
-
-	/**
-	 * Return the measured sweep values Lower indices in the array are values
-	 * more to the left
-	 */
-	/*
-	 * public int[] getLightSweepValues() { return polledLightValues; }
-	 */
 
 	public int getRawLightValue() {
 		return lightSensor.getRawValue();
 	}
 
 	/**
-	 * <<<<<<< Updated upstream Calibrate the light sensor ======= Calibrate the
-	 * light sensor. The passed values must have been obtained by
+	 * Calibrate the light sensor.
+	 * The passed values must have been obtained by
 	 * {@link #getLight()} because of the backlight-subtraction applied there.
-	 * >>>>>>> Stashed changes
 	 * 
 	 * @param minValue
 	 *            The value mapped to 0

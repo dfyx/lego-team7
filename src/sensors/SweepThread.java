@@ -69,18 +69,18 @@ public class SweepThread implements Action {
 		case INACTIVE:
 			break;
 		case SHOULD_START:
-			motor.moveTo(sweepFrom, true, 1000);
+			motor.moveTo(sweepFrom, 1000);
 			state = State.SWEEP_LEFT;
 			break;
 		case SWEEP_LEFT:
 			if (!motor.isMoving()) {
-				motor.moveTo(sweepTo, true, sweepSpeed);
+				motor.moveTo(sweepTo, sweepSpeed);
 				state = State.SWEEP_RIGHT;
 			}
 			break;
 		case SWEEP_RIGHT:
 			if (!motor.isMoving()) {
-				motor.moveTo(sweepFrom, true, sweepSpeed);
+				motor.moveTo(sweepFrom, sweepSpeed);
 				state = State.SWEEP_LEFT;
 			}
 			break;
