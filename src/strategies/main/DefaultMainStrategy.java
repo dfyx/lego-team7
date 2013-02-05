@@ -34,7 +34,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(7), SEESAW(10);
+		RACE(13), LABYRINTH(7), SWAMP(4), SEESAW(10);
 
 		private final int value;
 
@@ -85,6 +85,7 @@ public class DefaultMainStrategy extends MainStrategy {
 		case SEESAW:
 			currentStrategy = new SeesawStrategy();
 			break;
+		case SWAMP:
 		case LABYRINTH:
 			currentStrategy = new WallFollowerStrategy(Side.LEFT, // side
 					0 , // rotation time
