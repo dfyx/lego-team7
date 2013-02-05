@@ -98,14 +98,12 @@ public class DefaultMainStrategy extends MainStrategy {
 
 	@Override
 	public void doInit() {
-		System.out.println("Start init");
 		barcodeReader = new CountLinesStrategy();
 		barcodeReader.init();
 		state = State.WAITING_WILL_CALIBRATE;
 		buttonState = ButtonState.DOWN;
 		detectBarcode = true;
 		switchToCalibrating();
-		System.out.println("End init");
 	}
 
 	/**
@@ -153,7 +151,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			if (!Platform.HEAD.isMoving())
 				barcodeReader.run();
 			if (detectBarcode && barcodeReader.hasNewCode()) {
-				System.out.println("New barcode :)");
+				System.out.println("New barcode: "+barcodeReader.getLineCount());
 				int code = barcodeReader.getLineCount();
 				if(code>1)
 					switchLevel(Barcode.get(code));

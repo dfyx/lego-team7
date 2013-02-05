@@ -9,7 +9,7 @@ public class SeesawStrategy extends Strategy {
 	private State state;
 	
 	//The minimum distance when to trigger "bridge is down"
-	final static int MINDISTANCE=150;
+	final static int MINDISTANCE=100;
 	final static int MINVALUES = 20; //When X values are >MINDISTANCE, the bridge is down.
 	
 	int valuecount=0;
@@ -17,7 +17,6 @@ public class SeesawStrategy extends Strategy {
 	protected void doInit() {
 		state = State.POSITIONING_HEAD;
 		Platform.ENGINE.move(-1000);
-		System.out.println("Init Seesaw");
 		Platform.HEAD.moveTo(0, 200);
 	}
 
@@ -25,7 +24,6 @@ public class SeesawStrategy extends Strategy {
 		switch(state) {
 		case POSITIONING_HEAD:
 			if(!Platform.HEAD.isMoving()) {
-				System.out.println("Positioning finished");
 				Platform.ENGINE.stop();
 				state = State.WAITING_FOR_BRIDGE_DOWN;
 			}
@@ -38,8 +36,6 @@ public class SeesawStrategy extends Strategy {
 				valuecount=0;
 			}
 			if(valuecount>MINVALUES) {
-				System.out.println("Bridge ist down");
-				System.out.println("distance="+Platform.HEAD.getDistance());
 				state = State.MOVING;
 				Platform.ENGINE.move(1000);
 				Platform.HEAD.startSweeping(-1000, 1000, 1000);
