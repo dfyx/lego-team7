@@ -14,28 +14,23 @@ public class Head implements Action {
 	private int polledDistance;
 	private int polledLight;
 	private int polledPosition;
-	//private int[] polledUltrasonicValues;
-	//private int[] polledLightValues;
 
-	// private MotorThread motorThread = new MotorThread();
 	private HeadMotor headMotor = new HeadMotor();
-	private SweepThread sweepThread = new SweepThread(headMotor/*,
-			ultrasonicSensor, lightSensor*/);
+	private SweepThread sweepAction = new SweepThread(headMotor);
 
 	public void poll() {
 		polledPosition = headMotor.getPosition();
 		polledDistance = ultrasonicSensor.getValue();
 		polledLight = lightSensor.getValue();
-		//polledUltrasonicValues = sweepThread.getUltrasonicValues();
-		//polledLightValues = sweepThread.getLightValues();
 	}
 
 	public int getDistance() {
 		return polledDistance;
 	}
-	
+
 	@Override
 	public void run() {
+		sweepAction.run();
 		headMotor.run();
 	}
 
@@ -48,7 +43,7 @@ public class Head implements Action {
 	}
 
 	public boolean isSweeping() {
-		return sweepThread.isRunning();
+		return sweepAction.isRunning();
 	}
 
 	public void stopMoving() {
@@ -56,7 +51,7 @@ public class Head implements Action {
 	}
 
 	public void terminate() {
-		sweepThread.terminate();
+		sweepAction.terminate();
 		headMotor.terminate();
 	}
 
@@ -68,7 +63,8 @@ public class Head implements Action {
 	}
 
 	/**
-	 * Start collision detection. You need to explicitly stop this befor moving the head.
+	 * Start collision detection. You need to explicitly stop this befor moving
+	 * the head.
 	 * 
 	 * @param detect
 	 *            True, iff collisions should be detected. False otherwise.
@@ -76,11 +72,11 @@ public class Head implements Action {
 	public void detectCollisions(boolean detect) {
 		headMotor.detectCollisions(detect);
 	}
-	
+
 	/**
-	 * Ensure, that the motor is floating, when calling this method.
-	 * Otherwise it will always return false;
-	 * If the head is moving, while calling this method, the behaviour is undefined.
+	 * Ensure, that the motor is floating, when calling this method. Otherwise
+	 * it will always return false; If the head is moving, while calling this
+	 * method, the behaviour is undefined.
 	 * 
 	 * @return True, iff the head is turning due to a collision.
 	 */
@@ -114,7 +110,7 @@ public class Head implements Action {
 	 * manually using moveTo(pos)
 	 */
 	public void stopSweeping() {
-		sweepThread.stopSweeping();
+		sweepAction.stopSweeping();
 	}
 
 	/**
@@ -124,17 +120,11 @@ public class Head implements Action {
 	 *            The leftmost position to sweep. See getPosition() for range.
 	 * @param to
 	 *            The rightmost position to sweep. See getPosition() for range.
-	 * @param lightValuecount
-	 *            The number of light values to scan, distributed over the
-	 *            sweeping area
-	 * @param ultrasonicValuecount
-	 *            The number of distance values to scan, distributed over the
-	 *            sweeping area
+	 * @param speed
+	 *            The speed to sweep with (0<=speed<=1000)
 	 */
-	public void startSweeping(int from, int to, int lightValuecount,
-			int ultrasonicValuecount) {
-		sweepThread.startSweeping(from, to/*, lightValuecount,
-				ultrasonicValuecount*/);
+	public void startSweeping(int from, int to, int speed) {
+		sweepAction.startSweeping(from, to, speed);
 	}
 
 	/**
@@ -195,17 +185,18 @@ public class Head implements Action {
 	 * Return the measured sweep values Lower indices in the array are values
 	 * more to the left
 	 */
-	/*public int[] getUltrasonicSweepValues() {
-		return polledUltrasonicValues;
-	}*/
+	/*
+	 * public int[] getUltrasonicSweepValues() { return polledUltrasonicValues;
+	 * }
+	 */
 
 	/**
 	 * Return the measured sweep values Lower indices in the array are values
 	 * more to the left
 	 */
-	/*public int[] getLightSweepValues() {
-		return polledLightValues;
-	}*/
+	/*
+	 * public int[] getLightSweepValues() { return polledLightValues; }
+	 */
 
 	public int getRawLightValue() {
 		return lightSensor.getRawValue();
@@ -228,10 +219,6 @@ public class Head implements Action {
 
 	public void resetLightCalibration() {
 		lightSensor.resetCalibration();
-	}
-
-	public void setSweepSpeed(int speed) {
-		sweepThread.setSpeed(speed);
 	}
 
 	/**
