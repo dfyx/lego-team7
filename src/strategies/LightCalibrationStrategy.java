@@ -217,18 +217,18 @@ public class LightCalibrationStrategy extends Strategy {
         void update(final State oldState, final State newState) {
             switch (newState) {
                 case INIT:
-                    HEAD.moveTo(sweepTo, true, SWEEP_SPEED);
+                    HEAD.moveTo(sweepTo, SWEEP_SPEED);
                     sweepTo *= -1;
                     break;
                 case SAMPLE:
                     if (!HEAD.isMoving()) {
-                        HEAD.moveTo(sweepTo, true, SWEEP_SPEED);
+                        HEAD.moveTo(sweepTo, SWEEP_SPEED);
                         sweepTo *= -1;
                     }
                     break;
                 case DRIVE_BACK:
                     if (oldState == State.SAMPLE) {
-                        HEAD.moveTo(0, true);
+                        HEAD.moveTo(0, 1000);
                     }
                     break;
             }

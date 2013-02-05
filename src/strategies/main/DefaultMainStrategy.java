@@ -139,6 +139,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			case RUNNING:
 				state = State.WAITING;
 				ENGINE.stop();
+				Platform.HEAD.stopMoving();
 				break;
 			case WAITING_FOR_STARTSIGNAL:
 				currentStrategy = new RaceStrategy();
@@ -154,7 +155,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			if (!Platform.HEAD.isMoving())
 				barcodeReader.run();
 			if (detectBarcode && barcodeReader.hasNewCode()) {
-				System.out.println("New barcode :)");
+				System.out.println("New barcode: "+barcodeReader.getLineCount());
 				int code = barcodeReader.getLineCount();
 				if(code>1)
 					switchLevel(Barcode.get(code));

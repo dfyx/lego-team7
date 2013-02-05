@@ -65,12 +65,12 @@ public class LineFinderStrategy extends Strategy {
                     turnDir = HEAD.getPosition() < 0 ? -1 : 1;
                     
                     ENGINE.stop();
-                    HEAD.moveTo(0, true);
+                    HEAD.moveTo(0, 1000);
                     
                     state = State.WAIT_FOR_HEAD;
                 } else {
                     if (!HEAD.isMoving()) {
-                        HEAD.moveTo(sweepTo, true, sweepSpeed);
+                        HEAD.moveTo(sweepTo, sweepSpeed);
                         
                         sweepTo = -sweepTo;
                     }

@@ -178,7 +178,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			break;
 		case TURN_HEAD_FORWARD:
 			ENGINE.stop();
-			HEAD.moveTo(FRONT_POSITION, true);
+			HEAD.moveTo(FRONT_POSITION, 1000);
 			break;
 		case SEARCH_OBSTACLE:
 			// Turning head forward
@@ -194,7 +194,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		case START_TURN_HEAD_SIDEWAYS:
 			// Start turning head sideways
 			ENGINE.stop();
-			HEAD.moveTo(SIDE_POSITION, true);
+			HEAD.moveTo(SIDE_POSITION, 1000);
 			break;
 		case TURN_HEAD_SIDEWAYS:
 			// head turning sideways
