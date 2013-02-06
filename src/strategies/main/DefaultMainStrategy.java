@@ -7,6 +7,8 @@ import sensors.LightSensor;
 import strategies.CountLinesStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
+import strategies.line_follower.LineFollowerController;
+import strategies.sections.BridgeController;
 import strategies.sections.GateStrategy;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
@@ -43,7 +45,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10);
+		RACE(13), BRIDGE(5), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10), LINE_TO_PLANT(9);
 
 		private final int value;
 
@@ -95,9 +97,15 @@ public class DefaultMainStrategy extends MainStrategy {
 		case RACE:
 			state = State.WAITING_FOR_STARTSIGNAL;
 			break;
+		case BRIDGE:
+		    currentStrategy = new BridgeController();
+		    break;
 		case SEESAW:
 			currentStrategy = new SeesawStrategy();
 			break;
+		case LINE_TO_PLANT:
+		    currentStrategy = new LineFollowerController(); // FIXME, add special strategy
+		    break;
 		case SWAMP:
 			currentStrategy = WallFollowerStrategy.getSwampStrategy();
 			break;
