@@ -19,7 +19,7 @@ public class LineFinderStrategy extends Strategy {
     /** Brightness treshold used for line detection. */
     public static final int DETECTION_THRESHOLD = LineFollowerStrategy.LIGHT_SETPOINT + 50;
     /** Sweep angle used during initial line search. */
-    private static final int DETECTION_ANGLE = 75;
+    private static final int DETECTION_ANGLE = 85;
     /** Maximum turn angle during alignment. */
     private static final int MAX_ANGLE = 120;
     /** Used to unlock direction change. */

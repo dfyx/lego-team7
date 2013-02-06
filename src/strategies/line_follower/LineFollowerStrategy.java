@@ -12,11 +12,11 @@ public class LineFollowerStrategy extends Strategy {
     protected static final int LIGHT_SETPOINT = 600;
     
     private static final int LINE_LOSS_LIMIT = 5;
-    private static final int LINE_LOSS_UNDO_CYCLES = 10;
+    private static final int LINE_LOSS_UNDO_CYCLES = 15;
     private static final int LINE_LOSS_THRESHOLD = 250;
     
-    private static final double P = 0.8;
-    private static final double D = 2.0;
+    private static final double P = 0.75;
+    private static final double D = 2.5;
     
     private int speed = 500;
     private int clamp = 1000;
@@ -88,11 +88,11 @@ public class LineFollowerStrategy extends Strategy {
 
         dSum -= out - linear;
 
-        /*
+        
         System.out.println("val: " + value + " err: " + error + " lin: "
                 + linear + " errorD: " + errorD + " dSum: " + dSum + " out: "
                 + out);
-         */
+        
 
         lastSpeeds.addValue(speed);
         lastDirections.addValue(out);

@@ -11,7 +11,7 @@ public class LineFollowerController extends Strategy {
 
     private static final int SEARCH_LINE_SPEED = 400;
     private static final int HALT_TIME = 2000;
-    private static final int MAX_GAP_SIZE = 140; // > 100mm
+    private static final int MAX_GAP_SIZE = 150; // > 100mm
     
     private final LineFinderStrategy finder = new LineFinderStrategy();
     private final LineFollowerStrategy follower = new LineFollowerStrategy();
