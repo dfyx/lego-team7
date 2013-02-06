@@ -110,8 +110,8 @@ public class FindWallStrategy extends ChildStrategy {
 			break;
 		}
 
-		if (currentState != newState)
-			System.out.println(currentState.name() + " -> " + newState.name());
+//		if (currentState != newState)
+//			System.out.println(currentState.name() + " -> " + newState.name());
 
 		return newState;
 	}
@@ -157,10 +157,10 @@ public class FindWallStrategy extends ChildStrategy {
 	@Override
 	public void work() {
 
-		State oldState = currentState;
+//		State oldState = currentState;
 		currentState = checkState();
-		if (oldState != currentState)
-			System.out.println("running: " + currentState.name());
+//		if (oldState != currentState)
+//			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
 		case START:
