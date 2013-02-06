@@ -2,6 +2,7 @@ package strategies.sections;
 
 import robot.Platform;
 import strategies.Strategy;
+import strategies.line_follower.LineFinderStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils;
 import utils.Utils.Side;
@@ -11,7 +12,7 @@ public class SliderStrategy extends Strategy {
 
 	private final static int FORWARD_MOVING_TIME = 1000;
 	private final static int STOPPING_WALLFOLLOWER_TIME = 5000;
-	private final static int MINDISTANCE_TO_SLIDER = 50;
+	private final static int MINDISTANCE_TO_SLIDER = 15;
 	private final static int MAXDISTANCE_TO_SLIDER = 200;
 
 	public enum State {
@@ -22,6 +23,7 @@ public class SliderStrategy extends Strategy {
 	private int startedDelay;
 
 	private WallFollowerStrategy wallFollowerStrategy = WallFollowerStrategy.getSliderStrategy(Side.RIGHT,10);
+	private LineFinderStrategy lineFinderStrategy = new LineFinderStrategy();
 
 	@Override
 	protected void doInit() {
@@ -57,8 +59,8 @@ public class SliderStrategy extends Strategy {
 					.getSystemTime()) {
 				Platform.HEAD.moveTo(0, 1000);
 				state = State.POSITION_HEAD_FOR_SLIDER;
+				System.out.println("Switch to position head");
 			}
-			System.out.println("Switch to position head");
 			break;
 		case POSITION_HEAD_FOR_SLIDER:
 			if (!Platform.HEAD.isMoving()) {
@@ -83,13 +85,15 @@ public class SliderStrategy extends Strategy {
 		case WAIT_FOR_SLIDER:
 			if(Platform.HEAD.getDistance()>MAXDISTANCE_TO_SLIDER) {
 				Platform.ENGINE.move(1000);
-				Platform.HEAD.startSweeping(-1000,1000,1000);
+				//Platform.HEAD.startSweeping(-1000,1000,1000);
+				lineFinderStrategy.init();
 				state = State.PASS_SLIDER;
 				System.out.println("Switch to pass slider");
 			}
 			break;
 		case PASS_SLIDER:
-			if(Platform.HEAD.getLight()>500) {
+			lineFinderStrategy.run();
+			if(lineFinderStrategy.isFinished()) {
 				Platform.ENGINE.stop();
 				System.out.println("Finished");
 				setFinished();
