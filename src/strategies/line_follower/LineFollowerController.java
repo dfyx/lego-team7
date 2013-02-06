@@ -23,8 +23,6 @@ public class LineFollowerController extends Strategy {
     @Override
     protected void doInit() {
         State.OFF_LINE.transitionTo(this);
-        
-        System.out.println("init: " + state);
     }
 
     @Override
@@ -36,7 +34,7 @@ public class LineFollowerController extends Strategy {
                 if (follower.isFinished()) {                    
                     State.JUST_LOST_LINE.transitionTo(this);
                     
-                    System.out.println("on_line -> " + state);
+                    System.out.println("on_line -> " + state); // FIXME: Debug
                 }
                 break;
             case JUST_LOST_LINE:
@@ -45,11 +43,11 @@ public class LineFollowerController extends Strategy {
                 if (finder.isFinished()) {                    
                     State.ON_LINE.transitionTo(this);
                     
-                    System.out.println("just_lost_line -> " + state);
+                    System.out.println("just_lost_line -> " + state); // FIXME: Debug
                 } else if (timer.elapsed() > HALT_TIME) {
                     State.OFF_LINE.transitionTo(this);
                     
-                    System.out.println("just_lost_line -> " + state);
+                    System.out.println("just_lost_line -> " + state); // FIXME: Debug
                 }
                 break;
             case OFF_LINE:
@@ -60,11 +58,11 @@ public class LineFollowerController extends Strategy {
                 if (finder.isFinished()) {                    
                     State.ON_LINE.transitionTo(this);
                     
-                    System.out.println("off_line -> " + state);
+                    System.out.println("off_line -> " + state); // FIXME: Debug
                 } else if (noLineDistance > MAX_GAP_SIZE) {
                     State.OFF_LINE_NO_GAP.transitionTo(this);
                     
-                    System.out.println("off_line -> " + state);
+                    System.out.println("off_line -> " + state); // FIXME: Debug
                 }
                 break;
             case OFF_LINE_NO_GAP:
@@ -72,7 +70,16 @@ public class LineFollowerController extends Strategy {
                 if (!HEAD.isMoving()) {
                     setFinished();
                     
-                    System.out.println("finished");
+                    System.out.println("finished"); // FIXME: Debug
+                }
+                break;
+            case OFF_LINE_SEEK:
+                finder.run();
+                
+                if (finder.isFinished()) {
+                    State.ON_LINE.transitionTo(this);
+                    
+                    System.out.println("off_line_seek -> " + state); // FIXME: Debug
                 }
                 break;
         }
@@ -89,7 +96,7 @@ public class LineFollowerController extends Strategy {
      * @param state the new state set
      */
     public void setState(final State state) {
-        this.state = state;
+        state.transitionTo(this);
     }
     
     public int getSpeed() {
@@ -156,6 +163,15 @@ public class LineFollowerController extends Strategy {
                 HEAD.moveTo(0, 1000);
                 ENGINE.stop();
             }
+        },
+        OFF_LINE_SEEK {
+            @Override
+            void doTransition(final LineFollowerController ctrl) {
+                ctrl.init();
+                
+                ENGINE.move(SEARCH_LINE_SPEED); // TODO: Maybe increase
+            }
+            
         };
         
         // FOR INTERNAL USE ONLY, DO NOT CALL THIS METHOD DIRECTLY!
