@@ -115,7 +115,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		SIDE_POSITION = 1000 * headSide.getValue();
 
 		collisionStrategy = new DetectCollisionStrategy(headSide);
-		moveBackStrategy = new MoveDistanceStrategy(backwardSpeed, backwardDistance);
+		moveBackStrategy = new MoveDistanceStrategy(backwardSpeed, -backwardDistance);
 
 		OBSTACLE_DISTANCE = obstacleDistance;
 		SEARCH_OBSTACLE_SPEED = searchObstacleSpeed;
