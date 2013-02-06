@@ -109,7 +109,7 @@ public class WallFollowerStrategy extends Strategy {
 				, rotationTime // Time
 				, curveSpeed, curveDirection);
 		wallStrategy = new WallRegulatorStrategy(this.headSide, 500, desiredWallDistance);
-		startStrategy = new FindWallStrategy(headSide, 1000, -200, 15, 30, 1000, 1000, 1000);
+		startStrategy = new FindWallStrategy(headSide, 1000, -200, 15, 30, 500, 1000, 1000);
 	}
 
 	private State checkState() {
