@@ -3,7 +3,6 @@ package strategies.sections;
 import static robot.Platform.ENGINE;
 import strategies.Strategy;
 import strategies.wall_follower.WallFollowerStrategy;
-import utils.Utils.Side;
 import bluetooth.Gate;
 
 /**
@@ -25,7 +24,7 @@ public class GateStrategy extends Strategy {
 	}
 	
 	public GateStrategy() {
-		wallFollower = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
+		wallFollower = WallFollowerStrategy.getGateStrategy();
 	}
 
 	private State currentState;

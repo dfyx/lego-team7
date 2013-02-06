@@ -10,22 +10,22 @@ import utils.Utils.Side;
 
 public class WallFollowerStrategy extends Strategy {
 	private Side headSide;
-	
+
 	private int wallCollisionCount = 0;
 	private int lostEdgeCount = 0;
-	
+
 	/**
-	 * May be used to detect turns. (unsafe)
-	 * Use #init to reset.
-	 * @return 
+	 * May be used to detect turns. (unsafe) Use #init to reset.
+	 * 
+	 * @return
 	 */
 	public int getWallCollisionCount() {
 		return wallCollisionCount;
 	}
-	
+
 	/**
-	 * May be used to detect turns. (unsafe)
-	 * Use # init to reset.
+	 * May be used to detect turns. (unsafe) Use # init to reset.
+	 * 
 	 * @return
 	 */
 	public int getLostEdgeCount() {
@@ -44,34 +44,13 @@ public class WallFollowerStrategy extends Strategy {
 
 	private State currentState;
 	
-	/**
-	 * 
-	 * @param headSide
-	 * @param desiredDistance Should be 10
-	 * @return
-	 */
-	public static WallFollowerStrategy getSliderStrategy(Side headSide, int desiredDistance) {
-		return new WallFollowerStrategy(headSide, // side
-				0, // rotation time
-				1000, // curve speed
-				470, // curve direction
-				35, // max wall distance
-				desiredDistance // desired wall distance
-		);
+	public static WallFollowerStrategy getGateStrategy() {
+		return getSwampStrategy();
 	}
-	
-	public static WallFollowerStrategy getMazeStrategy(Side headSide) {
-		return new WallFollowerStrategy(headSide, // side
-				0, // rotation time
-				1000, // curve speed
-				470, // curve direction
-				35, // max wall distance
-				14 // desired wall distance
-		);
-	}
-	
-	public static WallFollowerStrategy getRaceStrategy() {
+
+	public static WallFollowerStrategy getSwampStrategy() {
 		return new WallFollowerStrategy(Side.LEFT, // side
+				1000, // speed
 				0, // rotation time
 				1000, // curve speed
 				470, // curve direction
@@ -83,13 +62,62 @@ public class WallFollowerStrategy extends Strategy {
 	/**
 	 * 
 	 * @param headSide
-	 * @param rotationTime should be around 300
-	 * @param curveSpeed should be 1000
-	 * @param curveDirection should be 300 for race and less for labyrinth
-	 * @param maxWallDistance used to prevent overregulating after a curve. Should be around 35.
-	 * @param desiredWallDistance the desired distance to the wall. Should be around 14.
+	 * @param desiredDistance
+	 *            Should be 10
+	 * @return
 	 */
-	private WallFollowerStrategy(Side headSide, int rotationTime, int curveSpeed, int curveDirection, int maxWallDistance, int desiredWallDistance) {
+	public static WallFollowerStrategy getSliderStrategy(Side headSide,
+			int desiredDistance) {
+		return new WallFollowerStrategy(headSide, // side
+				1000, // speed
+				0, // rotation time
+				1000, // curve speed
+				470, // curve direction
+				35, // max wall distance
+				desiredDistance // desired wall distance
+		);
+	}
+
+	public static WallFollowerStrategy getMazeStrategy(Side headSide) {
+		return new WallFollowerStrategy(headSide, // side
+				1000, // speed
+				0, // rotation time
+				1000, // curve speed
+				470, // curve direction
+				35, // max wall distance
+				14 // desired wall distance
+		);
+	}
+
+	public static WallFollowerStrategy getRaceStrategy() {
+		return new WallFollowerStrategy(Side.LEFT, // side
+				1000, // speed
+				0, // rotation time
+				1000, // curve speed
+				470, // curve direction
+				35, // max wall distance
+				14 // desired wall distance
+		);
+	}
+
+	/**
+	 * 
+	 * @param headSide
+	 * @param rotationTime
+	 *            should be around 300
+	 * @param curveSpeed
+	 *            should be 1000
+	 * @param curveDirection
+	 *            should be 300 for race and less for labyrinth
+	 * @param maxWallDistance
+	 *            used to prevent overregulating after a curve. Should be around
+	 *            35.
+	 * @param desiredWallDistance
+	 *            the desired distance to the wall. Should be around 14.
+	 */
+	private WallFollowerStrategy(Side headSide, int forwardSpeed,
+			int rotationTime, int curveSpeed, int curveDirection,
+			int maxWallDistance, int desiredWallDistance) {
 		this.headSide = headSide;
 		wallCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
@@ -115,17 +143,20 @@ public class WallFollowerStrategy extends Strategy {
 				200, // wall speed
 				1000 // wall direction
 		);
-//		edgeCollisionStrategy = new EdgeCollisionStrategy(headSide, //head
-//				5, 90, // detection
-//				500, // backward speed
-//				1000 // backward time
-//				);
-		edgeStrategy = new EdgeStrategy(this.headSide, maxWallDistance // wall distance
+		// edgeCollisionStrategy = new EdgeCollisionStrategy(headSide, //head
+		// 5, 90, // detection
+		// 500, // backward speed
+		// 1000 // backward time
+		// );
+		edgeStrategy = new EdgeStrategy(this.headSide, maxWallDistance // wall
+																		// distance
 				, 1000, 1000 // Rotation speed, direction
 				, rotationTime // Time
 				, curveSpeed, curveDirection);
-		wallStrategy = new WallRegulatorStrategy(this.headSide, 500, desiredWallDistance);
-		startStrategy = new FindWallStrategy(headSide, 1000, -200, 15, 30, 500, 1000, 1000);
+		wallStrategy = new WallRegulatorStrategy(this.headSide, forwardSpeed,
+				500, desiredWallDistance);
+		startStrategy = new FindWallStrategy(headSide, 1000, -200, 15, 30, 500,
+				1000, 1000);
 	}
 
 	private State checkState() {
@@ -139,7 +170,7 @@ public class WallFollowerStrategy extends Strategy {
 			currentState = State.FIND_WALL;
 			break;
 		case FIND_WALL:
-			if(startStrategy.isStopped())
+			if (startStrategy.isStopped())
 				currentState = State.STARTED;
 			break;
 		case STARTED:
@@ -184,7 +215,7 @@ public class WallFollowerStrategy extends Strategy {
 		edgeStrategy.init();
 		wallStrategy.init();
 		startStrategy.init();
-		
+
 		wallCollisionCount = 0;
 		lostEdgeCount = 0;
 	}
@@ -193,7 +224,7 @@ public class WallFollowerStrategy extends Strategy {
 	protected void doRun() {
 		State oldState = currentState;
 		currentState = checkState();
-		if(oldState != currentState)
+		if (oldState != currentState)
 			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
