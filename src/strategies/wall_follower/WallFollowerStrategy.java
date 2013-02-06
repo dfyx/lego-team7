@@ -155,7 +155,7 @@ public class WallFollowerStrategy extends Strategy {
 		wallCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
 				500,// backward speed
-				1000, // backward time
+				100, // backward distance
 				30, // max obstacle distance
 				400, // obstacle speed
 				1000, // obstacle direction
@@ -167,7 +167,7 @@ public class WallFollowerStrategy extends Strategy {
 		edgeCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
 				500,// backward speed
-				1000, // backward time
+				100, // backward distance
 				30, // max obstacle distance
 				400, // obstacle speed
 				1000, // obstacle direction

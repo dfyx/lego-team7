@@ -3,18 +3,16 @@ package strategies.wall_follower.collision;
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
 import strategies.util.ChildStrategy;
+import strategies.util.MoveDistanceStrategy;
 import strategies.wall_follower.DetectCollisionStrategy;
 import utils.Utils.Side;
 
 public class FollowCollisionStrategy extends ChildStrategy {
 	// TODO SB make this work for both head positions
 	DetectCollisionStrategy collisionStrategy;
+	MoveDistanceStrategy moveBackStrategy;
 
 	private final int EPSILON = 5;
-
-	private final int BACKWARD_SPEED;
-	private final long BACKWARD_TIME;
-	private long endBackwardTime;
 
 	private final int FRONT_POSITION = 0;
 	private final int SIDE_POSITION;
@@ -60,10 +58,10 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			break;
 		case STAND:
 			newState = State.DRIVE_BACK;
-			endBackwardTime = System.currentTimeMillis() + BACKWARD_TIME;
+			moveBackStrategy.init();
 			break;
 		case DRIVE_BACK:
-			if (System.currentTimeMillis() > endBackwardTime)
+			if (moveBackStrategy.isFinished())
 				newState = State.TURN_HEAD_FORWARD;
 			break;
 		case TURN_HEAD_FORWARD:
@@ -110,15 +108,14 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	}
 
 	public FollowCollisionStrategy(Side headSide, int valueCount,
-			int sensitivity, int backwardSpeed, int backwardTime,
+			int sensitivity, int backwardSpeed, int backwardDistance,
 			int obstacleDistance, int searchObstacleSpeed,
 			int searchObstacleDirection, int extraTurnTime, int wallDistance,
 			int searchWallSpeed, int searchWallDirection) {
 		SIDE_POSITION = 1000 * headSide.getValue();
 
 		collisionStrategy = new DetectCollisionStrategy(headSide);
-		BACKWARD_SPEED = -backwardSpeed;
-		BACKWARD_TIME = backwardTime;
+		moveBackStrategy = new MoveDistanceStrategy(backwardSpeed, backwardDistance);
 
 		OBSTACLE_DISTANCE = obstacleDistance;
 		SEARCH_OBSTACLE_SPEED = searchObstacleSpeed;
@@ -170,11 +167,9 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			collisionStrategy.run();
 			break;
 		case STAND:
-			ENGINE.move(BACKWARD_SPEED, 0);
 			break;
 		case DRIVE_BACK:
-			// intentionally left blank
-			// TODO SB use touch sensors?
+			moveBackStrategy.run();
 			break;
 		case TURN_HEAD_FORWARD:
 			ENGINE.stop();
