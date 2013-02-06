@@ -114,6 +114,7 @@ public class SliderStrategy extends Strategy {
 		case SET_BACK:
 			if (startedDelay + SETBACK_TIME < Utils.getSystemTime()) {
 				state = State.READ_END_BARCODE;
+				Platform.ENGINE.stop();
 				Platform.getMainStrategy().enableBarcodeDetection();
 				//Platform.getMainStrategy().setClearance();
 				driveForwardStrategy.init();
