@@ -23,10 +23,9 @@ public class FindWallStrategy extends ChildStrategy {
 	private final int WALL_DISTANCE;
 	private final int NEAR_WALL_DISTANCE;
 
-	// TODO SM (SB) check if collision was false positive through turning head
-	// to front and measuring resistance
 	private enum State {
 		START, // run is only called, if too far away from wall
+		WAIT_FOR_HEAD, // wait for head moving forward
 		START_MOVE_BACK, // start move backwards to ensure proximity to wall
 		MOVE_BACK, // moving...
 		START_TURN_HEAD_FORWARD, // finished moving -> start to turn head to
@@ -52,9 +51,11 @@ public class FindWallStrategy extends ChildStrategy {
 
 		switch (newState) {
 		case START:
-			if (HEAD.getDistance() < WALL_DISTANCE)
+			newState = State.WAIT_FOR_HEAD;
+		case WAIT_FOR_HEAD:
+			if (!HEAD.isMoving() && HEAD.getDistance() < WALL_DISTANCE)
 				newState = State.WALL_FOUND;
-			else
+			else if(!HEAD.isMoving())
 				newState = State.START_MOVE_BACK;
 			break;
 		case START_MOVE_BACK:
@@ -164,6 +165,8 @@ public class FindWallStrategy extends ChildStrategy {
 
 		switch (currentState) {
 		case START:
+			break;
+		case WAIT_FOR_HEAD:
 			break;
 		case START_MOVE_BACK: // start move backwards to ensure proximity to
 								// wall
