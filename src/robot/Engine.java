@@ -1,5 +1,6 @@
 package robot;
 
+import lejos.nxt.Motor;
 import lejos.nxt.MotorPort;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.TachoMotorPort;
@@ -178,36 +179,36 @@ public class Engine {
 	 * @param speed
 	 *            The speed. If between -1000 and 0, it moves backward. If
 	 *            between 0 and 1000, it moves forward.
+	 *            If you really want full speed, you can give values up to 1111.
+	 *            But then it's possible that the movement won't be correctly
+	 *            straight forward because the left and right motor can't synchronize
+	 *            correctly.
 	 * @param direction
 	 *            The direction to move (speed difference between left and right
 	 *            chain). Between -1000 and 0 for moving left and between 0 and
 	 *            1000 for moving right.
 	 */
 	public void move(int speed, int direction) {
-		if (1000 < speed || -1000 > speed || 1000 < direction
-				|| -1000 > direction)
-			throw new IllegalStateException("Incorrect parameters speed:"
-					+ speed + ", direction:" + direction);
+		final int MAXSPEED = 1111;
+		final int MAXDIRECTION = 1000;
 
-		final int MAX = 1000;
-
-		if (speed < -MAX || speed > MAX) {
+		if (speed < -MAXSPEED || speed > MAXSPEED) {
 			throw new IllegalArgumentException("Speed must be between "
-					+ -MAX	+ " and " + MAX);
+					+ -MAXSPEED	+ " and " + MAXSPEED);
 		}
 
-		if (direction < -MAX || direction > MAX) {
+		if (direction < -MAXDIRECTION || direction > MAXDIRECTION) {
 			throw new IllegalArgumentException("Direction must be between "
-					+ -MAX + " and " + MAX);
+					+ -MAXDIRECTION + " and " + MAXDIRECTION);
 		}
 
 		// Calculate linear function
-		int left = MAX + 2 * direction;
-		int right = MAX - 2 * direction;
+		int left = MAXSPEED + 2 * direction;
+		int right = MAXSPEED - 2 * direction;
 
 		// Clamp to valid region
-		left = Utils.clamp(left, -MAX, MAX);
-		right = Utils.clamp(right, -MAX, MAX);
+		left = Utils.clamp(left, -MAXSPEED, MAXSPEED);
+		right = Utils.clamp(right, -MAXSPEED, MAXSPEED);
 
 		/* This results in following function for the right motor
 		 *
@@ -229,8 +230,8 @@ public class Engine {
 		 */
 
 		// Fix point multiplication with speed
-		left = left * speed / MAX;
-		right = right * speed / MAX;
+		left = left * speed / MAXSPEED;
+		right = right * speed / MAXSPEED;
 
 		//Normalize speed
 		newLeftSpeed = left*calibrationMaxSpeed/1000;
