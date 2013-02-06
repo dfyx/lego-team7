@@ -6,10 +6,11 @@ import utils.Utils;
 //Only used inside Head class
 class LightSensor implements Sensor {
 
+    public static final CalibrationData DEFAULT_CALIBRATION = new CalibrationData(0, 1023); // maximum sensor value according to lejos.nxt.LightSensor
+    
     private final lejos.nxt.LightSensor realSensor;
     
-    private int maxLight;
-    private int minLight;
+    private CalibrationData calibration;
     
     public LightSensor(final SensorPort port) {
         realSensor = new lejos.nxt.LightSensor(port);
@@ -22,7 +23,9 @@ class LightSensor implements Sensor {
      * Returns the light value, normalized between 0 and 1000.
      */
     public int getValue() {
-        return Utils.clamp(1000 * (realSensor.getNormalizedLightValue() - minLight) / (maxLight - minLight),0,1000);
+        return Utils.clamp(1000
+                * (realSensor.getNormalizedLightValue() - calibration.minLight)
+                / (calibration.maxLight - calibration.minLight), 0, 1000);
     }
     
     public int getRawValue() {
@@ -33,6 +36,10 @@ class LightSensor implements Sensor {
         realSensor.setFloodlight(value);
     }
     
+    public CalibrationData getCalibration() {
+        return calibration;
+    }
+    
     /**
      * Calibrate the light sensor
      * 
@@ -40,13 +47,20 @@ class LightSensor implements Sensor {
      * @param maxValue The value mapped to 1000
      */
     public void calibrate(int minValue, int maxValue) {
-        minLight = minValue;
-        maxLight = maxValue;
+        calibration = new CalibrationData(minValue, maxValue);
     }
     
     public void resetCalibration() {
-        maxLight = 1023; // maximum sensor value according to lejos.nxt.LightSensor
-        minLight = 0;
+        calibration = DEFAULT_CALIBRATION;
     }
-
+    
+    public static class CalibrationData {
+        public final int minLight;
+        public final int maxLight;
+        
+        public CalibrationData(final int minValue, final int maxValue) {
+            minLight = minValue;
+            maxLight = maxValue;
+        }
+    }
 }
