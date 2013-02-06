@@ -5,6 +5,7 @@ import strategies.Strategy;
 import strategies.line_follower.LineFollowerController;
 import strategies.sections.color_finder.ColorScannerStrategy;
 import strategies.sections.color_finder.ColorScannerStrategy.ColorName;
+import strategies.util.MoveDistanceStrategy;
 import strategies.util.TurnAngleStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils.Side;
@@ -19,6 +20,7 @@ public class ColorFinderStrategy extends Strategy {
 		ALIGN_BEFORE_BUTTON,
 		PRESS_BUTTON,
 		ALIGN_AFTER_BUTTON,
+		ROTATE_AFTER_BUTTON,
 		PASS_GATE
 	}
 
@@ -26,7 +28,9 @@ public class ColorFinderStrategy extends Strategy {
 	
 	protected State currentState = State.ROTATE_BEFORE_LINE;
 	protected TurnAngleStrategy rotateStrategy = new TurnAngleStrategy();
+	protected MoveDistanceStrategy moveStrategy = new MoveDistanceStrategy();
 	protected LineFollowerController lineFollower = new LineFollowerController();
+	protected WallFollowerStrategy wallFollower = WallFollowerStrategy.getColorFinderStrategy();
 	protected ColorScannerStrategy colorScanner = new ColorScannerStrategy(3);
 
 	private ColorName receivedColor;
@@ -87,10 +91,25 @@ public class ColorFinderStrategy extends Strategy {
 			break;
 		case PRESS_BUTTON:
 			if (Platform.HEAD.isColliding()) {
-				Platform.ENGINE.move(-200);
+				moveStrategy.init();
+				moveStrategy.setSpeed(200);
+				moveStrategy.setTargetPosition(-100);
 				return State.ALIGN_AFTER_BUTTON;
 			}
 			break;
+		case ALIGN_AFTER_BUTTON:
+			if (moveStrategy.isFinished()) {
+				rotateStrategy.init();
+				rotateStrategy.setSpeed(500);
+				rotateStrategy.setTargetAngle(-90);
+				return State.ROTATE_AFTER_BUTTON;
+			}
+			break;
+		case ROTATE_AFTER_BUTTON:
+			if (rotateStrategy.isFinished()) {
+				wallFollower.init();
+				return State.PASS_GATE;
+			}
 		}
 		return currentState;
 	}
@@ -131,6 +150,15 @@ public class ColorFinderStrategy extends Strategy {
 			break;
 		case ALIGN_BEFORE_BUTTON:
 			rotateStrategy.run();
+			break;
+		case ALIGN_AFTER_BUTTON:
+			moveStrategy.run();
+			break;
+		case ROTATE_AFTER_BUTTON:
+			rotateStrategy.run();
+			break;
+		case PASS_GATE:
+			wallFollower.run();
 			break;
 		}
 	}
