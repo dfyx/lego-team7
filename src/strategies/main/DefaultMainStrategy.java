@@ -7,6 +7,8 @@ import sensors.LightSensor;
 import strategies.CountLinesStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
+import strategies.line_follower.LineFollowerController;
+import strategies.sections.BridgeController;
 import strategies.sections.GateStrategy;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
@@ -44,7 +46,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10), TURNTABLE(11);
+		RACE(13), BRIDGE(5), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10), LINE_TO_PLANT(9), TURNTABLE(11);
 
 		private final int value;
 
@@ -87,6 +89,8 @@ public class DefaultMainStrategy extends MainStrategy {
 		currentStrategy = new DriveForwardStrategy();
 		currentStrategy.init();
 	}
+	
+	boolean currentlyMazeLeft = true;
 
 	private void switchLevel(Barcode barcode) {
 		ENGINE.stop();
@@ -94,15 +98,25 @@ public class DefaultMainStrategy extends MainStrategy {
 		case RACE:
 			state = State.WAITING_FOR_STARTSIGNAL;
 			break;
+		case BRIDGE:
+		    currentStrategy = new BridgeController();
+		    break;
 		case SEESAW:
 			currentStrategy = new SeesawStrategy();
 			break;
+		case LINE_TO_PLANT:
+		    currentStrategy = new LineFollowerController(); // FIXME, add special strategy
+		    break;
 		case SWAMP:
 			currentStrategy = WallFollowerStrategy.getSwampStrategy();
 			break;
 		case LABYRINTH:
 			// TODO SB switch side
-			currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
+			if(currentlyMazeLeft)
+				currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
+			else
+				currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.RIGHT);
+			currentlyMazeLeft = !currentlyMazeLeft;
 			break;
 		case GATE:
 			currentStrategy = new GateStrategy();
@@ -156,7 +170,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			case RUNNING:
 				state = State.WAITING;
 				ENGINE.stop();
-				Platform.HEAD.stopMoving();
+				Platform.HEAD.moveTo(1000,1000);
 				break;
 			case WAITING_FOR_STARTSIGNAL:
 				currentStrategy = new RaceStrategy();
