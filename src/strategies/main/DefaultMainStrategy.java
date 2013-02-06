@@ -171,5 +171,10 @@ public class DefaultMainStrategy extends MainStrategy {
 			state = State.RUNNING;
 			switchToBarcodeReading();
 		}
+		
+		//React, if strategy is finished
+		if (state == State.RUNNING && currentStrategy.isFinished()) {
+			setFinished();
+		}
 	}
 }
