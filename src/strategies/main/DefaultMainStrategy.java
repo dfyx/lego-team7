@@ -7,6 +7,7 @@ import sensors.LightSensor;
 import strategies.CountLinesStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
+import strategies.sections.ColorFinderStrategy;
 import strategies.sections.GateStrategy;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
@@ -43,7 +44,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10);
+		RACE(13), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10), COLORFINDER(8);
 
 		private final int value;
 
@@ -107,6 +108,9 @@ public class DefaultMainStrategy extends MainStrategy {
 			break;
 		case SLIDER:
 			currentStrategy = new SliderStrategy();
+			break;
+		case COLORFINDER:
+			currentStrategy = new ColorFinderStrategy();
 			break;
 		}
 		currentStrategy.init();
