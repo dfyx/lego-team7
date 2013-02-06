@@ -70,7 +70,7 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	public static WallFollowerStrategy getColorFinderStrategy() {
-		return new WallFollowerStrategy(Side.RIGHT, // side
+		return new WallFollowerStrategy(Side.LEFT, // side
 				300, // speed
 				0, // rotation time
 				1000, // curve speed
