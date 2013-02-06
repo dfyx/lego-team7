@@ -82,6 +82,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private void switchToBarcodeReading() {
 		ENGINE.stop();
 		barcodeReader.setClearance(true);
+		detectBarcode = true;
 		currentStrategy = new DriveForwardStrategy();
 		currentStrategy.init();
 	}
