@@ -70,7 +70,14 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	public static WallFollowerStrategy getColorFinderStrategy() {
-		return getSwampStrategy();
+		return new WallFollowerStrategy(Side.RIGHT, // side
+				300, // speed
+				0, // rotation time
+				1000, // curve speed
+				470, // curve direction
+				35, // max wall distance
+				14 // desired wall distance
+		);
 	}
 
 	public static WallFollowerStrategy getSwampStrategy() {
