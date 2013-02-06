@@ -90,13 +90,7 @@ public class DefaultMainStrategy extends MainStrategy {
 		case SWAMP:
 		case LABYRINTH:
 			// TODO SB switch side
-			currentStrategy = new WallFollowerStrategy(Side.LEFT, // side
-					0, // rotation time
-					1000, // curve speed
-					350, // curve direction
-					35, // max wall distance
-					14 // desired wall distance
-			);
+			currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
 			break;
 		case GATE:
 			currentStrategy = new GateStrategy();
