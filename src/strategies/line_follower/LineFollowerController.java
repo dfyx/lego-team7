@@ -138,6 +138,10 @@ public class LineFollowerController extends Strategy {
         OFF_LINE {
             @Override
             void doTransition(final LineFollowerController ctrl) {
+                if (ctrl.finder.isFinished()) {
+                    ctrl.finder.init();
+                }
+                
                 ctrl.noLineDistance = 0;
 
                 ENGINE.move(SEARCH_LINE_SPEED);
@@ -153,7 +157,7 @@ public class LineFollowerController extends Strategy {
         OFF_LINE_SEEK {
             @Override
             void doTransition(final LineFollowerController ctrl) {
-                ctrl.init();
+                ctrl.finder.init();
                 
                 ENGINE.move(SEARCH_LINE_SPEED); // TODO: Maybe increase
             }
