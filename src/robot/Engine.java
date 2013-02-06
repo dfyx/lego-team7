@@ -46,7 +46,7 @@ public class Engine {
 		//Wait until full speed reached
 		Delay.msDelay(500);
 		//Measure speed
-		calibrationMaxSpeed=Math.min(LEFT_MOTOR.getRotationSpeed(),RIGHT_MOTOR.getRotationSpeed());
+		calibrationMaxSpeed=(int)(0.9*Math.min(LEFT_MOTOR.getRotationSpeed(),RIGHT_MOTOR.getRotationSpeed()));
 		//Drive back to original position
 		LEFT_MOTOR.stop(true);
 		RIGHT_MOTOR.stop();
