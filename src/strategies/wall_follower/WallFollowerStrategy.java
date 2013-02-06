@@ -44,13 +44,19 @@ public class WallFollowerStrategy extends Strategy {
 
 	private State currentState;
 	
+	/**
+	 * 
+	 * @param headSide
+	 * @param desiredDistance Should be 10
+	 * @return
+	 */
 	public static WallFollowerStrategy getSliderStrategy(Side headSide, int desiredDistance) {
 		return new WallFollowerStrategy(headSide, // side
 				0, // rotation time
 				1000, // curve speed
 				470, // curve direction
 				35, // max wall distance
-				10 // desired wall distance
+				desiredDistance // desired wall distance
 		);
 	}
 	
