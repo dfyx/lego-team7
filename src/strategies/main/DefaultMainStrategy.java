@@ -90,6 +90,8 @@ public class DefaultMainStrategy extends MainStrategy {
 			currentStrategy = new SeesawStrategy();
 			break;
 		case SWAMP:
+			currentStrategy = WallFollowerStrategy.getSwampStrategy();
+			break;
 		case LABYRINTH:
 			// TODO SB switch side
 			currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
