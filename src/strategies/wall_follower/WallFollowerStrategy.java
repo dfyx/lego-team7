@@ -122,8 +122,8 @@ public class WallFollowerStrategy extends Strategy {
 		);
 	}
 
-	public static WallFollowerStrategy getRaceStrategy() {
-		return new WallFollowerStrategy(Side.LEFT, // side
+	public static WallFollowerStrategy getRaceStrategy(Side side) {
+		return new WallFollowerStrategy(side, // side
 				1000, // speed
 				0, // rotation time
 				1000, // curve speed
