@@ -6,10 +6,11 @@ import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils;
 import utils.Utils.Side;
 
+//TODO Übergang Holz->Schwarz erkennen
 public class SliderStrategy extends Strategy {
 
 	private final static int FORWARD_MOVING_TIME = 1000;
-	private final static int STOPPING_WALLFOLLOWER_TIME = 2000;
+	private final static int STOPPING_WALLFOLLOWER_TIME = 5000;
 	private final static int MINDISTANCE_TO_SLIDER = 50;
 	private final static int MAXDISTANCE_TO_SLIDER = 200;
 
@@ -20,14 +21,7 @@ public class SliderStrategy extends Strategy {
 	private State state;
 	private int startedDelay;
 
-	private WallFollowerStrategy wallFollowerStrategy = new WallFollowerStrategy(
-			Side.RIGHT, // side
-			0, // rotation time
-			1000, // curve speed
-			350, // curve direction
-			35, // max wall distance
-			8 // desired wall distance
-	);
+	private WallFollowerStrategy wallFollowerStrategy = WallFollowerStrategy.getSliderStrategy(Side.RIGHT,10);
 
 	@Override
 	protected void doInit() {
@@ -60,9 +54,10 @@ public class SliderStrategy extends Strategy {
 		case STOPPING_WALL_FOLLOWER:
 			wallFollowerStrategy.run();
 			if (startedDelay + STOPPING_WALLFOLLOWER_TIME < Utils
-					.getSystemTime())
+					.getSystemTime()) {
 				Platform.HEAD.moveTo(0, 1000);
 				state = State.POSITION_HEAD_FOR_SLIDER;
+			}
 			System.out.println("Switch to position head");
 			break;
 		case POSITION_HEAD_FOR_SLIDER:

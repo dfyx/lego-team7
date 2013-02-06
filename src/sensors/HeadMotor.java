@@ -170,7 +170,7 @@ class HeadMotor implements Action {
 		int diff = collisionTachoCount - currentTachoCount;
 		if (diff < 0)
 			diff *= -1;
-		boolean result =  diff > 2 && state == State.FLOATING;
+		boolean result =  diff > 3 && state == State.FLOATING;
 		return result;
 	}
 
