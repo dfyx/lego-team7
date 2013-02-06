@@ -82,7 +82,7 @@ public class WallFollowerStrategy extends Strategy {
 
 	public static WallFollowerStrategy getRollersStrategy(Side headSide,
 			int desiredDistance) {
-		return createSliderStrategies(headSide, desiredDistance, false);
+		return createSliderStrategies(headSide, desiredDistance, false, 1000);
 	}
 
 	/**
@@ -94,13 +94,13 @@ public class WallFollowerStrategy extends Strategy {
 	 */
 	public static WallFollowerStrategy getSliderStrategy(Side headSide,
 			int desiredDistance) {
-		return createSliderStrategies(headSide, desiredDistance, true);
+		return createSliderStrategies(headSide, desiredDistance, true, 200);
 	}
 
 	private static WallFollowerStrategy createSliderStrategies(Side headSide,
-			int desiredDistance, boolean trackCollision) {
+			int desiredDistance, boolean trackCollision, int speed) {
 		WallFollowerStrategy strategy = new WallFollowerStrategy(headSide, // side
-				1000, // speed
+				speed, // speed
 				0, // rotation time
 				1000, // curve speed
 				470, // curve direction

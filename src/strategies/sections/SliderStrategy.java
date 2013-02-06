@@ -97,6 +97,7 @@ public class SliderStrategy extends Strategy {
 			wallFollowerStrategy.run();
 			if(lineFollowerController.lineValueOk()) {
 				state = State.FOLLOW_LINE;
+				Platform.getMainStrategy().disableBarcodeDetection();
 				lineFollowerController.init();
 			}
 			break;
@@ -104,6 +105,7 @@ public class SliderStrategy extends Strategy {
 			lineFollowerController.run();
 			if(lineFollowerController.isFinished()) {
 				state = State.READ_END_BARCODE;
+				Platform.getMainStrategy().enableBarcodeDetection();
 				Platform.getMainStrategy().setClearance();
 				driveForwardStrategy.init();
 			}
