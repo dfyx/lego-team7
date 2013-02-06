@@ -86,6 +86,8 @@ public class DefaultMainStrategy extends MainStrategy {
 		currentStrategy = new DriveForwardStrategy();
 		currentStrategy.init();
 	}
+	
+	boolean currentlyMazeLeft = true;
 
 	private void switchLevel(Barcode barcode) {
 		ENGINE.stop();
@@ -101,7 +103,11 @@ public class DefaultMainStrategy extends MainStrategy {
 			break;
 		case LABYRINTH:
 			// TODO SB switch side
-			currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
+			if(currentlyMazeLeft)
+				currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
+			else
+				currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.RIGHT);
+			currentlyMazeLeft = !currentlyMazeLeft;
 			break;
 		case GATE:
 			currentStrategy = new GateStrategy();
