@@ -11,10 +11,11 @@ public class DriveForwardStrategy extends Strategy {
 
 	@Override
 	protected void doInit() {
+	    Platform.ENGINE.move(1000);
 	}
 
 	@Override
 	protected void doRun() {
-		Platform.ENGINE.move(1000);
+		
 	}
 }
