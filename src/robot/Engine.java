@@ -88,7 +88,6 @@ public class Engine {
 
     public void commit() {
         if (newLeftSpeed != oldLeftSpeed) {
-            System.out.println("Set new left speed");
             if (newLeftSpeed == 0) {
                 LEFT_MOTOR.stop(true);
             } else if (newLeftSpeed > 0) {
@@ -101,7 +100,6 @@ public class Engine {
             oldLeftSpeed = newLeftSpeed;
         }
         if (newRightSpeed != oldRightSpeed) {
-            System.out.println("Set new right speed");
             if (newRightSpeed == 0) {
                 RIGHT_MOTOR.stop(true);
             } else if (newRightSpeed > 0) {
@@ -124,7 +122,6 @@ public class Engine {
     public void stop() {
         newLeftSpeed = 0;
         newRightSpeed = 0;
-        System.out.println("STOP ENGINE");
     }
 
     /**
