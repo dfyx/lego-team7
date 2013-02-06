@@ -54,7 +54,7 @@ public class WallFollowerStrategy extends Strategy {
 		);
 	}
 	
-	public static WallFollowerStrategy getRazeStrategy() {
+	public static WallFollowerStrategy getRaceStrategy() {
 		return new WallFollowerStrategy(Side.LEFT, // side
 				0, // rotation time
 				1000, // curve speed
