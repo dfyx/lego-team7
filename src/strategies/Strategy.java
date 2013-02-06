@@ -5,7 +5,7 @@ public abstract class Strategy implements Action {
 	private boolean running = false;
 
 	@Override
-	public void run() {
+	public final void run() {
 		doRun();
 	}
 
@@ -17,7 +17,7 @@ public abstract class Strategy implements Action {
 		return !running;
 	}
 
-	public void init() {
+	public final void init() {
 		running = true;
 
 		doInit();
