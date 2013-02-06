@@ -107,7 +107,7 @@ public class WallFollowerStrategy extends Strategy {
 				256, // max wall distance
 				desiredDistance // desired wall distance
 		);
-		strategy.setCollision(false);
+		strategy.setCollision(trackCollision);
 		return strategy;
 	}
 
