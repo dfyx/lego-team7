@@ -9,6 +9,7 @@ import strategies.Strategy;
 import strategies.sections.GateStrategy;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
+import strategies.sections.SliderStrategy;
 import strategies.util.DriveForwardStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils.Side;
@@ -36,7 +37,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(7), SWAMP(4), GATE(3), SEESAW(10);
+		RACE(13), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10);
 
 		private final int value;
 
@@ -100,6 +101,9 @@ public class DefaultMainStrategy extends MainStrategy {
 			break;
 		case GATE:
 			currentStrategy = new GateStrategy();
+			break;
+		case SLIDER:
+			currentStrategy = new SliderStrategy();
 			break;
 		}
 		currentStrategy.init();
