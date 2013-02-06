@@ -32,6 +32,12 @@ public class WallFollowerStrategy extends Strategy {
 		return lostEdgeCount;
 	}
 
+	private boolean trackCollision = true;
+
+	public void setCollision(boolean collision) {
+		trackCollision = collision;
+	}
+
 	private FollowCollisionStrategy wallCollisionStrategy;
 	private FollowCollisionStrategy edgeCollisionStrategy;
 	private EdgeStrategy edgeStrategy;
@@ -43,7 +49,7 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	private State currentState;
-	
+
 	public static WallFollowerStrategy getBridgeStartStrategy() {
 		return new WallFollowerStrategy(Side.LEFT, // side
 				1000, // speed
@@ -54,11 +60,11 @@ public class WallFollowerStrategy extends Strategy {
 				50 // desired wall distance
 		);
 	}
-	
+
 	public static WallFollowerStrategy getBridgeEndStrategy() {
 		return getMazeStrategy(Side.LEFT);
 	}
-	
+
 	public static WallFollowerStrategy getGateStrategy() {
 		return getSwampStrategy();
 	}
@@ -74,6 +80,11 @@ public class WallFollowerStrategy extends Strategy {
 		);
 	}
 
+	public static WallFollowerStrategy getRollersStrategy(Side headSide,
+			int desiredDistance) {
+		return createSliderStrategies(headSide, desiredDistance, false);
+	}
+
 	/**
 	 * 
 	 * @param headSide
@@ -83,7 +94,12 @@ public class WallFollowerStrategy extends Strategy {
 	 */
 	public static WallFollowerStrategy getSliderStrategy(Side headSide,
 			int desiredDistance) {
-		return new WallFollowerStrategy(headSide, // side
+		return createSliderStrategies(headSide, desiredDistance, true);
+	}
+
+	private static WallFollowerStrategy createSliderStrategies(Side headSide,
+			int desiredDistance, boolean trackCollision) {
+		WallFollowerStrategy strategy = new WallFollowerStrategy(headSide, // side
 				1000, // speed
 				0, // rotation time
 				1000, // curve speed
@@ -91,6 +107,8 @@ public class WallFollowerStrategy extends Strategy {
 				256, // max wall distance
 				desiredDistance // desired wall distance
 		);
+		strategy.setCollision(false);
+		return strategy;
 	}
 
 	public static WallFollowerStrategy getMazeStrategy(Side headSide) {
@@ -179,7 +197,7 @@ public class WallFollowerStrategy extends Strategy {
 		edgeCollisionStrategy.check();
 		edgeStrategy.check();
 
-//		State oldState = currentState;
+		// State oldState = currentState;
 		switch (currentState) {
 		case START:
 			currentState = State.FIND_WALL;
@@ -192,7 +210,7 @@ public class WallFollowerStrategy extends Strategy {
 			currentState = State.FOLLOW_WALL;
 			break;
 		case FOLLOW_WALL:
-			if (wallCollisionStrategy.willStart()) {
+			if (wallCollisionStrategy.willStart() && trackCollision) {
 				currentState = State.WALL_COLLISION;
 				wallCollisionCount++;
 			} else if (edgeStrategy.willStart()) {
@@ -206,7 +224,7 @@ public class WallFollowerStrategy extends Strategy {
 			break;
 		case FOLLOW_EDGE:
 			// TODO SB correct order?
-			if (edgeCollisionStrategy.willStart())
+			if (edgeCollisionStrategy.willStart() && trackCollision)
 				currentState = State.EDGE_COLLISION;
 			else if (edgeStrategy.isStopped())
 				currentState = State.FOLLOW_WALL;
@@ -217,8 +235,8 @@ public class WallFollowerStrategy extends Strategy {
 			break;
 		}
 
-//		if (oldState != currentState)
-//			System.out.println(oldState.name() + " -> " + currentState.name());
+		// if (oldState != currentState)
+		// System.out.println(oldState.name() + " -> " + currentState.name());
 		return currentState;
 	}
 
