@@ -1,5 +1,6 @@
 package strategies.sections;
 
+import bluetooth.ColorGate;
 import robot.Platform;
 import strategies.Strategy;
 import strategies.line_follower.LineFollowerController;
@@ -117,12 +118,13 @@ public class ColorFinderStrategy extends Strategy {
 	@Override
 	protected void doInit() {
 		currentState = State.ROTATE_BEFORE_LINE;
+		ColorGate.getInstance().connect();
 		rotateStrategy.init();
 		rotateStrategy.setSpeed(500);
 		rotateStrategy.setTargetAngle(30);
 		
 		// Dummy for now
-		receivedColor = ColorScannerStrategy.ColorName.RED;
+		receivedColor = null;
 	}
 
 	@Override
@@ -148,6 +150,10 @@ public class ColorFinderStrategy extends Strategy {
 		case SCAN_COLORS:
 			colorScanner.run();
 			break;
+		case GOTO_COLOR:
+			if (receivedColor == null) {
+				receivedColor = ColorScannerStrategy.ColorName.fromId(ColorGate.getInstance().readColor());
+			}
 		case ALIGN_BEFORE_BUTTON:
 			rotateStrategy.run();
 			break;

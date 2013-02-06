@@ -22,6 +22,19 @@ public class ColorScannerStrategy extends Strategy {
 		public int getValue() {
 			return value;
 		}
+		
+		public static ColorName fromId(int id) {
+			switch(id) {
+			case 0:
+				return GREEN;
+			case 1:
+				return YELLOW;
+			case 2:
+				return RED;
+			default:
+				return null;
+			}
+		}
 	}
 	
 	public class Color {
