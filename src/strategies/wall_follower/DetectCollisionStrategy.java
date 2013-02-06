@@ -34,7 +34,7 @@ public class DetectCollisionStrategy extends ChildStrategy {
 
 	@Override
 	protected void childInit() {
-		HEAD.moveTo(headSide.getValue() * 800, 1000);
+		HEAD.moveTo(headSide.getValue() * HEAD_POSITION, 1000);
 		currentState = State.START;
 		foundWall = false;
 	} // TODO SB exception, if not floating

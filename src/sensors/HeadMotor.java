@@ -57,7 +57,8 @@ class HeadMotor implements Action {
 	private int collisionTachoCount;
 
 	public void terminate() {
-		// TODO
+		MOTOR.stop();
+		enterState(State.INACTIVE);
 	}
 
 	public HeadMotor() {
@@ -151,6 +152,8 @@ class HeadMotor implements Action {
 	}
 
 	public void detectCollisions(boolean detect) {
+		if(isMoving())
+			throw new IllegalStateException("can not detect collisions while head is moving");
 		collisionTachoCount = MOTOR.getTachoCount();
 		if (detect) {
 			MOTOR.flt(true);
@@ -167,7 +170,8 @@ class HeadMotor implements Action {
 		int diff = collisionTachoCount - currentTachoCount;
 		if (diff < 0)
 			diff *= -1;
-		return diff > 3;
+		boolean result =  diff > 2 && state == State.FLOATING;
+		return result;
 	}
 
 	public boolean isMoving() {
