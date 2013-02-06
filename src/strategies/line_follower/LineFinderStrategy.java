@@ -49,6 +49,7 @@ public class LineFinderStrategy extends Strategy {
         
         sweepSpeed = SEARCH_SWEEP_SPEED;
         
+        angle = 0;
         sweepTo = Head.degreeToPosition(DETECTION_ANGLE);
         turnDirUnlock = true;
         turnDir = -1 * trackingSide.getValue();
@@ -79,6 +80,8 @@ public class LineFinderStrategy extends Strategy {
                 break;
             case WAIT_FOR_HEAD:
                 if (!HEAD.isMoving()) {
+                    angle = 0;
+                    
                     state = State.MOVE_TO_LINE;
                 }
                 break;
@@ -113,7 +116,7 @@ public class LineFinderStrategy extends Strategy {
         int out = turnDir * linear;
         out = Utils.clamp(out, -turnSpeed, turnSpeed); // limit to drive speed
         
-        // System.out.println("err: " + error + " lin: " + linear + " out: " + out);
+        //System.out.println("err: " + error + " lin: " + linear + " out: " + out);
         
         ENGINE.rotate(out);
     }

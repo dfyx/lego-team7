@@ -4,7 +4,7 @@ import lejos.nxt.SensorPort;
 import utils.Utils;
 
 //Only used inside Head class
-class LightSensor implements Sensor {
+public class LightSensor {
 
     public static final CalibrationData DEFAULT_CALIBRATION = new CalibrationData(0, 1023); // maximum sensor value according to lejos.nxt.LightSensor
     
@@ -12,7 +12,7 @@ class LightSensor implements Sensor {
     
     private CalibrationData calibration;
     
-    public LightSensor(final SensorPort port) {
+    LightSensor(final SensorPort port) {
         realSensor = new lejos.nxt.LightSensor(port);
         
         resetCalibration();
@@ -22,17 +22,17 @@ class LightSensor implements Sensor {
     /**
      * Returns the light value, normalized between 0 and 1000.
      */
-    public int getValue() {
+    int getValue() {
         return Utils.clamp(1000
                 * (realSensor.getNormalizedLightValue() - calibration.minLight)
                 / (calibration.maxLight - calibration.minLight), 0, 1000);
     }
     
-    public int getRawValue() {
+    int getRawValue() {
         return realSensor.getNormalizedLightValue();
     }
     
-    public void setFloodlight(boolean value) {
+    void setFloodlight(boolean value) {
         realSensor.setFloodlight(value);
     }
     
@@ -48,6 +48,10 @@ class LightSensor implements Sensor {
      */
     public void calibrate(int minValue, int maxValue) {
         calibration = new CalibrationData(minValue, maxValue);
+    }
+    
+    public void calibrate(final CalibrationData calibration) {
+        this.calibration = calibration;
     }
     
     public void resetCalibration() {

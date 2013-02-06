@@ -193,4 +193,8 @@ public class Head implements Action {
 	public static int positionToDegrees(final int position) {
 		return (position * 90) / 1000;
 	}
+	
+	public LightSensor getLightSensor() {
+	    return lightSensor;
+	}
 }
