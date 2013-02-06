@@ -27,6 +27,10 @@ public class DefaultMainStrategy extends MainStrategy {
 	public void enableBarcodeDetection() {
 		detectBarcode = true;
 	}
+	
+	public void setClearance() {
+		barcodeReader.setClearance(true);
+	}
 
 	private enum State {
 		WAITING, WAITING_WILL_CALIBRATE, CALIBRATING, WAITING_FOR_STARTSIGNAL, RUNNING

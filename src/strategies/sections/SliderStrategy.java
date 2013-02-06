@@ -104,6 +104,7 @@ public class SliderStrategy extends Strategy {
 			lineFollowerController.run();
 			if(lineFollowerController.isFinished()) {
 				state = State.READ_END_BARCODE;
+				Platform.getMainStrategy().setClearance();
 				driveForwardStrategy.init();
 			}
 			break;
