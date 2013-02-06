@@ -43,6 +43,26 @@ public class WallFollowerStrategy extends Strategy {
 	}
 
 	private State currentState;
+	
+	public static WallFollowerStrategy getMazeStrategy(Side headSide) {
+		return new WallFollowerStrategy(headSide, // side
+				0, // rotation time
+				1000, // curve speed
+				350, // curve direction
+				35, // max wall distance
+				14 // desired wall distance
+		);
+	}
+	
+	public static WallFollowerStrategy getRazeStrategy() {
+		return new WallFollowerStrategy(Side.LEFT, // side
+				0, // rotation time
+				1000, // curve speed
+				350, // curve direction
+				35, // max wall distance
+				14 // desired wall distance
+		);
+	}
 
 	/**
 	 * 
@@ -53,7 +73,7 @@ public class WallFollowerStrategy extends Strategy {
 	 * @param maxWallDistance used to prevent overregulating after a curve. Should be around 35.
 	 * @param desiredWallDistance the desired distance to the wall. Should be around 14.
 	 */
-	public WallFollowerStrategy(Side headSide, int rotationTime, int curveSpeed, int curveDirection, int maxWallDistance, int desiredWallDistance) {
+	private WallFollowerStrategy(Side headSide, int rotationTime, int curveSpeed, int curveDirection, int maxWallDistance, int desiredWallDistance) {
 		this.headSide = headSide;
 		wallCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
