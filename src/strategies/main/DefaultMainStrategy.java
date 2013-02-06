@@ -7,11 +7,17 @@ import sensors.LightSensor;
 import strategies.CountLinesStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
+<<<<<<< HEAD
 import strategies.sections.ColorFinderStrategy;
+=======
+import strategies.sections.BridgeController;
+>>>>>>> master
 import strategies.sections.GateStrategy;
+import strategies.sections.LineToPlantController;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
 import strategies.sections.SliderStrategy;
+import strategies.sections.TurntableStrategy;
 import strategies.util.DriveForwardStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils.Side;
@@ -44,7 +50,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10), COLORFINDER(8);
+		RACE(13), BRIDGE(5), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10), LINE_TO_PLANT(9), TURNTABLE(11), COLORFINDER(8);
 
 		private final int value;
 
@@ -82,10 +88,14 @@ public class DefaultMainStrategy extends MainStrategy {
 
 	private void switchToBarcodeReading() {
 		ENGINE.stop();
+		barcodeReader.init();
 		barcodeReader.setClearance(true);
+		detectBarcode = true;
 		currentStrategy = new DriveForwardStrategy();
 		currentStrategy.init();
 	}
+	
+	boolean currentlyMazeLeft = true;
 
 	private void switchLevel(Barcode barcode) {
 		ENGINE.stop();
@@ -93,15 +103,25 @@ public class DefaultMainStrategy extends MainStrategy {
 		case RACE:
 			state = State.WAITING_FOR_STARTSIGNAL;
 			break;
+		case BRIDGE:
+		    currentStrategy = new BridgeController();
+		    break;
 		case SEESAW:
 			currentStrategy = new SeesawStrategy();
 			break;
+		case LINE_TO_PLANT:
+		    currentStrategy = new LineToPlantController(); 
+		    break;
 		case SWAMP:
 			currentStrategy = WallFollowerStrategy.getSwampStrategy();
 			break;
 		case LABYRINTH:
 			// TODO SB switch side
-			currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
+			if(currentlyMazeLeft)
+				currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
+			else
+				currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.RIGHT);
+			currentlyMazeLeft = !currentlyMazeLeft;
 			break;
 		case GATE:
 			currentStrategy = new GateStrategy();
@@ -111,6 +131,8 @@ public class DefaultMainStrategy extends MainStrategy {
 			break;
 		case COLORFINDER:
 			currentStrategy = new ColorFinderStrategy();
+		case TURNTABLE:
+			currentStrategy = new TurntableStrategy();
 			break;
 		}
 		currentStrategy.init();
@@ -155,7 +177,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			case RUNNING:
 				state = State.WAITING;
 				ENGINE.stop();
-				Platform.HEAD.stopMoving();
+				Platform.HEAD.moveTo(1000,1000);
 				break;
 			case WAITING_FOR_STARTSIGNAL:
 				currentStrategy = new RaceStrategy();
@@ -168,7 +190,7 @@ public class DefaultMainStrategy extends MainStrategy {
 		if (state == State.RUNNING || state == State.CALIBRATING) {
 			// run strategy and commit changes
 			barcodeReader.clearStatus();
-			if (!Platform.HEAD.isMoving())
+			if (!Platform.HEAD.isMoving() && detectBarcode)
 				barcodeReader.run();
 			if (detectBarcode && barcodeReader.hasNewCode()) {
 				System.out.println("New barcode: "+barcodeReader.getLineCount());

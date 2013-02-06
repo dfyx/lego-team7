@@ -9,14 +9,12 @@ import utils.Utils.Side;
 
 public class LineFollowerStrategy extends Strategy {
 
-    protected static final int LIGHT_SETPOINT = 600;
+    public static final Parameters LINE_PARAMS = new LineParameters();
+    public static final Parameters BRIDGE_PARAMS = new BridgeParameters();
     
-    private static final int LINE_LOSS_LIMIT = 5;
-    private static final int LINE_LOSS_UNDO_CYCLES = 15;
-    private static final int LINE_LOSS_THRESHOLD = 250;
+    protected static final int LIGHT_SETPOINT = LINE_PARAMS.lightSetpoint();
     
-    private static final double P = 0.75;
-    private static final double D = 2.5;
+    private Parameters params = LINE_PARAMS;
     
     private int speed = 500;
     private int clamp = 1000;
@@ -35,6 +33,11 @@ public class LineFollowerStrategy extends Strategy {
         doInit();
     }
     
+    public LineFollowerStrategy(final Parameters params) {
+        this();
+        this.params = params;
+    }
+    
     protected void doInit() {
         onLine = true;
         lineLossCounter = 0;
@@ -42,20 +45,20 @@ public class LineFollowerStrategy extends Strategy {
         oldError = 0;
         dSum = 0;
         
-        lastSpeeds = new RunningAverage(LINE_LOSS_LIMIT);
-        lastDirections = new RunningAverage(LINE_LOSS_LIMIT);
+        lastSpeeds = new RunningAverage(params.lossLimit());
+        lastDirections = new RunningAverage(params.lossLimit());
     }
 
     protected void doRun() {
         final int value = HEAD.getLight();
         
-        if (onLine && value < LINE_LOSS_THRESHOLD) {
-            onLine = ++lineLossCounter <= LINE_LOSS_LIMIT;
+        if (onLine && value < params.lossThreshold()) {
+            onLine = ++lineLossCounter <= params.lossLimit();
             
             if (!onLine) {
-                lineLossCounter = LINE_LOSS_UNDO_CYCLES;
+                lineLossCounter = params.lossUndo();
             }
-        } else if (value > LINE_LOSS_THRESHOLD) {
+        } else if (value > params.lossThreshold()) {
             lineLossCounter = 0;
         }
 
@@ -77,22 +80,22 @@ public class LineFollowerStrategy extends Strategy {
     }
 
     private void controlLoop(final int value) {
-        final int error = trackingSide.getValue() * (value - LIGHT_SETPOINT);
+        final int error = trackingSide.getValue() * (value - params.lightSetpoint());
         final int errorD = error - oldError;
 
         oldError = error;
 
-        final int linear = (int) (P * error);
-        dSum += errorD * D;
+        final int linear = (int) (params.p() * error);
+        dSum += errorD * params.d();
         final int out = Utils.clamp(linear + dSum, -clamp, clamp);
 
         dSum -= out - linear;
 
-        
+        /*
         System.out.println("val: " + value + " err: " + error + " lin: "
                 + linear + " errorD: " + errorD + " dSum: " + dSum + " out: "
                 + out);
-        
+        */
 
         lastSpeeds.addValue(speed);
         lastDirections.addValue(out);
@@ -130,5 +133,78 @@ public class LineFollowerStrategy extends Strategy {
     
     public void setTrackingSide(final Side side) {
         trackingSide = side;
+    }
+    
+    interface Parameters {
+        int lightSetpoint();
+        int lossThreshold();
+        int lossLimit();
+        int lossUndo();
+        float p();
+        float d();
+    }
+    
+    private static class LineParameters implements Parameters {
+        @Override
+        public int lightSetpoint() {
+            return 600;
+        }
+
+        @Override
+        public int lossThreshold() {
+            return 250;
+        }
+
+        @Override
+        public float p() {
+            return (float) 0.75;
+        }
+
+        @Override
+        public float d() {
+            return (float) 2.5;
+        }
+
+        @Override
+        public int lossLimit() {
+            return 8;
+        }
+
+        @Override
+        public int lossUndo() {
+            return 20;
+        }
+    }
+    
+    private static class BridgeParameters implements Parameters {
+        @Override
+        public int lightSetpoint() {
+            return 350;
+        }
+
+        @Override
+        public int lossThreshold() {
+            return 75;
+        }
+
+        @Override
+        public float p() {
+            return (float) 2.0;
+        }
+
+        @Override
+        public float d() {
+            return (float) 4.0;
+        }
+
+        @Override
+        public int lossLimit() {
+            return 15;
+        }
+
+        @Override
+        public int lossUndo() {
+            return 30;
+        }
     }
 }

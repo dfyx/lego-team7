@@ -105,7 +105,7 @@ public class WallFollowerStrategy extends Strategy {
 	 */
 	public static WallFollowerStrategy getSliderStrategy(Side headSide,
 			int desiredDistance) {
-		return createSliderStrategies(headSide, desiredDistance, true, 200);
+		return createSliderStrategies(headSide, desiredDistance, true, 400);
 	}
 
 	private static WallFollowerStrategy createSliderStrategies(Side headSide,
@@ -132,9 +132,20 @@ public class WallFollowerStrategy extends Strategy {
 				14 // desired wall distance
 		);
 	}
-
-	public static WallFollowerStrategy getRaceStrategy() {
+	
+	public static WallFollowerStrategy getSeesawStrategy() {
 		return new WallFollowerStrategy(Side.LEFT, // side
+				1000, // speed
+				0, // rotation time
+				1000, // curve speed
+				470, // curve direction
+				35, // max wall distance
+				14 // desired wall distance
+		);
+	}
+
+	public static WallFollowerStrategy getRaceStrategy(Side side) {
+		return new WallFollowerStrategy(side, // side
 				1000, // speed
 				0, // rotation time
 				1000, // curve speed
@@ -166,7 +177,7 @@ public class WallFollowerStrategy extends Strategy {
 		wallCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
 				500,// backward speed
-				50, // backward distance
+				450, // backward time
 				30, // max obstacle distance
 				400, // obstacle speed
 				1000, // obstacle direction
@@ -178,7 +189,7 @@ public class WallFollowerStrategy extends Strategy {
 		edgeCollisionStrategy = new FollowCollisionStrategy(headSide, // head
 				5, 90,// detection
 				500,// backward speed
-				50, // backward distance
+				450, // backward time
 				30, // max obstacle distance
 				400, // obstacle speed
 				1000, // obstacle direction

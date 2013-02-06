@@ -15,15 +15,19 @@ public class SliderStrategy extends Strategy {
 	private final static int STOPPING_WALLFOLLOWER_TIME = 5000;
 	private final static int MINDISTANCE_TO_SLIDER = 20;
 	private final static int MAXDISTANCE_TO_SLIDER = 200;
+	private final static int SETBACK_TIME = 500;
 
 	public enum State {
-		FORWARD, FOLLOW_WALL, STOPPING_WALL_FOLLOWER, POSITION_HEAD_FOR_SLIDER, APPROACH_SLIDER, WAIT_FOR_SLIDER, PASS_SLIDER, FOLLOW_LINE, READ_END_BARCODE
+		FORWARD, FOLLOW_WALL, STOPPING_WALL_FOLLOWER, POSITION_HEAD_FOR_SLIDER, APPROACH_SLIDER, WAIT_FOR_SLIDER, PASS_SLIDER, FOLLOW_LINE, SET_BACK, READ_END_BARCODE
 	}
 
 	private State state;
 	private int startedDelay;
 
-	private WallFollowerStrategy wallFollowerStrategy = WallFollowerStrategy.getSliderStrategy(Side.RIGHT,10);
+	private WallFollowerStrategy wallFollowerStrategy = WallFollowerStrategy
+			.getSliderStrategy(Side.RIGHT, 10);
+	private WallFollowerStrategy wallFollowerStrategy2 = WallFollowerStrategy
+			.getRollersStrategy(Side.RIGHT, 14);
 	private LineFollowerController lineFollowerController = new LineFollowerController();
 	private DriveForwardStrategy driveForwardStrategy = new DriveForwardStrategy();
 
@@ -38,16 +42,15 @@ public class SliderStrategy extends Strategy {
 	protected void doRun() {
 		switch (state) {
 		case FORWARD:
-			//System.out.println("Run state forward");
-			if (startedDelay + FORWARD_MOVING_TIME < Utils
-					.getSystemTime()) {
+			// System.out.println("Run state forward");
+			if (startedDelay + FORWARD_MOVING_TIME < Utils.getSystemTime()) {
 				wallFollowerStrategy.init();
 				state = State.FOLLOW_WALL;
 				System.out.println("Switch to follow wall");
 			}
 			break;
 		case FOLLOW_WALL:
-			//System.out.println("Run state follow wall");
+			// System.out.println("Run state follow wall");
 			wallFollowerStrategy.run();
 			if (wallFollowerStrategy.getWallCollisionCount() >= 2) {
 				state = State.STOPPING_WALL_FOLLOWER;
@@ -72,30 +75,31 @@ public class SliderStrategy extends Strategy {
 			break;
 		case APPROACH_SLIDER:
 			if (Platform.HEAD.getDistance() > MAXDISTANCE_TO_SLIDER) {
-				//Stop, when slider is open
+				// Stop, when slider is open
 				Platform.ENGINE.stop();
 			} else if (Platform.HEAD.getDistance() > MINDISTANCE_TO_SLIDER) {
-				//Move, when slider is closed but far away
+				// Move, when slider is closed but far away
 				Platform.ENGINE.move(250);
 			} else {
-				//Stop, when slider is closed and nearby. Then wait for the slider to open
+				// Stop, when slider is closed and nearby. Then wait for the
+				// slider to open
 				Platform.ENGINE.stop();
 				state = State.WAIT_FOR_SLIDER;
 				System.out.println("Switch to wait for slider");
 			}
 			break;
 		case WAIT_FOR_SLIDER:
-			if(Platform.HEAD.getDistance()>MAXDISTANCE_TO_SLIDER) {
+			if (Platform.HEAD.getDistance() > MAXDISTANCE_TO_SLIDER) {
 				Platform.ENGINE.move(1000);
-				//Platform.HEAD.startSweeping(-1000,1000,1000);
-				wallFollowerStrategy.init();
+				// Platform.HEAD.startSweeping(-1000,1000,1000);
+				wallFollowerStrategy2.init();
 				state = State.PASS_SLIDER;
 				System.out.println("Switch to pass slider");
 			}
 			break;
 		case PASS_SLIDER:
-			wallFollowerStrategy.run();
-			if(lineFollowerController.lineValueOk()) {
+			wallFollowerStrategy2.run();
+			if (lineFollowerController.lineValueOk()) {
 				state = State.FOLLOW_LINE;
 				Platform.getMainStrategy().disableBarcodeDetection();
 				lineFollowerController.init();
@@ -103,10 +107,17 @@ public class SliderStrategy extends Strategy {
 			break;
 		case FOLLOW_LINE:
 			lineFollowerController.run();
-			if(lineFollowerController.isFinished()) {
+			if (lineFollowerController.isFinished()) {
+				state = State.SET_BACK;
+				startedDelay = Utils.getSystemTime();
+				Platform.ENGINE.move(-1000);
+			}
+			break;
+		case SET_BACK:
+			if (startedDelay + SETBACK_TIME < Utils.getSystemTime()) {
 				state = State.READ_END_BARCODE;
+				Platform.ENGINE.stop();
 				Platform.getMainStrategy().enableBarcodeDetection();
-				Platform.getMainStrategy().setClearance();
 				driveForwardStrategy.init();
 			}
 			break;
