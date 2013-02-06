@@ -7,9 +7,9 @@ import sensors.LightSensor;
 import strategies.CountLinesStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
-import strategies.line_follower.LineFollowerController;
 import strategies.sections.BridgeController;
 import strategies.sections.GateStrategy;
+import strategies.sections.LineToPlantController;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
 import strategies.sections.SliderStrategy;
@@ -106,7 +106,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			currentStrategy = new SeesawStrategy();
 			break;
 		case LINE_TO_PLANT:
-		    currentStrategy = new LineFollowerController(); // FIXME, add special strategy
+		    currentStrategy = new LineToPlantController(); 
 		    break;
 		case SWAMP:
 			currentStrategy = WallFollowerStrategy.getSwampStrategy();
