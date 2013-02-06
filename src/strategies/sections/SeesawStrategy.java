@@ -9,6 +9,7 @@ import static robot.Platform.ENGINE;
 public class SeesawStrategy extends Strategy {
 	
 	WallFollowerStrategy wallFollower = WallFollowerStrategy.getSeesawStrategy();
+	BridgeStrategy bridgeStrategy = new BridgeStrategy();
 
 	private enum State {
 		POSITIONING_HEAD, // head to front
@@ -52,14 +53,12 @@ public class SeesawStrategy extends Strategy {
 			}
 			if (valuecount > MINVALUES) {
 				state = State.FOLLOW_BRIDGE;
-				// TODO MJ
-//				Platform.ENGINE.move(1000);
-//				Platform.HEAD.startSweeping(-1000, 1000, 1000);
+				bridgeStrategy.init();
 			}
 			break;
 		case FOLLOW_BRIDGE:
-			// TODO MJ
-			if(HEAD.getDistance() < 50) {
+			bridgeStrategy.run();
+			if(bridgeStrategy.isFinished() && HEAD.getDistance() < 50) {
 				wallFollower.init();
 				state = State.FOLLOW_WALL;
 			}
