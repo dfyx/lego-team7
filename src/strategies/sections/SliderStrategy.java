@@ -3,6 +3,7 @@ package strategies.sections;
 import robot.Platform;
 import strategies.Strategy;
 import strategies.line_follower.LineFollowerController;
+import strategies.util.DriveForwardStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils;
 import utils.Utils.Side;
@@ -16,7 +17,7 @@ public class SliderStrategy extends Strategy {
 	private final static int MAXDISTANCE_TO_SLIDER = 200;
 
 	public enum State {
-		FORWARD, FOLLOW_WALL, STOPPING_WALL_FOLLOWER, POSITION_HEAD_FOR_SLIDER, APPROACH_SLIDER, WAIT_FOR_SLIDER, PASS_SLIDER, FOLLOW_LINE
+		FORWARD, FOLLOW_WALL, STOPPING_WALL_FOLLOWER, POSITION_HEAD_FOR_SLIDER, APPROACH_SLIDER, WAIT_FOR_SLIDER, PASS_SLIDER, FOLLOW_LINE, READ_END_BARCODE
 	}
 
 	private State state;
@@ -24,6 +25,7 @@ public class SliderStrategy extends Strategy {
 
 	private WallFollowerStrategy wallFollowerStrategy = WallFollowerStrategy.getSliderStrategy(Side.RIGHT,10);
 	private LineFollowerController lineFollowerController = new LineFollowerController();
+	private DriveForwardStrategy driveForwardStrategy = new DriveForwardStrategy();
 
 	@Override
 	protected void doInit() {
@@ -100,7 +102,13 @@ public class SliderStrategy extends Strategy {
 			break;
 		case FOLLOW_LINE:
 			lineFollowerController.run();
+			if(lineFollowerController.isFinished()) {
+				state = State.READ_END_BARCODE;
+				driveForwardStrategy.init();
+			}
 			break;
+		case READ_END_BARCODE:
+			driveForwardStrategy.run();
 		}
 	}
 }
