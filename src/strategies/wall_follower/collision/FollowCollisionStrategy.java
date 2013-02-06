@@ -10,12 +10,15 @@ import utils.Utils.Side;
 public class FollowCollisionStrategy extends ChildStrategy {
 	// TODO SB make this work for both head positions
 	DetectCollisionStrategy collisionStrategy;
-	MoveDistanceStrategy moveBackStrategy;
 
 	private final int EPSILON = 5;
 
 	private final int FRONT_POSITION = 0;
 	private final int SIDE_POSITION;
+	
+	private final int BACKWARD_SPEED;
+	private final long BACKWARD_TIME;
+	private long endBackwardTime;
 
 	private final int SEARCH_OBSTACLE_SPEED;
 	private final int SEARCH_OBSTACLE_DIRECTION;
@@ -58,10 +61,10 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			break;
 		case STAND:
 			newState = State.DRIVE_BACK;
-			moveBackStrategy.init();
+			endBackwardTime = System.currentTimeMillis() + BACKWARD_TIME;
 			break;
 		case DRIVE_BACK:
-			if (moveBackStrategy.isFinished())
+			if (System.currentTimeMillis() > endBackwardTime)
 				newState = State.TURN_HEAD_FORWARD;
 			break;
 		case TURN_HEAD_FORWARD:
@@ -108,14 +111,15 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	}
 
 	public FollowCollisionStrategy(Side headSide, int valueCount,
-			int sensitivity, int backwardSpeed, int backwardDistance,
+			int sensitivity, int backwardSpeed, int backwardTime,
 			int obstacleDistance, int searchObstacleSpeed,
 			int searchObstacleDirection, int extraTurnTime, int wallDistance,
 			int searchWallSpeed, int searchWallDirection) {
 		SIDE_POSITION = 1000 * headSide.getValue();
 
 		collisionStrategy = new DetectCollisionStrategy(headSide);
-		moveBackStrategy = new MoveDistanceStrategy(backwardSpeed, -backwardDistance);
+		BACKWARD_TIME = backwardTime;
+		BACKWARD_SPEED = -backwardSpeed;
 
 		OBSTACLE_DISTANCE = obstacleDistance;
 		SEARCH_OBSTACLE_SPEED = searchObstacleSpeed;
@@ -167,9 +171,10 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			collisionStrategy.run();
 			break;
 		case STAND:
+			ENGINE.move(BACKWARD_SPEED, 0);
 			break;
 		case DRIVE_BACK:
-			moveBackStrategy.run();
+			//
 			break;
 		case TURN_HEAD_FORWARD:
 			ENGINE.stop();
