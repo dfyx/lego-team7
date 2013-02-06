@@ -65,7 +65,6 @@ public class CountLinesStrategy extends Strategy {
             lineCount = edgeCount / 2;
             edgeCount = 0;
             
-            System.out.println("Found new code");
             changed = true;
         } else if (drivenDistance > CLEARANCE_BEFORE) {
             clearance = true;
@@ -94,12 +93,15 @@ public class CountLinesStrategy extends Strategy {
      * @param clearance
      *            the new clearance state
      */
-    void setClearance(final boolean clearance) {
+    public void setClearance(final boolean clearance) {
         if (this.clearance != clearance) {
             if (!clearance) {
-               edgeCount = 0;
+                edgeCount = 0;
+                drivenDistance = 0;
             }
         }
+        
+        this.clearance = clearance;
     }
     
     /** 
