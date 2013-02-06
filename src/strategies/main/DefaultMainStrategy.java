@@ -158,7 +158,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			case RUNNING:
 				state = State.WAITING;
 				ENGINE.stop();
-				Platform.HEAD.stopMoving();
+				Platform.HEAD.moveTo(1000,1000);
 				break;
 			case WAITING_FOR_STARTSIGNAL:
 				currentStrategy = new RaceStrategy();
