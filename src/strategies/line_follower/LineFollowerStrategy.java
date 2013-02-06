@@ -88,11 +88,11 @@ public class LineFollowerStrategy extends Strategy {
 
         dSum -= out - linear;
 
-        
+        /*
         System.out.println("val: " + value + " err: " + error + " lin: "
                 + linear + " errorD: " + errorD + " dSum: " + dSum + " out: "
                 + out);
-        
+        */
 
         lastSpeeds.addValue(speed);
         lastDirections.addValue(out);
