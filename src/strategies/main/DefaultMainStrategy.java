@@ -7,7 +7,11 @@ import sensors.LightSensor;
 import strategies.CountLinesStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
+<<<<<<< HEAD
+import strategies.sections.ColorFinderStrategy;
+=======
 import strategies.sections.BridgeController;
+>>>>>>> master
 import strategies.sections.GateStrategy;
 import strategies.sections.LineToPlantController;
 import strategies.sections.RaceStrategy;
@@ -46,7 +50,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), BRIDGE(5), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10), LINE_TO_PLANT(9), TURNTABLE(11);
+		RACE(13), BRIDGE(5), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10), LINE_TO_PLANT(9), TURNTABLE(11), COLORFINDER(8);
 
 		private final int value;
 
@@ -127,6 +131,8 @@ public class DefaultMainStrategy extends MainStrategy {
 		case SLIDER:
 			currentStrategy = new SliderStrategy();
 			break;
+		case COLORFINDER:
+			currentStrategy = new ColorFinderStrategy();
 		case TURNTABLE:
 			currentStrategy = new TurntableStrategy();
 			break;
