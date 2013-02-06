@@ -44,6 +44,21 @@ public class WallFollowerStrategy extends Strategy {
 
 	private State currentState;
 	
+	public static WallFollowerStrategy getBridgeStartStrategy() {
+		return new WallFollowerStrategy(Side.LEFT, // side
+				1000, // speed
+				0, // rotation time
+				1000, // curve speed
+				470, // curve direction
+				100, // max wall distance
+				50 // desired wall distance
+		);
+	}
+	
+	public static WallFollowerStrategy getBridgeEndStrategy() {
+		return getMazeStrategy(Side.LEFT);
+	}
+	
 	public static WallFollowerStrategy getGateStrategy() {
 		return getSwampStrategy();
 	}
@@ -73,7 +88,7 @@ public class WallFollowerStrategy extends Strategy {
 				0, // rotation time
 				1000, // curve speed
 				470, // curve direction
-				35, // max wall distance
+				256, // max wall distance
 				desiredDistance // desired wall distance
 		);
 	}
