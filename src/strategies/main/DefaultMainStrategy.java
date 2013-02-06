@@ -1,26 +1,35 @@
 package strategies.main;
+
 import static robot.Platform.ENGINE;
 import lejos.nxt.Button;
 import robot.Platform;
+import sensors.LightSensor;
 import strategies.CountLinesStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
+import strategies.sections.GateStrategy;
 import strategies.sections.RaceStrategy;
 import strategies.sections.SeesawStrategy;
+import strategies.sections.SliderStrategy;
 import strategies.util.DriveForwardStrategy;
 import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils.Side;
 
 public class DefaultMainStrategy extends MainStrategy {
-	
+
 	private boolean detectBarcode;
-	
+	private LightSensor.CalibrationData calibration = LightSensor.DEFAULT_CALIBRATION;
+
 	public void disableBarcodeDetection() {
-		detectBarcode=false;
+		detectBarcode = false;
 	}
-	
+
 	public void enableBarcodeDetection() {
 		detectBarcode = true;
+	}
+	
+	public void setClearance() {
+		barcodeReader.setClearance(true);
 	}
 
 	private enum State {
@@ -34,7 +43,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private ButtonState buttonState;
 
 	public static enum Barcode {
-		RACE(13), LABYRINTH(7), SEESAW(10);
+		RACE(13), LABYRINTH(7), SWAMP(4), SLIDER(12), GATE(3), SEESAW(10);
 
 		private final int value;
 
@@ -72,6 +81,8 @@ public class DefaultMainStrategy extends MainStrategy {
 
 	private void switchToBarcodeReading() {
 		ENGINE.stop();
+		barcodeReader.setClearance(true);
+		detectBarcode = true;
 		currentStrategy = new DriveForwardStrategy();
 		currentStrategy.init();
 	}
@@ -85,11 +96,18 @@ public class DefaultMainStrategy extends MainStrategy {
 		case SEESAW:
 			currentStrategy = new SeesawStrategy();
 			break;
+		case SWAMP:
+			currentStrategy = WallFollowerStrategy.getSwampStrategy();
+			break;
 		case LABYRINTH:
-			currentStrategy = new WallFollowerStrategy(Side.LEFT, // side
-					0 , // rotation time
-					1000 , // curve speed
-					350); // curve direction
+			// TODO SB switch side
+			currentStrategy = WallFollowerStrategy.getMazeStrategy(Side.LEFT);
+			break;
+		case GATE:
+			currentStrategy = new GateStrategy();
+			break;
+		case SLIDER:
+			currentStrategy = new SliderStrategy();
 			break;
 		}
 		currentStrategy.init();
@@ -134,6 +152,7 @@ public class DefaultMainStrategy extends MainStrategy {
 			case RUNNING:
 				state = State.WAITING;
 				ENGINE.stop();
+				Platform.HEAD.stopMoving();
 				break;
 			case WAITING_FOR_STARTSIGNAL:
 				currentStrategy = new RaceStrategy();
@@ -142,16 +161,16 @@ public class DefaultMainStrategy extends MainStrategy {
 			}
 		}
 
-		//Run child strategy
+		// Run child strategy
 		if (state == State.RUNNING || state == State.CALIBRATING) {
 			// run strategy and commit changes
 			barcodeReader.clearStatus();
-			if (!Platform.HEAD.isMoving())
+			if (!Platform.HEAD.isMoving() && detectBarcode)
 				barcodeReader.run();
 			if (detectBarcode && barcodeReader.hasNewCode()) {
-				System.out.println("New barcode :)");
+				System.out.println("New barcode: "+barcodeReader.getLineCount());
 				int code = barcodeReader.getLineCount();
-				if(code>1)
+				if (code > 1)
 					switchLevel(Barcode.get(code));
 				else
 					currentStrategy.run();
@@ -161,10 +180,22 @@ public class DefaultMainStrategy extends MainStrategy {
 			ENGINE.commit();
 		}
 
-		//React, if calibration is finished
+		// React, if calibration is finished
 		if (state == State.CALIBRATING && currentStrategy.isFinished()) {
+		    calibration = Platform.HEAD.getLightSensor().getCalibration();
+		    
 			state = State.RUNNING;
 			switchToBarcodeReading();
 		}
+		
+		//React, if strategy is finished
+		if (state == State.RUNNING && currentStrategy.isFinished()) {
+			setFinished();
+		}
 	}
+
+    @Override
+    public void restoreLightCalibration() {
+        Platform.HEAD.getLightSensor().calibrate(calibration);
+    }
 }

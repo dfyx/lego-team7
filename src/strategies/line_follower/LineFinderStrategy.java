@@ -17,13 +17,14 @@ import utils.Utils.Side;
 public class LineFinderStrategy extends Strategy {
     
     /** Brightness treshold used for line detection. */
-    private static final int DETECTION_THRESHOLD = LineFollowerStrategy.LIGHT_SETPOINT + 50;
+    public static final int DETECTION_THRESHOLD = LineFollowerStrategy.LIGHT_SETPOINT + 50;
     /** Sweep angle used during initial line search. */
-    private static final int DETECTION_ANGLE = 75;
+    private static final int DETECTION_ANGLE = 85;
     /** Maximum turn angle during alignment. */
     private static final int MAX_ANGLE = 120;
+    /** Used to unlock direction change. */
+    private static final int TURN_CHANGE_UNLOCK_ANGLE = MAX_ANGLE / 2;
     
-    private static final int DRIVE_SPEED = 500;
     private static final int ALIGN_SPEED = 200;
     private static final int SEARCH_SWEEP_SPEED = 400;
     
@@ -31,12 +32,12 @@ public class LineFinderStrategy extends Strategy {
     
     private State state = State.NOT_LOCKED;
     
-    private int driveSpeed = DRIVE_SPEED;
     private int sweepSpeed = SEARCH_SWEEP_SPEED;
 
     private Side trackingSide = Side.LEFT;
     
     private int sweepTo = Head.degreeToPosition(DETECTION_ANGLE);
+    private boolean turnDirUnlock = true;
     private int turnDir = -1 * trackingSide.getValue();
     private int turnSpeed = ALIGN_SPEED;
     
@@ -46,10 +47,11 @@ public class LineFinderStrategy extends Strategy {
     protected void doInit() {
         state = State.NOT_LOCKED;
         
-        driveSpeed = DRIVE_SPEED;
         sweepSpeed = SEARCH_SWEEP_SPEED;
         
+        angle = 0;
         sweepTo = Head.degreeToPosition(DETECTION_ANGLE);
+        turnDirUnlock = true;
         turnDir = -1 * trackingSide.getValue();
         turnSpeed = ALIGN_SPEED;
     }
@@ -65,12 +67,12 @@ public class LineFinderStrategy extends Strategy {
                     turnDir = HEAD.getPosition() < 0 ? -1 : 1;
                     
                     ENGINE.stop();
-                    HEAD.moveTo(0, true);
+                    HEAD.moveTo(0, 1000);
                     
                     state = State.WAIT_FOR_HEAD;
                 } else {
                     if (!HEAD.isMoving()) {
-                        HEAD.moveTo(sweepTo, true, sweepSpeed);
+                        HEAD.moveTo(sweepTo, sweepSpeed);
                         
                         sweepTo = -sweepTo;
                     }
@@ -78,14 +80,21 @@ public class LineFinderStrategy extends Strategy {
                 break;
             case WAIT_FOR_HEAD:
                 if (!HEAD.isMoving()) {
+                    angle = 0;
+                    
                     state = State.MOVE_TO_LINE;
                 }
                 break;
             case MOVE_TO_LINE:
                 if (value < DETECTION_THRESHOLD) {
+
                     angle += ENGINE.estimateAngle();
                     
-                    if (Math.abs(angle) > MAX_ANGLE) {
+                    if (Math.abs(angle) < TURN_CHANGE_UNLOCK_ANGLE) {
+                        turnDirUnlock = true;
+                    }
+                    if (turnDirUnlock && Math.abs(angle) > MAX_ANGLE) {
+                        turnDirUnlock = false;
                         turnDir *= -1;
                         turnSpeed = ALIGN_SPEED / 2;
                     }
@@ -107,7 +116,7 @@ public class LineFinderStrategy extends Strategy {
         int out = turnDir * linear;
         out = Utils.clamp(out, -turnSpeed, turnSpeed); // limit to drive speed
         
-        // System.out.println("err: " + error + " lin: " + linear + " out: " + out);
+        //System.out.println("err: " + error + " lin: " + linear + " out: " + out);
         
         ENGINE.rotate(out);
     }
@@ -119,26 +128,6 @@ public class LineFinderStrategy extends Strategy {
      */
     public boolean isLocked() {
         return state != State.NOT_LOCKED;
-    }
-    
-    /**
-     * Gets the driving speed used for alignment.
-     * 
-     * @return a speed value suitable for {@link actors.Engine}
-     */
-    public int getDriveSpeed() {
-        return driveSpeed;
-    }
-    
-    /**
-     * Sets the driving speed used for alignment.
-     * 
-     * @param driveSpeed
-     *            the speed value, required to be within the value range
-     *            accepted by {@link actors.Engine}
-     */
-    public void setDriveSpeed(int driveSpeed) {
-        this.driveSpeed = driveSpeed;
     }
     
     /**

@@ -5,10 +5,19 @@ import lejos.nxt.MotorPort;
 import lejos.nxt.NXTMotor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.util.Delay;
+import strategies.Action;
+import utils.Queue;
 import utils.Utils;
 
 // This thread handles asynchronous motor movements
-class HeadMotor extends Thread {
+class HeadMotor implements Action {
+
+	private enum State {
+		INACTIVE, CALIBRATING_LEFT, CALIBRATING_RIGHT, MOVING, FLOATING
+	};
+
+	private State state;
+
 	private static final NXTRegulatedMotor MOTOR = Motor.C;
 	private static final NXTMotor RAW_MOTOR = new NXTMotor(MotorPort.C);
 
@@ -29,6 +38,7 @@ class HeadMotor extends Thread {
 	 * The voltage to use for calibration
 	 */
 	private final int CALIBRATION_POWER = 50;
+	private final int CALIBRATION_MEASUREDELAY = 200;
 
 	// When was the last head calibration?
 	private int lastCalibrationLeft = 0;
@@ -38,83 +48,145 @@ class HeadMotor extends Thread {
 	private int mostLeftPos;
 	private int mostRightPos;
 
-	// Current state
-	private volatile boolean fixedPowerMoving = false;
-	private volatile boolean isMoving = false;
-	private volatile boolean isCalibrating = false;
-	private volatile int target;
-	private volatile boolean reMove = false; // Abort current movement and
-												// continue with next move
-												// command
-	private volatile boolean stopMoving = false; // Abort current movement
-	private volatile int speed = 1000;
+	private Queue<State> stateQueue;
 
-	private boolean terminate = false;
+	// Current state
 	/**
 	 * the tacho count, when collision detection is started
 	 */
 	private int collisionTachoCount;
 
 	public void terminate() {
-		terminate = true;
+		MOTOR.stop();
+		enterState(State.INACTIVE);
 	}
 
 	public HeadMotor() {
-		start();
+		stateQueue = new Queue<State>();
+		stateQueue.push(State.CALIBRATING_RIGHT);
+		enterState(State.CALIBRATING_LEFT);
 	}
-	
-	public void detectCollisions(boolean detect) {
-		collisionTachoCount = MOTOR.getTachoCount();
-		if(detect)
-			MOTOR.flt(true);
-		else
+
+	private void enterState(State newState) {
+		if (newState == null) {
 			MOTOR.stop(true);
+			state = State.INACTIVE;
+			return;
+		}
+
+		switch (newState) {
+		case CALIBRATING_LEFT:
+			MOTOR.suspendRegulation();
+			RAW_MOTOR.setPower(-CALIBRATION_POWER);
+			lastMotorPos = RAW_MOTOR.getTachoCount();
+			state = State.CALIBRATING_LEFT;
+			calibratingLastTime = Utils.getSystemTime();
+			break;
+		case CALIBRATING_RIGHT:
+			MOTOR.suspendRegulation();
+			RAW_MOTOR.setPower(CALIBRATION_POWER);
+			lastMotorPos = RAW_MOTOR.getTachoCount();
+			state = State.CALIBRATING_RIGHT;
+			calibratingLastTime = Utils.getSystemTime();
+			break;
+		case MOVING:
+			doMove();
+			break;
+		case FLOATING:
+		case INACTIVE:
+			state = newState;
+		}
 	}
-	
+
+	private int calibratingLastTime;
+	private int lastMotorPos;
+
+	@Override
+	public void run() {
+		int currentTime = Utils.getSystemTime();
+		switch (state) {
+		case INACTIVE:
+			break;
+		case CALIBRATING_LEFT:
+			if (currentTime >= calibratingLastTime + CALIBRATION_MEASUREDELAY) {
+				int motorPos = RAW_MOTOR.getTachoCount();
+				if (lastMotorPos - motorPos < MIN_MOVEMENT) {
+					lastCalibrationLeft = currentTime;
+					mostLeftPos = RAW_MOTOR.getTachoCount()
+							+ CALIBRATION_OFFSET;
+					enterState(stateQueue.pop());
+				} else
+					calibratingLastTime = currentTime;
+				lastMotorPos = motorPos;
+			}
+			break;
+		case CALIBRATING_RIGHT:
+			if (currentTime >= calibratingLastTime + CALIBRATION_MEASUREDELAY) {
+				int motorPos = RAW_MOTOR.getTachoCount();
+				if (motorPos - lastMotorPos < MIN_MOVEMENT) {
+					lastCalibrationRight = currentTime;
+					mostRightPos = RAW_MOTOR.getTachoCount()
+							- CALIBRATION_OFFSET;
+					enterState(stateQueue.pop());
+				} else
+					calibratingLastTime = currentTime;
+				lastMotorPos = motorPos;
+			}
+			break;
+		case MOVING:
+			if (!MOTOR.isMoving()) {
+				if(getPosition()>900 && lastCalibrationRight+RECALIBRATION_MIN_INTERVAL<currentTime) {
+					stateQueue.push(State.MOVING);
+					enterState(State.CALIBRATING_RIGHT);
+				} else if(getPosition()<-900  && lastCalibrationLeft+RECALIBRATION_MIN_INTERVAL<currentTime) {
+					stateQueue.push(State.MOVING);
+					enterState(State.CALIBRATING_LEFT);
+				} else {
+					enterState(State.INACTIVE);
+				}
+			}
+			break;
+		case FLOATING:
+			break;
+		}
+	}
+
+	public void detectCollisions(boolean detect) {
+		if(isMoving())
+			throw new IllegalStateException("can not detect collisions while head is moving");
+		collisionTachoCount = MOTOR.getTachoCount();
+		if (detect) {
+			MOTOR.flt(true);
+			state = State.FLOATING;
+		} else {
+			MOTOR.stop(true);
+			state = State.MOVING;
+			// State change to INACTIVE done automatically when motor stops
+		}
+	}
+
 	public boolean isColliding() {
 		int currentTachoCount = MOTOR.getTachoCount();
-//		System.out.println("Target: " + collisionTachoCount + " Position: " + currentTachoCount);
 		int diff = collisionTachoCount - currentTachoCount;
-		if(diff < 0)
+		if (diff < 0)
 			diff *= -1;
-		return diff > 3;
+		boolean result =  diff > 3 && state == State.FLOATING;
+		return result;
 	}
 
-	private void doRotateTo(int target, boolean async) {
-		int motorPos = (mostLeftPos + mostRightPos) / 2 + target
-				* (mostRightPos - mostLeftPos) / 2000;
-		fixedPowerMoving = false;
-		MOTOR.stop();
-		MOTOR.setSpeed(speed);
-		System.out.println("Move with speed "+speed);
-		if (motorPos > mostRightPos || motorPos < mostLeftPos)
-			throw new IllegalArgumentException("Move out of range: " + motorPos);
-		MOTOR.rotateTo(motorPos, async);
+	public boolean isMoving() {
+		return state == State.MOVING || state == State.CALIBRATING_LEFT
+				|| state == State.CALIBRATING_RIGHT;
 	}
 
-	private boolean isStalled = false;
-	
-	public void moveWithFixedPower(int power) {
-		isStalled=false;
-		fixedPowerMoving = true;
-		MOTOR.suspendRegulation();
-		RAW_MOTOR.setPower(power);
+	public void stopMoving() {
+		MOTOR.stop(true);
+		// State change to inactive is done automatically when moving ends
 	}
 
-	public boolean isStalled() {
-		return isStalled;
-	}
-
-	public synchronized boolean isMoving() {
-		return isMoving || fixedPowerMoving;
-	}
-
-	public synchronized void stopMoving() {
-		stopMoving = true;
-	}
-
-	public synchronized boolean isCalibrating() {
-		return isCalibrating;
+	public boolean isCalibrating() {
+		return state == State.CALIBRATING_LEFT
+				|| state == State.CALIBRATING_RIGHT;
 	}
 
 	public int getPosition() {
@@ -122,149 +194,45 @@ class HeadMotor extends Thread {
 				/ (mostRightPos - mostLeftPos);
 	}
 
-	public void moveTo(int position, boolean async, int speed) {
-		this.speed = speed;
-		moveTo(position, async);
-	}
-
-	public void moveTo(int position, boolean async) {
-		moveTo(position);
-		if (!async) {
-			while (isMoving) {
-				Delay.msDelay(10);
-			}
-		}
-	}
-
-	public synchronized void moveTo(int position) {
-		target = position;
-		if (isMoving)
-			reMove = true;
-		isMoving = true;
-	}
-
-	// Calibrate one of the corners using the given power
-	// The sign of the power determines fixes the direction.
-	private int doCalibrateDirection(int power) {
-		MOTOR.suspendRegulation();
-		RAW_MOTOR.setPower(power);
-
-		int lastPosition = RAW_MOTOR.getTachoCount();
-		Delay.msDelay(200);
-		int position = RAW_MOTOR.getTachoCount();
-		while (Math.abs(position - lastPosition) >= MIN_MOVEMENT) {
-			Delay.msDelay(200);
-			lastPosition = position;
-			position = RAW_MOTOR.getTachoCount();
-		}
-		;
-
+	public void moveToSync(int position, int speed) {
 		MOTOR.stop();
-		return position;
-	}
-
-	/**
-	 * Recalibrate the bottom right corner
-	 */
-	private void calibrateRight() {
-		mostRightPos = doCalibrateDirection(CALIBRATION_POWER)
-				- CALIBRATION_OFFSET;
-		lastCalibrationRight = Utils.getSystemTime();
-		MOTOR.rotateTo(mostRightPos);
-	}
-
-	/**
-	 * Recalibrate the top left corner
-	 */
-	private void calibrateLeft() {
-		mostLeftPos = doCalibrateDirection(-CALIBRATION_POWER)
-				+ CALIBRATION_OFFSET;
-		lastCalibrationLeft = Utils.getSystemTime();
-		MOTOR.rotateTo(mostLeftPos);
-	}
-
-	/**
-	 * Recalibrate the complete head movement
-	 */
-	public void calibrate() {
-		isCalibrating = true;
-		calibrateLeft();
-		calibrateRight();
-		isCalibrating = false;
-	}
-
-	public void run() {
-		try {
-			// Delay necessary, because motor commands are ignored when in debug
-			// mode and issued too early
-			Delay.msDelay(500);
-			calibrate();
-			while (!interrupted()) {
-				int position = RAW_MOTOR.getTachoCount();
-				int lastPosition = position;
-				// State is NOT_MOVING
-				while (!isMoving && !terminate) {
-					while(!isMoving && !terminate && !fixedPowerMoving)
-						Delay.msDelay(10);
-					isStalled =  Math.abs(position - lastPosition) < MIN_MOVEMENT;
-					lastPosition=position;
-					position=RAW_MOTOR.getTachoCount();
-					Delay.msDelay(10);
-					if(stopMoving) {
-						break;
-					}
-				}
-				if (terminate)
-					break;
-				// State just switched to MOVING
-				doRotateTo(target, true);
-				while (MOTOR.isMoving() && !reMove && !stopMoving && !terminate && !fixedPowerMoving) {
-					Delay.msDelay(10);
-				}
-				if (stopMoving) {
-					MOTOR.stop();
-				}
-				if (terminate) {
-					break;
-				}
-				// If state switched to reMove, remain MOVING state.
-				// Otherwise switch back to NOT_MOVING
-				if (!reMove) {
-					// Recalibrate if possible
-					if (target == -1000
-							&& lastCalibrationLeft + RECALIBRATION_MIN_INTERVAL <= Utils
-									.getSystemTime()) {
-						synchronized (this) {
-							isCalibrating = true;
-							isMoving = false;
-						}
-						calibrateLeft();
-						synchronized (this) {
-							isCalibrating = false;
-						}
-					} else if (target == 1000
-							&& lastCalibrationRight
-									+ RECALIBRATION_MIN_INTERVAL <= Utils
-										.getSystemTime()) {
-						synchronized (this) {
-							isCalibrating = true;
-							isMoving = false;
-						}
-						calibrateRight();
-						synchronized (this) {
-							isCalibrating = false;
-						}
-					} else {
-						synchronized (this) {
-							isMoving = false;
-						}
-					}
-				}
-				reMove = false;
-			}
-		} finally {
-			MOTOR.stop();
-			Delay.msDelay(1000);
+		while (isMoving()) {
+			Delay.msDelay(10);
 		}
+		moveTo(position, speed);
+
+		while (isMoving()) {
+			Delay.msDelay(10);
+		}
+	}
+	
+	private int newPosition;
+	private int newSpeed;
+
+	public void moveTo(int position, int speed) {
+		newPosition = position;
+		newSpeed = speed;
+		
+		switch (state) {
+		case INACTIVE:
+		case MOVING:
+		case FLOATING:
+			enterState(State.MOVING);
+			break;
+		case CALIBRATING_LEFT:
+		case CALIBRATING_RIGHT:
+			stateQueue.push(State.MOVING);
+		}
+	}
+
+	private void doMove() {
+		int motorPos = (mostLeftPos + mostRightPos) / 2 + newPosition
+				* (mostRightPos - mostLeftPos) / 2000;
+
+		if (motorPos > mostRightPos || motorPos < mostLeftPos)
+			throw new IllegalArgumentException("Move out of range: " + motorPos);
+		MOTOR.setSpeed(newSpeed);
+		MOTOR.rotateTo(motorPos, true);
+		state = State.MOVING;
 	}
 }

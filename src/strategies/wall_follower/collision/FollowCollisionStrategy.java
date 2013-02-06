@@ -3,6 +3,7 @@ package strategies.wall_follower.collision;
 import static robot.Platform.ENGINE;
 import static robot.Platform.HEAD;
 import strategies.util.ChildStrategy;
+import strategies.util.MoveDistanceStrategy;
 import strategies.wall_follower.DetectCollisionStrategy;
 import utils.Utils.Side;
 
@@ -12,12 +13,12 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	private final int EPSILON = 5;
 
+	private final int FRONT_POSITION = 0;
+	private final int SIDE_POSITION;
+	
 	private final int BACKWARD_SPEED;
 	private final long BACKWARD_TIME;
 	private long endBackwardTime;
-
-	private final int FRONT_POSITION = 0;
-	private final int SIDE_POSITION;
 
 	private final int SEARCH_OBSTACLE_SPEED;
 	private final int SEARCH_OBSTACLE_DIRECTION;
@@ -103,8 +104,8 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			break;
 		}
 
-		if (currentState != newState)
-			System.out.println(currentState.name() + " -> " + newState.name());
+//		if (currentState != newState)
+//			System.out.println(currentState.name() + " -> " + newState.name());
 
 		return newState;
 	}
@@ -117,8 +118,8 @@ public class FollowCollisionStrategy extends ChildStrategy {
 		SIDE_POSITION = 1000 * headSide.getValue();
 
 		collisionStrategy = new DetectCollisionStrategy(headSide);
-		BACKWARD_SPEED = -backwardSpeed;
 		BACKWARD_TIME = backwardTime;
+		BACKWARD_SPEED = -backwardSpeed;
 
 		OBSTACLE_DISTANCE = obstacleDistance;
 		SEARCH_OBSTACLE_SPEED = searchObstacleSpeed;
@@ -145,7 +146,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	@Override
 	protected void childInit() {
-		System.out.println("init collision");
+//		System.out.println("init collision");
 		currentState = State.START;
 		collisionStrategy.init();
 	}
@@ -158,10 +159,10 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	@Override
 	public void work() {
 
-		State oldState = currentState;
+//		State oldState = currentState;
 		currentState = checkState();
-		if (oldState != currentState)
-			System.out.println("running: " + currentState.name());
+//		if (oldState != currentState)
+//			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
 		case START:
@@ -173,12 +174,11 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			ENGINE.move(BACKWARD_SPEED, 0);
 			break;
 		case DRIVE_BACK:
-			// intentionally left blank
-			// TODO SB use touch sensors?
+			//
 			break;
 		case TURN_HEAD_FORWARD:
 			ENGINE.stop();
-			HEAD.moveTo(FRONT_POSITION, true);
+			HEAD.moveTo(FRONT_POSITION, 1000);
 			break;
 		case SEARCH_OBSTACLE:
 			// Turning head forward
@@ -189,12 +189,12 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			endTurnTime = System.currentTimeMillis() + EXTRA_TURN_TIME;
 			break;
 		case TURN_EXTRA:
-			System.out.println("turning extra");
+//			System.out.println("turning extra");
 			break;
 		case START_TURN_HEAD_SIDEWAYS:
 			// Start turning head sideways
 			ENGINE.stop();
-			HEAD.moveTo(SIDE_POSITION, true);
+			HEAD.moveTo(SIDE_POSITION, 1000);
 			break;
 		case TURN_HEAD_SIDEWAYS:
 			// head turning sideways

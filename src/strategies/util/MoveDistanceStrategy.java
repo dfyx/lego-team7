@@ -11,6 +11,14 @@ public class MoveDistanceStrategy extends Strategy {
     private float targetDistance = 0;
     private float currentDistance = 0;
     
+    public MoveDistanceStrategy() {
+    }
+    
+    public MoveDistanceStrategy(int speed, float targetDistance) {
+    	this.speed = speed;
+    	this.targetDistance = targetDistance;
+    }
+    
     @Override
     protected void doInit() {
         state = State.START;
@@ -21,6 +29,8 @@ public class MoveDistanceStrategy extends Strategy {
     @Override
     protected void doRun() {
         currentDistance += ENGINE.estimateDistance();
+        
+        //System.out.println("currentDistance: "+currentDistance+"; targetDistance: "+targetDistance);
         
         switch (state) {
             case START:

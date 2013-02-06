@@ -21,9 +21,9 @@ public class CountLinesStrategy extends Strategy {
     private static final int DELTA_THRESHOLD = 600;
     
     /** Free area before a barcode, in mm. */
-    private static final int CLEARANCE_BEFORE = 150;
+    private static final int CLEARANCE_BEFORE = 160; // < 200 mm
     /** Free area after a barcode, in mm. */
-    private static final int CLEARANCE_AFTER = 75; // 3x 2,5mm
+    private static final int CLEARANCE_AFTER = 75; // 3x 2,5mm, < 100mm
     
     boolean clearance = false;
     boolean rising = false;
@@ -65,7 +65,6 @@ public class CountLinesStrategy extends Strategy {
             lineCount = edgeCount / 2;
             edgeCount = 0;
             
-            System.out.println("Found new code");
             changed = true;
         } else if (drivenDistance > CLEARANCE_BEFORE) {
             clearance = true;
@@ -94,12 +93,15 @@ public class CountLinesStrategy extends Strategy {
      * @param clearance
      *            the new clearance state
      */
-    void setClearance(final boolean clearance) {
+    public void setClearance(final boolean clearance) {
         if (this.clearance != clearance) {
             if (!clearance) {
-               edgeCount = 0;
+                edgeCount = 0;
+                drivenDistance = 0;
             }
         }
+        
+        this.clearance = clearance;
     }
     
     /** 

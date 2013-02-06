@@ -52,30 +52,30 @@ public class EdgeStrategy extends ChildStrategy {
 		case CURVING:
 			break;
 		}
-		if (newState != currentState)
-			System.out.println(currentState.name() + " -> " + newState.name());
+//		if (newState != currentState)
+//			System.out.println(currentState.name() + " -> " + newState.name());
 		return newState;
 	}
 
 	@Override
 	public void work() {
 
-		State oldState = currentState;
+//		State oldState = currentState;
 		currentState = checkState();
-		if (oldState != currentState)
-			System.out.println("running: " + currentState.name());
+//		if (oldState != currentState)
+//			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
 		case START:
 			break;
 		case START_TURN:
 			endTurnTime = System.currentTimeMillis() + ROTATION_TIME;
-			System.out.println("start turning: " + System.currentTimeMillis()
-					+ " / " + (System.currentTimeMillis() + ROTATION_TIME));
+//			System.out.println("start turning: " + System.currentTimeMillis()
+//					+ " / " + (System.currentTimeMillis() + ROTATION_TIME));
 			ENGINE.move(ROTATION_SPEED, ROTATION_DIRECTION);
 			break;
 		case TURNING:
-			System.out.println("turning");
+//			System.out.println("turning");
 			break;
 		case START_CURVE:
 			// TODO SB use head position

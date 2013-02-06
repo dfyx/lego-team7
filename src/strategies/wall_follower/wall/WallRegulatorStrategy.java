@@ -14,10 +14,9 @@ public class WallRegulatorStrategy extends ChildStrategy {
 	/**
 	 * desired distance to wall (in cm)
 	 */
-	private int referenceValue = 14;
+	private final int REFERENCE_VALUE;
 
-	private static final int MAX_SPEED = 1000;
-	private int speed = MAX_SPEED;
+	private final int MAX_SPEED;
 
 	private static final int LINEAR_FACTOR_MOVE_AWAY = 55;
 	private static final int LINEAR_FACTOR_MOVE_TOWARDS = 37;
@@ -38,10 +37,13 @@ public class WallRegulatorStrategy extends ChildStrategy {
 	 * 
 	 * @param headSide
 	 * @param maxMotorDirection Should be around 500
+	 * @param desired distance to the wall. Should be around 14.
 	 */
-	public WallRegulatorStrategy(Side headSide, int maxMotorDirection) {
+	public WallRegulatorStrategy(Side headSide, int maxSpeed, int maxMotorDirection, int desiredWallDistance) {
 		this.headSide = headSide;
 		MAX_MOTOR_DIRECTION = maxMotorDirection;
+		REFERENCE_VALUE = desiredWallDistance;
+		MAX_SPEED = maxSpeed;
 	}
 
 	protected void childInit() {
@@ -60,7 +62,7 @@ public class WallRegulatorStrategy extends ChildStrategy {
 		// referenceValue
 		// + " -> " + direction);
 
-		ENGINE.move(speed, direction);
+		ENGINE.move(MAX_SPEED, direction);
 	}
 
 	// TODO SB doesn't work on big distances
@@ -69,7 +71,7 @@ public class WallRegulatorStrategy extends ChildStrategy {
 	 * @return positive = move to wall; negative = move away from wall
 	 */
 	private int getMotorDirection() {
-		int diff = (actualValue - referenceValue);
+		int diff = (actualValue - REFERENCE_VALUE);
 		int linearValue = 0;
 		// move to wall
 		if (diff > 0)

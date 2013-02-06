@@ -67,7 +67,7 @@ public class EdgeCollisionStrategy extends ChildStrategy {
 
 	@Override
 	protected void childInit() {
-		System.out.println("init edge collision");
+//		System.out.println("init edge collision");
 		currentState = State.START;
 		collisionStrategy.init();
 	}
@@ -80,10 +80,10 @@ public class EdgeCollisionStrategy extends ChildStrategy {
 	@Override
 	public void work() {
 
-		State oldState = currentState;
+//		State oldState = currentState;
 		currentState = checkState();
-		if (oldState != currentState)
-			System.out.println("running: " + currentState.name());
+//		if (oldState != currentState)
+//			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
 		case START:
