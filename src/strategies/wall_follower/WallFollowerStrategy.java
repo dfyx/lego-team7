@@ -48,7 +48,7 @@ public class WallFollowerStrategy extends Strategy {
 		return new WallFollowerStrategy(headSide, // side
 				0, // rotation time
 				1000, // curve speed
-				350, // curve direction
+				470, // curve direction
 				35, // max wall distance
 				14 // desired wall distance
 		);
@@ -58,7 +58,7 @@ public class WallFollowerStrategy extends Strategy {
 		return new WallFollowerStrategy(Side.LEFT, // side
 				0, // rotation time
 				1000, // curve speed
-				350, // curve direction
+				470, // curve direction
 				35, // max wall distance
 				14 // desired wall distance
 		);
