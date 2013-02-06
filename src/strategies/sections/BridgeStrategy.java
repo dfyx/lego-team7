@@ -68,10 +68,6 @@ public class BridgeStrategy extends Strategy {
                 }
                 break;
         }
-        
-        if (oldState != state) {
-            System.out.println(oldState + " -> " + state);
-        }
     }
 
     public static enum State {
