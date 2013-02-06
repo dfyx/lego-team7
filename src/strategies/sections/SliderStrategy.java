@@ -2,7 +2,7 @@ package strategies.sections;
 
 import robot.Platform;
 import strategies.Strategy;
-import strategies.line_follower.LineFinderStrategy;
+import strategies.line_follower.LineFollowerController;
 import strategies.wall_follower.WallFollowerStrategy;
 import utils.Utils;
 import utils.Utils.Side;
@@ -12,18 +12,18 @@ public class SliderStrategy extends Strategy {
 
 	private final static int FORWARD_MOVING_TIME = 1000;
 	private final static int STOPPING_WALLFOLLOWER_TIME = 5000;
-	private final static int MINDISTANCE_TO_SLIDER = 15;
+	private final static int MINDISTANCE_TO_SLIDER = 20;
 	private final static int MAXDISTANCE_TO_SLIDER = 200;
 
 	public enum State {
-		FORWARD, FOLLOW_WALL, STOPPING_WALL_FOLLOWER, POSITION_HEAD_FOR_SLIDER, APPROACH_SLIDER, WAIT_FOR_SLIDER, PASS_SLIDER
+		FORWARD, FOLLOW_WALL, STOPPING_WALL_FOLLOWER, POSITION_HEAD_FOR_SLIDER, APPROACH_SLIDER, WAIT_FOR_SLIDER, PASS_SLIDER, FOLLOW_LINE
 	}
 
 	private State state;
 	private int startedDelay;
 
 	private WallFollowerStrategy wallFollowerStrategy = WallFollowerStrategy.getSliderStrategy(Side.RIGHT,10);
-	private LineFinderStrategy lineFinderStrategy = new LineFinderStrategy();
+	private LineFollowerController lineFollowerController = new LineFollowerController();
 
 	@Override
 	protected void doInit() {
@@ -74,7 +74,7 @@ public class SliderStrategy extends Strategy {
 				Platform.ENGINE.stop();
 			} else if (Platform.HEAD.getDistance() > MINDISTANCE_TO_SLIDER) {
 				//Move, when slider is closed but far away
-				Platform.ENGINE.move(1000);
+				Platform.ENGINE.move(250);
 			} else {
 				//Stop, when slider is closed and nearby. Then wait for the slider to open
 				Platform.ENGINE.stop();
@@ -86,18 +86,21 @@ public class SliderStrategy extends Strategy {
 			if(Platform.HEAD.getDistance()>MAXDISTANCE_TO_SLIDER) {
 				Platform.ENGINE.move(1000);
 				//Platform.HEAD.startSweeping(-1000,1000,1000);
-				lineFinderStrategy.init();
+				wallFollowerStrategy.init();
 				state = State.PASS_SLIDER;
 				System.out.println("Switch to pass slider");
 			}
 			break;
 		case PASS_SLIDER:
-			lineFinderStrategy.run();
-			if(lineFinderStrategy.isFinished()) {
-				Platform.ENGINE.stop();
-				System.out.println("Finished");
-				setFinished();
+			wallFollowerStrategy.run();
+			if(lineFollowerController.lineValueOk()) {
+				state = State.FOLLOW_LINE;
+				lineFollowerController.init();
 			}
+			break;
+		case FOLLOW_LINE:
+			lineFollowerController.run();
+			break;
 		}
 	}
 }
