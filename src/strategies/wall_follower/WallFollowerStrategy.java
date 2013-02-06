@@ -44,6 +44,16 @@ public class WallFollowerStrategy extends Strategy {
 
 	private State currentState;
 	
+	public static WallFollowerStrategy getSliderStrategy(Side headSide, int desiredDistance) {
+		return new WallFollowerStrategy(headSide, // side
+				0, // rotation time
+				1000, // curve speed
+				470, // curve direction
+				35, // max wall distance
+				10 // desired wall distance
+		);
+	}
+	
 	public static WallFollowerStrategy getMazeStrategy(Side headSide) {
 		return new WallFollowerStrategy(headSide, // side
 				0, // rotation time
