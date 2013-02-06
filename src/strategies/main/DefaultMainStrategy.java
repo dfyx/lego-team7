@@ -3,6 +3,7 @@ package strategies.main;
 import static robot.Platform.ENGINE;
 import lejos.nxt.Button;
 import robot.Platform;
+import sensors.LightSensor;
 import strategies.CountLinesStrategy;
 import strategies.LightCalibrationStrategy;
 import strategies.Strategy;
@@ -16,6 +17,7 @@ import utils.Utils.Side;
 public class DefaultMainStrategy extends MainStrategy {
 
 	private boolean detectBarcode;
+	private LightSensor.CalibrationData calibration = LightSensor.DEFAULT_CALIBRATION;
 
 	public void disableBarcodeDetection() {
 		detectBarcode = false;
@@ -171,6 +173,8 @@ public class DefaultMainStrategy extends MainStrategy {
 
 		// React, if calibration is finished
 		if (state == State.CALIBRATING && currentStrategy.isFinished()) {
+		    calibration = Platform.HEAD.getLightSensor().getCalibration();
+		    
 			state = State.RUNNING;
 			switchToBarcodeReading();
 		}
@@ -180,4 +184,9 @@ public class DefaultMainStrategy extends MainStrategy {
 			setFinished();
 		}
 	}
+
+    @Override
+    public void restoreLightCalibration() {
+        Platform.HEAD.getLightSensor().calibrate(calibration);
+    }
 }
