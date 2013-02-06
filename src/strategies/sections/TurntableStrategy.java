@@ -2,6 +2,7 @@ package strategies.sections;
 
 import robot.Platform;
 import strategies.line_follower.LineFollowerController;
+import strategies.util.DriveForwardStrategy;
 import strategies.util.StateMachineStrategy;
 import bluetooth.TurnControl;
 import bluetooth.Turntable;
@@ -9,7 +10,7 @@ import bluetooth.Turntable;
 public class TurntableStrategy extends
 		StateMachineStrategy<TurntableStrategy.State> {
 	public enum State {
-		INIT, FOLLOW_LINE, WAIT_FOR_BOX, DETECT_BOX, TURN, MOVE_BACK, ROTATE_BEFORE_WALL, ROTATE_AFTER_WALL, MOVE_FORWARD, DETECT_EXIT, EXIT_BOX
+		INIT, FOLLOW_LINE, WAIT_FOR_BOX, DETECT_BOX, TURN, MOVE_BACK, ROTATE_BEFORE_WALL, ROTATE_AFTER_WALL, EXIT_BOX, READ_NEXT_BARCODE
 	}
 
 	public TurntableStrategy() {
@@ -25,6 +26,7 @@ public class TurntableStrategy extends
 	private static final int LINE_THRESHOLD = 0;
 
 	protected LineFollowerController lineFollower = new LineFollowerController();
+	private DriveForwardStrategy driveForwardStrategy = new DriveForwardStrategy();
 
 	protected TurnControl turntable = new TurnControl();
 
@@ -100,11 +102,13 @@ public class TurntableStrategy extends
 			break;
 		case EXIT_BOX:
 			if (lineFollower.isFinished()) {
-				System.out.println("Switch to finished");
-				setFinished();
+				System.out.println("Switch to drive forward");
+				driveForwardStrategy.init();
+				newState = State.READ_NEXT_BARCODE;
 			}
 			break;
-		default:
+		case READ_NEXT_BARCODE:
+			driveForwardStrategy.run();
 			break;
 		}
 
