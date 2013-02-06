@@ -26,6 +26,8 @@ public class SliderStrategy extends Strategy {
 
 	private WallFollowerStrategy wallFollowerStrategy = WallFollowerStrategy
 			.getSliderStrategy(Side.RIGHT, 10);
+	private WallFollowerStrategy wallFollowerStrategy2 = WallFollowerStrategy
+			.getRollersStrategy(Side.RIGHT, 14);
 	private LineFollowerController lineFollowerController = new LineFollowerController();
 	private DriveForwardStrategy driveForwardStrategy = new DriveForwardStrategy();
 
@@ -90,13 +92,13 @@ public class SliderStrategy extends Strategy {
 			if (Platform.HEAD.getDistance() > MAXDISTANCE_TO_SLIDER) {
 				Platform.ENGINE.move(1000);
 				// Platform.HEAD.startSweeping(-1000,1000,1000);
-				wallFollowerStrategy.init();
+				wallFollowerStrategy2.init();
 				state = State.PASS_SLIDER;
 				System.out.println("Switch to pass slider");
 			}
 			break;
 		case PASS_SLIDER:
-			wallFollowerStrategy.run();
+			wallFollowerStrategy2.run();
 			if (lineFollowerController.lineValueOk()) {
 				state = State.FOLLOW_LINE;
 				Platform.getMainStrategy().disableBarcodeDetection();
@@ -114,8 +116,8 @@ public class SliderStrategy extends Strategy {
 		case SET_BACK:
 			if (startedDelay + SETBACK_TIME < Utils.getSystemTime()) {
 				state = State.READ_END_BARCODE;
+				Platform.ENGINE.stop();
 				Platform.getMainStrategy().enableBarcodeDetection();
-				//Platform.getMainStrategy().setClearance();
 				driveForwardStrategy.init();
 			}
 			break;

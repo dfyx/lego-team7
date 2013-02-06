@@ -82,6 +82,7 @@ public class DefaultMainStrategy extends MainStrategy {
 	private void switchToBarcodeReading() {
 		ENGINE.stop();
 		barcodeReader.setClearance(true);
+		detectBarcode = true;
 		currentStrategy = new DriveForwardStrategy();
 		currentStrategy.init();
 	}
@@ -164,7 +165,7 @@ public class DefaultMainStrategy extends MainStrategy {
 		if (state == State.RUNNING || state == State.CALIBRATING) {
 			// run strategy and commit changes
 			barcodeReader.clearStatus();
-			if (!Platform.HEAD.isMoving())
+			if (!Platform.HEAD.isMoving() && detectBarcode)
 				barcodeReader.run();
 			if (detectBarcode && barcodeReader.hasNewCode()) {
 				System.out.println("New barcode: "+barcodeReader.getLineCount());
