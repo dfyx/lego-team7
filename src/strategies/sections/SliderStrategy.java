@@ -9,15 +9,16 @@ import utils.Utils.Side;
 public class SliderStrategy extends Strategy {
 
 	private final static int FORWARD_MOVING_TIME = 1000;
+	private final static int STOPPING_WALLFOLLOWER_TIME = 2000;
 	private final static int MINDISTANCE_TO_SLIDER = 50;
 	private final static int MAXDISTANCE_TO_SLIDER = 200;
 
 	public enum State {
-		FORWARD, FOLLOW_WALL, POSITION_HEAD_FOR_SLIDER, APPROACH_SLIDER, WAIT_FOR_SLIDER, PASS_SLIDER
+		FORWARD, FOLLOW_WALL, STOPPING_WALL_FOLLOWER, POSITION_HEAD_FOR_SLIDER, APPROACH_SLIDER, WAIT_FOR_SLIDER, PASS_SLIDER
 	}
 
 	private State state;
-	private int startedForwardMoving;
+	private int startedDelay;
 
 	private WallFollowerStrategy wallFollowerStrategy = new WallFollowerStrategy(
 			Side.RIGHT, // side
@@ -25,22 +26,22 @@ public class SliderStrategy extends Strategy {
 			1000, // curve speed
 			350, // curve direction
 			35, // max wall distance
-			14 // desired wall distance
+			8 // desired wall distance
 	);
 
 	@Override
 	protected void doInit() {
 		state = State.FORWARD;
 		Platform.ENGINE.move(1000);
-		startedForwardMoving = Utils.getSystemTime();
+		startedDelay = Utils.getSystemTime();
 	}
 
 	@Override
 	protected void doRun() {
 		switch (state) {
 		case FORWARD:
-			System.out.println("Run state forward");
-			if (startedForwardMoving + FORWARD_MOVING_TIME < Utils
+			//System.out.println("Run state forward");
+			if (startedDelay + FORWARD_MOVING_TIME < Utils
 					.getSystemTime()) {
 				wallFollowerStrategy.init();
 				state = State.FOLLOW_WALL;
@@ -48,22 +49,29 @@ public class SliderStrategy extends Strategy {
 			}
 			break;
 		case FOLLOW_WALL:
-			System.out.println("Run state follow wall");
+			//System.out.println("Run state follow wall");
 			wallFollowerStrategy.run();
 			if (wallFollowerStrategy.getWallCollisionCount() >= 2) {
-				Platform.HEAD.moveTo(0, 1000);
-				state = State.POSITION_HEAD_FOR_SLIDER;
-				System.out.println("Swith to position head");
+				state = State.STOPPING_WALL_FOLLOWER;
+				startedDelay = Utils.getSystemTime();
+				System.out.println("Swith to stop follow wall");
 			}
 			break;
+		case STOPPING_WALL_FOLLOWER:
+			wallFollowerStrategy.run();
+			if (startedDelay + STOPPING_WALLFOLLOWER_TIME < Utils
+					.getSystemTime())
+				Platform.HEAD.moveTo(0, 1000);
+				state = State.POSITION_HEAD_FOR_SLIDER;
+			System.out.println("Switch to position head");
+			break;
 		case POSITION_HEAD_FOR_SLIDER:
-			System.out.println("Run state position head");
-			if (!Platform.HEAD.isMoving())
+			if (!Platform.HEAD.isMoving()) {
 				state = State.APPROACH_SLIDER;
-			System.out.println("Switch to approach");
+				System.out.println("Switch to approach");
+			}
 			break;
 		case APPROACH_SLIDER:
-			System.out.println("Run state approach");
 			if (Platform.HEAD.getDistance() > MAXDISTANCE_TO_SLIDER) {
 				//Stop, when slider is open
 				Platform.ENGINE.stop();
@@ -78,7 +86,6 @@ public class SliderStrategy extends Strategy {
 			}
 			break;
 		case WAIT_FOR_SLIDER:
-			System.out.println("Run state slider");
 			if(Platform.HEAD.getDistance()>MAXDISTANCE_TO_SLIDER) {
 				Platform.ENGINE.move(1000);
 				Platform.HEAD.startSweeping(-1000,1000,1000);
@@ -87,9 +94,9 @@ public class SliderStrategy extends Strategy {
 			}
 			break;
 		case PASS_SLIDER:
-			System.out.println("Run state pass slider");
 			if(Platform.HEAD.getLight()>500) {
 				Platform.ENGINE.stop();
+				System.out.println("Finished");
 				setFinished();
 			}
 		}
