@@ -57,7 +57,8 @@ class HeadMotor implements Action {
 	private int collisionTachoCount;
 
 	public void terminate() {
-		// TODO
+		MOTOR.stop();
+		enterState(State.INACTIVE);
 	}
 
 	public HeadMotor() {
