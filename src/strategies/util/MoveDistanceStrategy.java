@@ -30,6 +30,8 @@ public class MoveDistanceStrategy extends Strategy {
     protected void doRun() {
         currentDistance += ENGINE.estimateDistance();
         
+        //System.out.println("currentDistance: "+currentDistance+"; targetDistance: "+targetDistance);
+        
         switch (state) {
             case START:
                 if (targetDistance > 0) {
