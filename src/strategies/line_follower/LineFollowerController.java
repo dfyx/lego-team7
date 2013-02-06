@@ -153,7 +153,7 @@ public class LineFollowerController extends Strategy {
         OFF_LINE_NO_GAP {
             @Override
             void doTransition(final LineFollowerController ctrl) {
-                HEAD.moveTo(0, true);
+                HEAD.moveTo(0, 1000);
                 ENGINE.stop();
             }
         };
