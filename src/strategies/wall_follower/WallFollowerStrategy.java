@@ -88,7 +88,7 @@ public class WallFollowerStrategy extends Strategy {
 				0, // rotation time
 				1000, // curve speed
 				470, // curve direction
-				35, // max wall distance
+				256, // max wall distance
 				desiredDistance // desired wall distance
 		);
 	}
