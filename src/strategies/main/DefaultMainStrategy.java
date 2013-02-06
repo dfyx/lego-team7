@@ -98,6 +98,8 @@ public class DefaultMainStrategy extends MainStrategy {
 		switch (barcode) {
 		case RACE:
 			state = State.WAITING_FOR_STARTSIGNAL;
+			System.out.println("Waiting for startsignal");
+			currentStrategy = null;
 			break;
 		case BRIDGE:
 		    currentStrategy = new BridgeController();
@@ -129,7 +131,8 @@ public class DefaultMainStrategy extends MainStrategy {
 			currentStrategy = new TurntableStrategy();
 			break;
 		}
-		currentStrategy.init();
+		if(currentStrategy!=null)
+			currentStrategy.init();
 	}
 
 	@Override
@@ -169,11 +172,13 @@ public class DefaultMainStrategy extends MainStrategy {
 				switchToCalibrating();
 				break;
 			case RUNNING:
+				System.out.println("Switch to waiting");
 				state = State.WAITING;
 				ENGINE.stop();
 				Platform.HEAD.moveTo(1000,1000);
 				break;
 			case WAITING_FOR_STARTSIGNAL:
+				System.out.println("Switch to running");
 				currentStrategy = new RaceStrategy();
 				state = State.RUNNING;
 				break;
@@ -187,8 +192,8 @@ public class DefaultMainStrategy extends MainStrategy {
 			if (!Platform.HEAD.isMoving() && detectBarcode)
 				barcodeReader.run();
 			if (detectBarcode && barcodeReader.hasNewCode()) {
-				System.out.println("New barcode: "+barcodeReader.getLineCount());
 				int code = barcodeReader.getLineCount();
+				System.out.println("New barcode: "+code);
 				if (code > 1)
 					switchLevel(Barcode.get(code));
 				else

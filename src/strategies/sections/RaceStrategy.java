@@ -25,15 +25,22 @@ public class RaceStrategy extends StateMachineStrategy<RaceStrategy.State> {
 
 	@Override
 	protected State run(State currentState) {
+		System.out.println("--run");
+		System.out.println("State: "+currentState);
 		State newState = currentState;
+		
 		switch (currentState) {
 		case INIT:
+			System.out.println("--init");
 			startTime = Utils.getSystemTime() + WAIT_TIME;
 			newState = State.SEARCH_LEFT_WALL;
+			System.out.println("--initfin");
 			break;
 		case SEARCH_LEFT_WALL:
+			System.out.println("--searchleftwall");
 			HEAD.moveTo(-1000, 1000);
 			newState = State.MEASURE_LEFT_WALL;
+			System.out.println("--searchleftwallfin");
 			break;
 		case MEASURE_LEFT_WALL:
 			if(!HEAD.isMoving()) {

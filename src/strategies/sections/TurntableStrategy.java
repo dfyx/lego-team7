@@ -37,17 +37,21 @@ public class TurntableStrategy extends
 			System.out.println("Connect to turntable");
 			Turntable.getInstance().connect();
 			System.out.println("Switch to follow line");
+			System.out.flush();
 			lineFollower.init();
 			newState = State.FOLLOW_LINE;
 			System.out.println("Switched to follow line");
+			System.out.flush();
 			break;
 		case FOLLOW_LINE:
 			System.out.println("Run lineFollower");
+			System.out.flush();
 			lineFollower.run();
 			if (lineFollower.isFinished()) {
 				Platform.ENGINE.stop();
 				Platform.HEAD.moveTo(0, 1000);
 				System.out.println("Switch to wait for box");
+				System.out.flush();
 				newState = State.WAIT_FOR_BOX;
 			}
 			break;

@@ -22,7 +22,11 @@ public class LineFollowerController extends Strategy {
     
     @Override
     protected void doInit() {
+    	System.out.println("init start");
+    	System.out.flush();
         State.OFF_LINE.transitionTo(this);
+        System.out.println("init end");
+        System.out.flush();
     }
 
     @Override

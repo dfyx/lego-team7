@@ -45,6 +45,7 @@ public class LineFinderStrategy extends Strategy {
             
     @Override
     protected void doInit() {
+    	System.out.println("init finder");
         state = State.NOT_LOCKED;
         
         sweepSpeed = SEARCH_SWEEP_SPEED;
@@ -54,6 +55,7 @@ public class LineFinderStrategy extends Strategy {
         turnDirUnlock = true;
         turnDir = -1 * trackingSide.getValue();
         turnSpeed = ALIGN_SPEED;
+        System.out.println("end init finder");
     }
 
     @Override
