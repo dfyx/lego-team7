@@ -103,8 +103,8 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			break;
 		}
 
-		if (currentState != newState)
-			System.out.println(currentState.name() + " -> " + newState.name());
+//		if (currentState != newState)
+//			System.out.println(currentState.name() + " -> " + newState.name());
 
 		return newState;
 	}
@@ -145,7 +145,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 
 	@Override
 	protected void childInit() {
-		System.out.println("init collision");
+//		System.out.println("init collision");
 		currentState = State.START;
 		collisionStrategy.init();
 	}
@@ -158,10 +158,10 @@ public class FollowCollisionStrategy extends ChildStrategy {
 	@Override
 	public void work() {
 
-		State oldState = currentState;
+//		State oldState = currentState;
 		currentState = checkState();
-		if (oldState != currentState)
-			System.out.println("running: " + currentState.name());
+//		if (oldState != currentState)
+//			System.out.println("running: " + currentState.name());
 
 		switch (currentState) {
 		case START:
@@ -189,7 +189,7 @@ public class FollowCollisionStrategy extends ChildStrategy {
 			endTurnTime = System.currentTimeMillis() + EXTRA_TURN_TIME;
 			break;
 		case TURN_EXTRA:
-			System.out.println("turning extra");
+//			System.out.println("turning extra");
 			break;
 		case START_TURN_HEAD_SIDEWAYS:
 			// Start turning head sideways

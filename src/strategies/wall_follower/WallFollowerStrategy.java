@@ -164,7 +164,7 @@ public class WallFollowerStrategy extends Strategy {
 		edgeCollisionStrategy.check();
 		edgeStrategy.check();
 
-		State oldState = currentState;
+//		State oldState = currentState;
 		switch (currentState) {
 		case START:
 			currentState = State.FIND_WALL;
@@ -202,8 +202,8 @@ public class WallFollowerStrategy extends Strategy {
 			break;
 		}
 
-		if (oldState != currentState)
-			System.out.println(oldState.name() + " -> " + currentState.name());
+//		if (oldState != currentState)
+//			System.out.println(oldState.name() + " -> " + currentState.name());
 		return currentState;
 	}
 
